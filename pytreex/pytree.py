@@ -83,15 +83,21 @@ class TreeMeta(ABCMeta):
 
         obj._field_metadata = obj._field_metadata.copy()
 
-        obj.__init__(*args, **kwargs)
+        if not dataclasses.is_dataclass(cls):
+            for field, default_factory in obj._factory_fields.items():
+                setattr(obj, field, default_factory())
 
-        if not obj._init_called:
-            raise RuntimeError(
-                f"{obj.__class__.__name__} not initialized properly, constructor must call `super().__init__()`"
-            )
+            for field, default_value in obj._default_field_values.items():
+                setattr(obj, field, default_value)
+
+        obj.__init__(*args, **kwargs)
 
         # auto-annotations
         for field, value in vars(obj).items():
+            if value is utils.LAZY:
+                raise ValueError(
+                    f"'{cls.__name__}' has field '{field}' set to `lazy=True` but no value was provided in `__post_init__`"
+                )
             if field not in obj._field_metadata and isinstance(value, Tree):
                 obj._field_metadata[field] = types.FieldMetadata(
                     node=True,
@@ -104,6 +110,8 @@ class TreeMeta(ABCMeta):
 class Tree(types.FieldMixin, metaclass=TreeMeta):
     _init_called: bool = False
     _field_metadata: tp.Dict[str, types.FieldMetadata]
+    _factory_fields: tp.Dict[str, tp.Callable[[], tp.Any]]
+    _default_field_values: tp.Dict[str, tp.Any]
 
     @property
     def field_metadata(self) -> tp.Mapping[str, types.FieldMetadata]:
@@ -134,15 +142,17 @@ class Tree(types.FieldMixin, metaclass=TreeMeta):
         annotations = utils._get_all_annotations(cls)
         class_vars = utils._get_all_vars(cls)
         cls._field_metadata = {}
+        cls._factory_fields = {}
+        cls._default_field_values = {}
 
         for field, value in class_vars.items():
             if isinstance(value, dataclasses.Field):
-                if value.default is not dataclasses.MISSING:
-                    setattr(cls, field, value.default)
-                elif value.default_factory is not dataclasses.MISSING:
-                    setattr(cls, field, value.default_factory())
-                else:
-                    delattr(cls, field)
+
+                if not dataclasses.is_dataclass(cls):
+                    if value.default is not dataclasses.MISSING:
+                        cls._default_field_values[field] = value.default
+                    elif value.default_factory is not dataclasses.MISSING:
+                        cls._factory_fields[field] = value.default_factory
 
                 if value.metadata is not None and "node" in value.metadata:
                     cls._field_metadata[field] = types.FieldMetadata(
@@ -158,9 +168,6 @@ class Tree(types.FieldMixin, metaclass=TreeMeta):
                     node=True,
                     kind=value,
                 )
-
-    def __init__(self) -> None:
-        self._init_called = True
 
     def tree_flatten(self):
 
@@ -378,7 +385,7 @@ def filter(obj: A, *filters: Filter) -> A:
             )
         assert isinstance(info, FieldInfo)
 
-        return info.value if all(f(info) for f in filters) else types.Nothing()
+        return info.value if all(f(info) for f in filters) else types.NOTHING
 
     with _Context(add_field_info=True):
         obj = jax.tree_map(apply_filters, obj)

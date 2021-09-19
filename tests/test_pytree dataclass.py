@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from inspect import Parameter
 import typing as tp
 
@@ -18,36 +19,37 @@ class State(ptx.FieldMixin):
     pass
 
 
+@dataclass
 class Linear(ptx.Tree):
-    w: np.ndarray = Parameter.node()
-    b: np.ndarray = Parameter.node()
-    n: int = State.node()
+    din: int
+    dout: int
+    w: np.ndarray = Parameter.node(lazy=True)
+    b: np.ndarray = Parameter.node(lazy=True)
+    name: str = "linear"
+    n: int = State.node(1)
 
-    def __init__(self, din, dout, name="linear"):
-        self.din = din
-        self.dout = dout
-        self.w = np.random.uniform(size=(din, dout))
-        self.b = np.random.uniform(size=(dout,))
-        self.n = 1
-        self.name = name
+    def __post_init__(self):
+        self.w = np.random.uniform(size=(self.din, self.dout))
+        self.b = np.random.uniform(size=(self.dout,))
 
 
+@dataclass
 class MLP(ptx.Tree):
-    linear1: Linear
-    linear2: Linear
+    din: int
+    dmid: int
+    dout: int
+    linear1: Linear = ptx.node(lazy=True)
+    linear2: Linear = ptx.node(lazy=True)
+    name: str = "mlp"
 
-    def __init__(self, din, dmid, dout, name="mlp"):
-        self.din = din
-        self.dmid = dmid
-        self.dout = dout
-        self.name = name
-
-        self.linear1 = Linear(din, dmid, name="linear1")
-        self.linear2 = Linear(dmid, dout, name="linear2")
+    def __post_init__(self):
+        self.linear1 = Linear(self.din, self.dmid, name="linear1")
+        self.linear2 = Linear(self.dmid, self.dout, name="linear2")
 
 
 class TestTreex:
     def test_default(self):
+        @dataclass
         class A(ptx.Tree):
             a: int = ptx.field(1, node=True)
 
@@ -60,6 +62,7 @@ class TestTreex:
         assert tree.a == 2
 
     def test_default_factory(self):
+        @dataclass
         class A(ptx.Tree):
             a: int = ptx.field(node=True, default_factory=lambda: 1)
 
@@ -81,6 +84,7 @@ class TestTreex:
 
     def test_flatten(self):
 
+        mlp = MLP(2, 3, 5)
         mlp = MLP(2, 3, 5)
 
         flat = jax.tree_leaves(mlp)

@@ -10,6 +10,13 @@ _pymap = map
 _pyfilter = filter
 
 
+class _Lazy:
+    pass
+
+
+LAZY = _Lazy()
+
+
 def field(
     default=dataclasses.MISSING,
     *,
@@ -20,7 +27,20 @@ def field(
     repr: bool = True,
     hash: tp.Optional[bool] = None,
     compare: bool = True,
+    lazy: bool = False,
 ) -> tp.Any:
+
+    if lazy:
+        if (
+            default is not dataclasses.MISSING
+            or default_factory is not dataclasses.MISSING
+        ):
+            raise ValueError(
+                "Cannot specify 'default' or 'default_factory' with when 'lazy=True'"
+            )
+
+        default = LAZY
+
     return dataclasses.field(
         default=default,
         metadata={"node": node, "kind": kind},
@@ -41,6 +61,7 @@ def node(
     repr: bool = True,
     hash: tp.Optional[bool] = None,
     compare: bool = True,
+    lazy: bool = False,
 ) -> tp.Any:
     return field(
         default=default,
@@ -51,6 +72,7 @@ def node(
         repr=repr,
         hash=hash,
         compare=compare,
+        lazy=lazy,
     )
 
 
@@ -63,6 +85,7 @@ def static(
     repr: bool = True,
     hash: tp.Optional[bool] = None,
     compare: bool = True,
+    lazy: bool = False,
 ) -> tp.Any:
     return field(
         default,
@@ -73,6 +96,7 @@ def static(
         repr=repr,
         hash=hash,
         compare=compare,
+        lazy=lazy,
     )
 
 

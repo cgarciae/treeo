@@ -47,22 +47,25 @@ character = update(character, 0.1)
 ```
 
 ## Guide
-Basics
+### Basics
 
 ```python
 class Character(ptx.Tree):
+    # tree part
     position: jnp.ndarray = ptx.field(node=True)
     velocity: jnp.ndarray = ptx.field(node=True)
+
+    # static part
     id: str = ptx.field(static=False)
 ```
 
 ```python
 character = Character(...)
 
-# double position and velocity
+# double pytree, only position and velocity are affected
 character = jax.tree_map(lambda x: 2.0 * x, character)
 
-# path through jit
+# path through jit, no problems with static fields like `id`
 @jax.jit
 def update(character: Character, ...):
     # do stuff

@@ -26,6 +26,7 @@ class FieldMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
+        lazy: bool = False,
     ) -> tp.Any:
         return utils.field(
             default=default,
@@ -36,6 +37,7 @@ class FieldMixin:
             repr=repr,
             hash=hash,
             compare=compare,
+            lazy=lazy,
         )
 
     @classmethod
@@ -48,6 +50,7 @@ class FieldMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
+        lazy: bool = False,
     ) -> tp.Any:
         return utils.node(
             default=default,
@@ -57,6 +60,7 @@ class FieldMixin:
             repr=repr,
             hash=hash,
             compare=compare,
+            lazy=lazy,
         )
 
     @classmethod
@@ -68,6 +72,7 @@ class FieldMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
+        lazy: bool = False,
     ) -> tp.Any:
         return cls.field(
             default=default,
@@ -77,6 +82,7 @@ class FieldMixin:
             repr=repr,
             hash=hash,
             compare=compare,
+            lazy=lazy,
         )
 
 
@@ -119,3 +125,6 @@ class Nothing:
 
     def __eq__(self, o: object) -> bool:
         return isinstance(o, Nothing)
+
+
+NOTHING = Nothing()
