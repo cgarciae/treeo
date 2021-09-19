@@ -1,43 +1,43 @@
 # Pytreex
 
-_A JAX library to easily create and manipulate custom Pytrees_
+_A library for easily creating and manipulating custom JAX Pytrees_
+
+* **Light-weight**: has dependencies other than `jax`.
+* **Compatible**: Pytreex `Tree` objects should be compatible with any `jax` function that accepts Pytrees.
+* **Pythonic**: `treeo.field` is built on top of python's `dataclasses.field` so `treeo.Tree` subclasses can be defined as both dataclass and and non-dataclass classes.
 
 
-[Documentation](https://cgarciae.github.io/pytreex) | [Guide](#guide)
+[Documentation](https://cgarciae.github.io/treeo) | [Guide](#guide)
 
 ## Installation
 Install using pip:
 ```bash
-pip install pytreex
+pip install treeo
 ```
 
 ## Getting Started
 This is a small appetizer to give you a feel for how using Pytreex looks like, be sure to checkout the [Guide section](#guide) below for details on more advanced usage.
 ```python
+from dataclasses import dataclass
 import jax.numpy as jnp
-import pytreex as ptx
+import treeo as to
 
-class Character(ptx.Tree):
-    position: jnp.ndarray = ptx.node()
-    velocity: jnp.ndarray = ptx.node()
-    id: str = ptx.static()
-
-    def __init__(
-        self,
-        position: jnp.ndarray,
-        velocity: jnp.ndarray,
-        id: str,
-    ):
-        super().__init__()
-        self.position = position
-        self.velocity = velocity
-        self.id = id
+@dataclass
+class Character(to.Tree):
+    position: jnp.ndarray = to.field(node=True)  # node field
+    velocity: jnp.ndarray = to.field(node=True)  # node field
+    id: str = to.field(node=False)  # static field
 
     def move(self, dt: float):
         self.position += self.velocity * dt
 
-character = Character('1', jnp.array([0, 0]), jnp.array([1, 1]))
+character = Character(
+    position=jnp.array([0, 0]),
+    velocity=jnp.array([1, 1]),
+    id='1',
+)
 
+# character can freely pass through jit
 @jax.jit
 def update(character: Character, dt: float):
     character.move(dt)
@@ -47,136 +47,83 @@ character = update(character, 0.1)
 ```
 
 ## Guide
-### Basics
+
+### Tree fields
+Tree fields are divided into two categories:
+* `node` fields: they are considered as part of the pytree, JAX functions such as `tree_map` will operate over them.
+* `static` fields: they are part of the `PyTreeDef`, JAX functions will not operate over them, but JAX is still aware of them, e.g. JAX will recompile jitted functions is case these fields change.
+```python
+@dataclass
+class Person(to.Tree):
+    height: float = to.field(node=True)
+    name: str = to.field(node=False)
+
+person = Person(height=1.5, name='John')
+
+tree_map(lambda x: x + 1, person) # Person(height=2.5, name='John')
+```
+Since `to.field` is just a wrapper over `dataclasses.field` that adds the `node` and `kind` arguments you can use all `dataclass` features. However, dataclasses are orthogonal to Treeo, this means that you can naturally use non-dataclass classes:
 
 ```python
-class Character(ptx.Tree):
-    # tree part
-    position: jnp.ndarray = ptx.field(node=True)
-    velocity: jnp.ndarray = ptx.field(node=True)
+class Person(to.Tree):
+    height: float = to.field(node=True)
+    name: str = to.field(node=False)
 
-    # static part
-    id: str = ptx.field(static=False)
+    def __init__(self, height: float, name: str):
+        self.height = height
+        self.name = name
+
+person = Person(height=1.5, name='John')
+
+tree_map(lambda x: x + 1, person) # Person(height=2.5, name='John')
 ```
 
-```python
-character = Character(...)
+### Field kinds
+You can define a `kind` for a field, this is useful for for filtering field value using the [treeo.filter](#filter) function. A `kind` is can be any `type` e.g.
 
-# double pytree, only position and velocity are affected
-character = jax.tree_map(lambda x: 2.0 * x, character)
-
-# path through jit, no problems with static fields like `id`
-@jax.jit
-def update(character: Character, ...):
-    # do stuff
-    ...
-    return character
-
-character = update(character, ...)
-```
+### Node policy
+If a field is **not** marked with `to.field` the following policy will be applied when determining whether a field is a node or not:
+* If the field is _annotated_ with a `Tree` subtype or a generic containing a `Tree` subtype e.g. `List[to.Tree]`, the field is considered a node.
+* If the runtime value of the field is a `to.Tree` instance, the field is considered a node and the `Tree`'s metadata will be updated to reflect this.
+* If none of the above apply, the field is considered a static field.
 
 ```python
-class Character(ptx.Tree):
-    position: jnp.ndarray = ptx.node()
-    velocity: jnp.ndarray = ptx.node()
-    id: str = ptx.static()
-```
-
-```python
-class Position:
-    pass
-
-class Velocity:
-    pass
-
-class Character(ptx.Tree):
-    position: jnp.ndarray = ptx.node(kind=Position)
-    velocity: jnp.ndarray = ptx.node(kind=Velocity)
-    id: str = ptx.static()
+class Agent(to.Tree):
     ...
 
-characters = [Character(...), Character(...), ...]
-...
-# reset position
-positions = ptx.filter(characters, Position) # filter Positions
-positions = jax.tree_map(jnp.zeros_like, positions) # reset
-character = ptx.update(characters, positions) #
+class Game(to.Tree):
+    player: Agent      # node
+    cpus: List[Agent]  # node
+    max_cpus: int      # static
 
-# alternative we could just use `ptx.map`
-characters = ptx.map(jnp.zeros_like, characters, Position)
-```
-
-```python
-class Position(ptx.FieldMixin):
-    pass
-
-class Velocity(ptx.FieldMixin):
-    pass
-
-class Character(ptx.Tree):
-    position: jnp.ndarray = Position.node()
-    velocity: jnp.ndarray = Velocity.node()
-    id: str = ptx.static()
-```
-
-```python
-class Game(ptx.Tree):
-    cpus: List[Character] = ptx.node(kind=Character)
-    player: Character = ptx.node(kind=Character)
-    player_checkpoint: Character = ptx.static(kind=Character)
-```
-
-```python
-class Game(ptx.Tree):
-    cpus: List[Character] = Character.node()
-    player: Character = Character.node()
-    player_checkpoint: Character = Character.static()
-```
-
-```python
-class Game(ptx.Tree):
-    cpus: List[Character]
-    player: Character
-    player_checkpoint: Character = Character.static()
-```
-
-```python
-class Game(ptx.Tree):
-    cpus = Character.node()
-    player_checkpoint = Character.static()
-
-    def __init__(...):
-        super().__init__()
-        self.player = Character(...)
+    def __init__(self, ...):
         ...
+        self.boss = Agent(...) # runtime node
 ```
 
-```python
-game = Game(...)
+### Changing node status
 
-# change `player_checkpoint` from static to node
-game = game.update_field_metadata("player_checkpoint", node=True)
-```
+### Sugar
 
 ### API
 #### Filter
 The `filter` method allows you to select a subtree by filtering based on a `TreePart` type, all leaves whose type annotations are a subclass of such type are kept, the rest are set to a special `Nothing` value.
 ```python
-class MyModule(ptx.Tree):
-    a: ptx.Parameter[np.ndarray] = np.array(1)
-    b: ptx.BatchStat[np.ndarray] = np.array(2)
+class MyModule(to.Tree):
+    a: to.Parameter[np.ndarray] = np.array(1)
+    b: to.BatchStat[np.ndarray] = np.array(2)
     ...
 
 module = MyModule(...)
 
-module.filter(ptx.Parameter) # MyModule(a=array([1]), b=Nothing)
-module.filter(ptx.BatchStat) # MyModule(a=Nothing, b=array([2]))
+module.filter(to.Parameter) # MyModule(a=array([1]), b=Nothing)
+module.filter(to.BatchStat) # MyModule(a=Nothing, b=array([2]))
 ```
 Since `Nothing` is an empty Pytree it gets ignored by tree operations, this effectively allows you to easily operate on a subset of the fields:
 
 ```python
-jax.tree_map(lambda x: -x, module.filter(ptx.Parameter)) # MyModule(a=array([-1]), b=Nothing)
-jax.tree_map(lambda x: -x, module.filter(ptx.BatchStat)) # MyModule(a=Nothing, b=array([-2]))
+jax.tree_map(lambda x: -x, module.filter(to.Parameter)) # MyModule(a=array([-1]), b=Nothing)
+jax.tree_map(lambda x: -x, module.filter(to.BatchStat)) # MyModule(a=Nothing, b=array([-2]))
 ```
 
 ##### filter predicates
@@ -185,8 +132,8 @@ If you need to do more complex filtering, you can pass callables with the signat
 ```python
 # all States that are not OptStates
 module.filter(
-    lambda field: issubclass(field.annotation, ptx.State) 
-    and not issubclass(field.annotation, ptx.OptState)
+    lambda field: issubclass(field.annotation, to.State) 
+    and not issubclass(field.annotation, to.OptState)
 ) 
 # MyModule(a=Nothing, b=array([2]))
 ```
@@ -195,14 +142,14 @@ The previous could be abbreviated using multiple filters as its required that **
 ```python
 # all States that are not OptStates
 module.filter(
-    ptx.State,
-    lambda field: not issubclass(field.annotation, ptx.OptState)
+    to.State,
+    lambda field: not issubclass(field.annotation, to.OptState)
 ) 
 # MyModule(a=Nothing, b=array([2]))
 ```
 The previous also be written as:
 ```python
-module.states(lambda field: not issubclass(field.annotation, ptx.OptState))
+module.states(lambda field: not issubclass(field.annotation, to.OptState))
 ```
 
 #### Update
@@ -229,7 +176,7 @@ The previous pattern is so common that `map` provides a shortcut for applying `f
 
 ```python
 module = MyModule(...) # MyModule(a=array([1]), b=array([2]))
-module = module.map(lambda x: -x, ptx.Parameter) # MyModule(a=array([-1]), b=array([2]))
+module = module.map(lambda x: -x, to.Parameter) # MyModule(a=array([-1]), b=array([2]))
 ```
 
 As shown here, `map` accepts the same `*args` as `filter` and calls `update` at the end if filters are given.
@@ -237,9 +184,9 @@ As shown here, `map` accepts the same `*args` as `filter` and calls `update` at 
 ### State Management
 Pytreex takes a "direct" approach to state management, i.e., state is updated in-place by the Tree whenever it needs to. For example, this module will calculate the running average of its input:
 ```python
-class Average(ptx.Tree):
-    count: ptx.State[jnp.ndarray]
-    total: ptx.State[jnp.ndarray]
+class Average(to.Tree):
+    count: to.State[jnp.ndarray]
+    total: to.State[jnp.ndarray]
 
     def __init__(self):
         super().__init__()
@@ -254,22 +201,22 @@ class Average(ptx.Tree):
 ```
 Pytreex Pytrees that require random state will often keep a `rng` key internally and update it in-place when needed:
 ```python
-class Dropout(ptx.Tree):
-    rng: ptx.Rng[ptx.Initializer, jnp.ndarray]  # Initializer | ndarray
+class Dropout(to.Tree):
+    rng: to.Rng[to.Initializer, jnp.ndarray]  # Initializer | ndarray
 
     def __init__(self, rate: float):
         ...
-        self.rng = ptx.Initializer(lambda key: key)
+        self.rng = to.Initializer(lambda key: key)
         ...
 
     def __call__(self, x):
         key, self.rng = jax.random.split(self.rng)
         ...
 ```
-Finally `ptx.Optimizer` also performs inplace updates inside the `apply_updates` method, here is a sketch of how it works:
+Finally `to.Optimizer` also performs inplace updates inside the `apply_updates` method, here is a sketch of how it works:
 ```python
-class Optimizer(ptx.TreeObject):
-    opt_state: ptx.OptState[Any]
+class Optimizer(to.TreeObject):
+    opt_state: to.OptState[Any]
     optimizer: optax.GradientTransformation
 
     def apply_updates(self, grads, params):
@@ -303,15 +250,15 @@ params = model.parameters()
 Here `model` is returned along with the loss through `value_and_grad` to update `model` on the outside thus persisting any changes to the state performed on the inside.
 
 ### Non-hashable static fields
-If you want to have a static field that contains a non-hashable value like a numpy or jax array, you can use `ptx.Hashable` to wrap around it such that it:
+If you want to have a static field that contains a non-hashable value like a numpy or jax array, you can use `to.Hashable` to wrap around it such that it:
 
 ```python
-class MyModule(ptx.Tree):
-    table: ptx.Hashable[np.ndarray]
+class MyModule(to.Tree):
+    table: to.Hashable[np.ndarray]
     ...
 
     def __init__(self, table: np.ndarray):
-        self.table = ptx.Hashable(table)
+        self.table = to.Hashable(table)
         ...
     
     def __call__(self, x: np.ndarray) -> np.ndarray:
@@ -327,7 +274,7 @@ module = MyModule(table)
 # use module as an argument for a jit-ed function
 ...
 
-module.table = ptx.Hashable(np.zeros((10, 10)))
+module.table = to.Hashable(np.zeros((10, 10)))
 
 # jit-ed function will recompile now
 ...
@@ -345,19 +292,19 @@ import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
 import optax
-import pytreex as ptx
+import treeo as to
 
 x = np.random.uniform(size=(500, 1))
 y = 1.4 * x - 0.3 + np.random.normal(scale=0.1, size=(500, 1))
 
-# pytreex already defines ptx.Linear but we can define our own
-class Linear(ptx.Tree):
-    w: ptx.Parameter[ptx.Initializer, jnp.ndarray]
-    b: ptx.Parameter[jnp.ndarray]
+# treeo already defines to.Linear but we can define our own
+class Linear(to.Tree):
+    w: to.Parameter[to.Initializer, jnp.ndarray]
+    b: to.Parameter[jnp.ndarray]
 
     def __init__(self, din, dout):
         super().__init__()
-        self.w = ptx.Initializer(lambda key: jax.random.uniform(key, shape=(din, dout)))
+        self.w = to.Initializer(lambda key: jax.random.uniform(key, shape=(din, dout)))
         self.b = jnp.zeros(shape=(dout,))
 
     def __call__(self, x):
@@ -365,7 +312,7 @@ class Linear(ptx.Tree):
 
 
 model = Linear(1, 1).init(42)
-optimizer = ptx.Optimizer(optax.adam(0.01))
+optimizer = to.Optimizer(optax.adam(0.01))
 optimizer = optimizer.init(model.paramerters())
 
 

@@ -2,7 +2,7 @@
 "__st"
 # %% [markdown]
 """
-# Treex
+# Treeo
 
 **Main features**:
 * Modules contain their parameters

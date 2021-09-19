@@ -8,7 +8,7 @@ import jax.numpy as jnp
 import jax.tree_util
 import numpy as np
 
-from pytreex import utils
+from treeo import utils
 
 A = tp.TypeVar("A")
 B = tp.TypeVar("B")
@@ -26,7 +26,6 @@ class FieldMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
-        lazy: bool = False,
     ) -> tp.Any:
         return utils.field(
             default=default,
@@ -37,7 +36,6 @@ class FieldMixin:
             repr=repr,
             hash=hash,
             compare=compare,
-            lazy=lazy,
         )
 
     @classmethod
@@ -50,7 +48,6 @@ class FieldMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
-        lazy: bool = False,
     ) -> tp.Any:
         return utils.node(
             default=default,
@@ -60,7 +57,6 @@ class FieldMixin:
             repr=repr,
             hash=hash,
             compare=compare,
-            lazy=lazy,
         )
 
     @classmethod
@@ -72,7 +68,6 @@ class FieldMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
-        lazy: bool = False,
     ) -> tp.Any:
         return cls.field(
             default=default,
@@ -82,7 +77,6 @@ class FieldMixin:
             repr=repr,
             hash=hash,
             compare=compare,
-            lazy=lazy,
         )
 
 
@@ -128,3 +122,26 @@ class Nothing:
 
 
 NOTHING = Nothing()
+
+
+class Opaque(tp.Generic[A]):
+    def __init__(self, value: A):
+        self.value = value
+
+    def __repr__(self):
+        return f"Hidden({self.value})"
+
+    def __eq__(self, o):
+        return isinstance(o, Opaque)
+
+
+class Hashable(tp.Generic[A]):
+    """A hashable immutable wrapper around non-hashable values"""
+
+    value: A
+
+    def __init__(self, value: A):
+        self.__dict__["value"] = value
+
+    def __setattr__(self, name: str, value: tp.Any) -> None:
+        raise AttributeError(f"Hashable is immutable")

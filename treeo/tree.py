@@ -16,7 +16,7 @@ import jax.tree_util
 import numpy as np
 
 
-from pytreex import types, utils
+from treeo import types, utils
 
 A = tp.TypeVar("A")
 B = tp.TypeVar("B")
@@ -94,10 +94,7 @@ class TreeMeta(ABCMeta):
 
         # auto-annotations
         for field, value in vars(obj).items():
-            if value is utils.LAZY:
-                raise ValueError(
-                    f"'{cls.__name__}' has field '{field}' set to `lazy=True` but no value was provided in `__post_init__`"
-                )
+
             if field not in obj._field_metadata and isinstance(value, Tree):
                 obj._field_metadata[field] = types.FieldMetadata(
                     node=True,
@@ -139,6 +136,11 @@ class Tree(types.FieldMixin, metaclass=TreeMeta):
     def __init_subclass__(cls):
         jax.tree_util.register_pytree_node_class(cls)
 
+        # Restore the signature
+        sig = inspect.signature(cls.__init__)
+        parameters = tuple(sig.parameters.values())
+        cls.__signature__ = sig.replace(parameters=parameters[1:])
+
         annotations = utils._get_all_annotations(cls)
         class_vars = utils._get_all_vars(cls)
         cls._field_metadata = {}
@@ -148,12 +150,13 @@ class Tree(types.FieldMixin, metaclass=TreeMeta):
         for field, value in class_vars.items():
             if isinstance(value, dataclasses.Field):
 
-                if not dataclasses.is_dataclass(cls):
-                    if value.default is not dataclasses.MISSING:
-                        cls._default_field_values[field] = value.default
-                    elif value.default_factory is not dataclasses.MISSING:
-                        cls._factory_fields[field] = value.default_factory
+                # save defaults
+                if value.default is not dataclasses.MISSING:
+                    cls._default_field_values[field] = value.default
+                elif value.default_factory is not dataclasses.MISSING:
+                    cls._factory_fields[field] = value.default_factory
 
+                # extract metadata
                 if value.metadata is not None and "node" in value.metadata:
                     cls._field_metadata[field] = types.FieldMetadata(
                         node=value.metadata["node"],

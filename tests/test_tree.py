@@ -7,18 +7,18 @@ import jax.tree_util
 import numpy as np
 import pytest
 
-import pytreex as ptx
+import treeo as to
 
 
-class Parameter(ptx.FieldMixin):
+class Parameter(to.FieldMixin):
     pass
 
 
-class State(ptx.FieldMixin):
+class State(to.FieldMixin):
     pass
 
 
-class Linear(ptx.Tree):
+class Linear(to.Tree):
     w: np.ndarray = Parameter.node()
     b: np.ndarray = Parameter.node()
     n: int = State.node()
@@ -32,7 +32,7 @@ class Linear(ptx.Tree):
         self.name = name
 
 
-class MLP(ptx.Tree):
+class MLP(to.Tree):
     linear1: Linear
     linear2: Linear
 
@@ -46,10 +46,10 @@ class MLP(ptx.Tree):
         self.linear2 = Linear(dmid, dout, name="linear2")
 
 
-class TestTreex:
+class TestTreeo:
     def test_default(self):
-        class A(ptx.Tree):
-            a: int = ptx.field(1, node=True)
+        class A(to.Tree):
+            a: int = to.field(1, node=True)
 
         tree = A()
 
@@ -60,8 +60,8 @@ class TestTreex:
         assert tree.a == 2
 
     def test_default_factory(self):
-        class A(ptx.Tree):
-            a: int = ptx.field(node=True, default_factory=lambda: 1)
+        class A(to.Tree):
+            a: int = to.field(node=True, default_factory=lambda: 1)
 
         tree = A()
 
@@ -72,12 +72,12 @@ class TestTreex:
         assert tree.a == 2
 
     def test_flatten_nothing(self):
-        x = [(1, 2), (3, ptx.Nothing())]
+        x = [(1, 2), (3, to.Nothing())]
         assert jax.tree_leaves(x) == [1, 2, 3]
 
-        flat_with_nothing = jax.tree_flatten(x, lambda x: isinstance(x, ptx.Nothing))[0]
+        flat_with_nothing = jax.tree_flatten(x, lambda x: isinstance(x, to.Nothing))[0]
 
-        assert flat_with_nothing == [1, 2, 3, ptx.Nothing()]
+        assert flat_with_nothing == [1, 2, 3, to.Nothing()]
 
     def test_flatten(self):
 
@@ -89,7 +89,7 @@ class TestTreex:
 
     def test_flatten_slice(self):
 
-        mlp = ptx.filter(MLP(2, 3, 5), State)
+        mlp = to.filter(MLP(2, 3, 5), State)
 
         flat = jax.tree_leaves(mlp)
 
@@ -97,9 +97,9 @@ class TestTreex:
 
     def test_flatten_slice_merging(self):
 
-        mlp = ptx.filter(MLP(2, 3, 5), State)
+        mlp = to.filter(MLP(2, 3, 5), State)
 
-        flat = jax.tree_flatten(mlp, lambda x: isinstance(x, ptx.Nothing))[0]
+        flat = jax.tree_flatten(mlp, lambda x: isinstance(x, to.Nothing))[0]
 
         assert len(flat) == 6
 
@@ -162,63 +162,63 @@ class TestTreex:
         mlp = MLP(2, 3, 5)
 
         # params
-        mlp_params = ptx.filter(mlp, Parameter)
+        mlp_params = to.filter(mlp, Parameter)
 
-        assert not isinstance(mlp_params.linear1.w, ptx.Nothing)
-        assert not isinstance(mlp_params.linear1.b, ptx.Nothing)
-        assert isinstance(mlp_params.linear1.n, ptx.Nothing)
+        assert not isinstance(mlp_params.linear1.w, to.Nothing)
+        assert not isinstance(mlp_params.linear1.b, to.Nothing)
+        assert isinstance(mlp_params.linear1.n, to.Nothing)
 
-        assert not isinstance(mlp_params.linear2.w, ptx.Nothing)
-        assert not isinstance(mlp_params.linear2.b, ptx.Nothing)
-        assert isinstance(mlp_params.linear2.n, ptx.Nothing)
+        assert not isinstance(mlp_params.linear2.w, to.Nothing)
+        assert not isinstance(mlp_params.linear2.b, to.Nothing)
+        assert isinstance(mlp_params.linear2.n, to.Nothing)
 
         # states
-        mlp_states = ptx.filter(mlp, State)
+        mlp_states = to.filter(mlp, State)
 
-        assert isinstance(mlp_states.linear1.w, ptx.Nothing)
-        assert isinstance(mlp_states.linear1.b, ptx.Nothing)
-        assert not isinstance(mlp_states.linear1.n, ptx.Nothing)
+        assert isinstance(mlp_states.linear1.w, to.Nothing)
+        assert isinstance(mlp_states.linear1.b, to.Nothing)
+        assert not isinstance(mlp_states.linear1.n, to.Nothing)
 
-        assert isinstance(mlp_states.linear2.w, ptx.Nothing)
-        assert isinstance(mlp_states.linear2.b, ptx.Nothing)
-        assert not isinstance(mlp_states.linear2.n, ptx.Nothing)
+        assert isinstance(mlp_states.linear2.w, to.Nothing)
+        assert isinstance(mlp_states.linear2.b, to.Nothing)
+        assert not isinstance(mlp_states.linear2.n, to.Nothing)
 
     def test_update(self):
 
         mlp = MLP(2, 3, 5)
 
-        mlp_params = ptx.filter(mlp, Parameter)
-        mlp_states = ptx.filter(mlp, State)
+        mlp_params = to.filter(mlp, Parameter)
+        mlp_states = to.filter(mlp, State)
 
-        mlp_next = ptx.update(mlp_params, mlp_states)
+        mlp_next = to.update(mlp_params, mlp_states)
 
-        assert not isinstance(mlp_next.linear1.w, ptx.Nothing)
-        assert not isinstance(mlp_next.linear1.b, ptx.Nothing)
-        assert not isinstance(mlp_next.linear1.n, ptx.Nothing)
+        assert not isinstance(mlp_next.linear1.w, to.Nothing)
+        assert not isinstance(mlp_next.linear1.b, to.Nothing)
+        assert not isinstance(mlp_next.linear1.n, to.Nothing)
 
-        assert not isinstance(mlp_next.linear2.w, ptx.Nothing)
-        assert not isinstance(mlp_next.linear2.b, ptx.Nothing)
-        assert not isinstance(mlp_next.linear2.n, ptx.Nothing)
+        assert not isinstance(mlp_next.linear2.w, to.Nothing)
+        assert not isinstance(mlp_next.linear2.b, to.Nothing)
+        assert not isinstance(mlp_next.linear2.n, to.Nothing)
 
     def test_update_not_inplace(self):
 
         mlp = MLP(2, 3, 5)
 
-        mlp_params = ptx.filter(mlp, Parameter)
-        mlp_states = ptx.filter(mlp, State)
+        mlp_params = to.filter(mlp, Parameter)
+        mlp_states = to.filter(mlp, State)
 
-        ptx.update(mlp_params, mlp_states)
+        to.update(mlp_params, mlp_states)
 
-        assert not isinstance(mlp_params.linear1.w, ptx.Nothing)
-        assert not isinstance(mlp_params.linear1.b, ptx.Nothing)
-        assert isinstance(mlp_params.linear1.n, ptx.Nothing)
+        assert not isinstance(mlp_params.linear1.w, to.Nothing)
+        assert not isinstance(mlp_params.linear1.b, to.Nothing)
+        assert isinstance(mlp_params.linear1.n, to.Nothing)
 
-        assert not isinstance(mlp_params.linear2.w, ptx.Nothing)
-        assert not isinstance(mlp_params.linear2.b, ptx.Nothing)
-        assert isinstance(mlp_params.linear2.n, ptx.Nothing)
+        assert not isinstance(mlp_params.linear2.w, to.Nothing)
+        assert not isinstance(mlp_params.linear2.b, to.Nothing)
+        assert isinstance(mlp_params.linear2.n, to.Nothing)
 
     def test_list(self):
-        class LinearList(ptx.Tree):
+        class LinearList(to.Tree):
             params: tp.List[np.ndarray] = Parameter.node()
 
             def __init__(self, din, dout, name="linear"):
@@ -247,7 +247,7 @@ class TestTreex:
         assert isinstance(linear.params[1], jnp.DeviceArray)
 
     def test_treelist(self):
-        class MLP(ptx.Tree):
+        class MLP(to.Tree):
             linears: tp.List[Linear]
 
             def __init__(self, din, dmid, dout, name="mlp"):
@@ -282,9 +282,9 @@ class TestTreex:
         assert isinstance(mlp.linears[1].n, jnp.DeviceArray)
 
     def test_static_annotation(self):
-        class Mod(ptx.Tree):
+        class Mod(to.Tree):
             a: Linear
-            b: Linear = ptx.static()
+            b: Linear = to.static()
 
             def __init__(self):
                 super().__init__()
@@ -306,7 +306,7 @@ class TestTreex:
         assert not isinstance(mod.b.n, str)
 
     def test_auto_annotations(self):
-        class MLP(ptx.Tree):
+        class MLP(to.Tree):
             def __init__(self, din, dmid, dout, name="mlp"):
                 super().__init__()
                 self.din = din
@@ -322,7 +322,7 @@ class TestTreex:
         assert "linear1" in mlp.field_metadata
 
     def test_auto_annotations_inserted(self):
-        class MLP(ptx.Tree):
+        class MLP(to.Tree):
             def __init__(self, din, dmid, dout, name="mlp"):
                 super().__init__()
                 self.din = din
@@ -342,8 +342,8 @@ class TestTreex:
         assert "linear3" in mlp.field_metadata
 
     def test_auto_annotations_static(self):
-        class MLP(ptx.Tree):
-            linear2: Linear = ptx.static()
+        class MLP(to.Tree):
+            linear2: Linear = to.static()
 
             def __init__(self, din, dmid, dout, name="mlp"):
                 super().__init__()
@@ -361,7 +361,7 @@ class TestTreex:
         assert not mlp.field_metadata["linear2"].node
 
     def test_annotations_missing_field_no_error(self):
-        class MLP(ptx.Tree):
+        class MLP(to.Tree):
             linear3: Linear  # missing field
 
             def __init__(self, din, dmid, dout, name="mlp"):
@@ -383,14 +383,14 @@ class TestTreex:
 
         tree = dict(a=1, b=Linear(3, 4))
 
-        tree2 = ptx.filter(tree, Parameter)
-        assert isinstance(tree2["a"], ptx.Nothing)
+        tree2 = to.filter(tree, Parameter)
+        assert isinstance(tree2["a"], to.Nothing)
 
-        tree2 = ptx.filter(tree, lambda field: isinstance(field.value, int))
+        tree2 = to.filter(tree, lambda field: isinstance(field.value, int))
         assert tree2["a"] == 1
 
     def test_module_map(self):
-        class A(ptx.Tree):
+        class A(to.Tree):
             def __init__(self):
                 super().__init__()
                 self.a = 1
@@ -400,7 +400,56 @@ class TestTreex:
         def map_fn(x):
             x.a = 2
 
-        module2 = ptx.object_apply(map_fn, module)
+        module2 = to.object_apply(map_fn, module)
 
         assert module.a == 1
         assert module2.a == 2
+
+    def test_opaque(self):
+        class A(to.Tree):
+            id: to.Opaque[str]
+
+            def __init__(self, id: str):
+                self.id = to.Opaque(id)
+
+        a1 = A("1")
+        a2 = A("2")
+
+        n = 0
+
+        @jax.jit
+        def f(a):
+            nonlocal n
+            n += 1
+
+        f(a1)
+        f(a2)
+
+        assert n == 1
+
+    def test_hashable(self):
+        class A(to.Tree):
+            array: to.Hashable[np.ndarray]
+
+            def __init__(self, array: np.ndarray):
+                self.array = to.Hashable(array)
+
+        tree = A(np.array(1))
+
+        n = 0
+
+        @jax.jit
+        def f(tree):
+            nonlocal n
+            n += 1
+
+        f(tree)
+        assert n == 1
+
+        f(tree)
+        assert n == 1
+
+        tree.array = to.Hashable(np.array(2))
+        f(tree)
+
+        assert n == 2
