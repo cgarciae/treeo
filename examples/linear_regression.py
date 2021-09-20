@@ -1,6 +1,3 @@
-from functools import partial
-from typing import Any
-
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
@@ -12,7 +9,7 @@ class Linear(to.Tree):
     w: jnp.ndarray = to.node()
     b: jnp.ndarray = to.node()
 
-    def __init__(self, din, dout, key: Any):
+    def __init__(self, din, dout, key):
         self.w = jax.random.uniform(key, shape=(din, dout))
         self.b = jnp.zeros(shape=(dout,))
 
