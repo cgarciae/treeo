@@ -1,13 +1,13 @@
 # Treeo
 
-_A library for easily creating and manipulating JAX Pytree classes_
+_A simple library for creating and manipulating custom JAX Pytree classes_
 
 * **Light-weight**: has no dependencies other than `jax`.
 * **Compatible**: Treeo `Tree` objects are compatible with any `jax` function that accepts Pytrees.
 * **Standards-based**: `treeo.field` is built on top of python's `dataclasses.field`
 * **Flexible**: Treeo is compatible with both dataclass and non-dataclass classes.
 
-Treeo was refactored from the core of [Treex](https://github.com/cgarciae/treex) and (although the author was not aware of this at the time) shares a lot in common with [flax.struct](https://flax.readthedocs.io/en/latest/flax.struct.html#module-flax.struct).
+Treeo was extracted from the core of [Treex](https://github.com/cgarciae/treex) and (although the author was not aware of this at the time) shares a lot in common with [flax.struct](https://flax.readthedocs.io/en/latest/flax.struct.html#module-flax.struct). Treeo has nothing in particular to do with Deep Learning, but some of the examples are motivated by it.
 
 [Documentation](https://cgarciae.github.io/treeo) | [Guide](#guide)
 
@@ -242,12 +242,12 @@ model = model.update_field_metadata(
 ### Sugar 🍬
 For pedagogical reason, `to.field` has been used throught the documentation to reinforce the concepts, however, Treeo has a couple of shortcuts to make it easier and more understandable to define Trees.
 
-| normal                                | shortcut            |
-| ------------------------------------- | ------------------- |
-| `to.field(node=True)`                 | `to.node()`         |
-| `to.field(node=False)`                | `to.static()`       |
-| `to.field(node=True, kind=SomeTree)`  | `SomeTree.node()`   |
-| `to.field(node=False, kind=SomeTree)` | `SomeTree.static()` |
+| normal                                  | shortcut              |
+| --------------------------------------- | --------------------- |
+| `to.field(node=True)`                   | `to.node()`           |
+| `to.field(node=False)`                  | `to.static()`         |
+| `to.field(node=True, kind=TreeOrKind)`  | `TreeOrKind.node()`   |
+| `to.field(node=False, kind=TreeOrKind)` | `TreeOrKind.static()` |
 
 Based on this, you can take the following code
 
@@ -273,16 +273,16 @@ class Parameter(to.KindMixin):
 
 class Child(to.Tree):
     a: float = to.node()
-    b: str # = to.static()
+    b: str # = to.static(), inferred
     b: float = Parameter.node()
     d: float = Parameter.static()
 
 class Parent(to.Tree):
-    child1: Child # = Child.node()
+    child1: Child # = Child.node(), inferred
     child2: Child = Child.static()
-    rest: List[Child] # = Child.node()
+    rest: List[Child] # = Child.node(), inferred
 ```
-Here the commented out code is actually not needed because Treeo picks up these by default.
+As you see we use the `to.KindMixin` to add some methods to the `Parameter` class. Also, since the `Tree` already inherits from `to.KindMixin`, we can use the `.node()` and `.static()` methods on the `Tree` subclass.
 
 ### API
 Throught these examples for the functional API we will use the following defintions:
