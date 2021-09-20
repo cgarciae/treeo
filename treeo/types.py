@@ -1,7 +1,7 @@
 import dataclasses
 import typing as tp
 from abc import ABCMeta
-from dataclasses import dataclass
+import dataclasses
 
 import jax
 import jax.numpy as jnp
@@ -14,7 +14,7 @@ A = tp.TypeVar("A")
 B = tp.TypeVar("B")
 
 
-class FieldMixin:
+class KindMixin:
     @classmethod
     def field(
         cls,
@@ -26,6 +26,8 @@ class FieldMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
+        opaque: bool = False,
+        opaque_is_equal: tp.Optional[tp.Callable[[utils.Opaque, tp.Any], bool]] = None,
     ) -> tp.Any:
         return utils.field(
             default=default,
@@ -36,6 +38,8 @@ class FieldMixin:
             repr=repr,
             hash=hash,
             compare=compare,
+            opaque=opaque,
+            opaque_is_equal=opaque_is_equal,
         )
 
     @classmethod
@@ -48,6 +52,8 @@ class FieldMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
+        opaque: bool = False,
+        opaque_is_equal: tp.Optional[tp.Callable[[utils.Opaque, tp.Any], bool]] = None,
     ) -> tp.Any:
         return utils.node(
             default=default,
@@ -57,6 +63,8 @@ class FieldMixin:
             repr=repr,
             hash=hash,
             compare=compare,
+            opaque=opaque,
+            opaque_is_equal=opaque_is_equal,
         )
 
     @classmethod
@@ -68,6 +76,8 @@ class FieldMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
+        opaque: bool = False,
+        opaque_is_equal: tp.Optional[tp.Callable[[utils.Opaque, tp.Any], bool]] = None,
     ) -> tp.Any:
         return cls.field(
             default=default,
@@ -77,6 +87,8 @@ class FieldMixin:
             repr=repr,
             hash=hash,
             compare=compare,
+            opaque=opaque,
+            opaque_is_equal=opaque_is_equal,
         )
 
 
@@ -99,10 +111,12 @@ class TrivialPytree:
         jax.tree_util.register_pytree_node_class(cls)
 
 
-@dataclass
+@dataclasses.dataclass
 class FieldMetadata(TrivialPytree):
     node: bool
     kind: type
+    opaque: bool
+    opaque_is_equal: tp.Optional[tp.Callable[["Opaque", tp.Any], bool]]
 
 
 @jax.tree_util.register_pytree_node_class
@@ -124,15 +138,11 @@ class Nothing:
 NOTHING = Nothing()
 
 
-class Opaque(tp.Generic[A]):
-    def __init__(self, value: A):
-        self.value = value
+class Missing:
+    pass
 
-    def __repr__(self):
-        return f"Hidden({self.value})"
 
-    def __eq__(self, o):
-        return isinstance(o, Opaque)
+MISSING = Missing()
 
 
 class Hashable(tp.Generic[A]):

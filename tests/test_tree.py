@@ -10,11 +10,11 @@ import pytest
 import treeo as to
 
 
-class Parameter(to.FieldMixin):
+class Parameter(to.KindMixin):
     pass
 
 
-class State(to.FieldMixin):
+class State(to.KindMixin):
     pass
 
 
@@ -410,7 +410,7 @@ class TestTreeo:
             id: to.Opaque[str]
 
             def __init__(self, id: str):
-                self.id = to.Opaque(id)
+                self.id = to.Opaque(id, None)
 
         a1 = A("1")
         a2 = A("2")
@@ -426,6 +426,56 @@ class TestTreeo:
         f(a2)
 
         assert n == 1
+
+    def test_opaque_field(self):
+        class A(to.Tree):
+            id: str = to.field(node=False, opaque=True)
+
+            def __init__(self, id: str):
+                self.id = id
+
+        a1 = A("1")
+        a2 = A("2")
+
+        n = 0
+
+        @jax.jit
+        def f(a):
+            nonlocal n
+            n += 1
+
+        f(a1)
+        f(a2)
+
+        assert n == 1
+
+    def test_opaque_field_array(self):
+        class A(to.Tree):
+            array: np.ndarray = to.field(node=False, opaque=True)
+
+            def __init__(self, array: np.ndarray):
+                self.array = array
+
+        a1 = A(np.array(1))
+        a2 = A(np.array(2))
+
+        n = 0
+
+        @jax.jit
+        def f(a):
+            nonlocal n
+            n += 1
+
+        f(a1)
+        f(a2)
+
+        assert n == 1
+
+        a3 = A(np.array([1, 2]))
+
+        f(a3)
+
+        assert n == 2
 
     def test_hashable(self):
         class A(to.Tree):

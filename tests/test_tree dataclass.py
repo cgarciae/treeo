@@ -11,11 +11,11 @@ import pytest
 import treeo as to
 
 
-class Parameter(to.FieldMixin):
+class Parameter(to.KindMixin):
     pass
 
 
-class State(to.FieldMixin):
+class State(to.KindMixin):
     pass
 
 
@@ -416,10 +416,30 @@ class TestTreeoDataclass:
 
             @classmethod
             def new(cls, id: str):
-                return cls(id=to.Opaque(id))
+                return cls(id=to.Opaque(id, None))
 
         a1 = A.new("1")
         a2 = A.new("2")
+
+        n = 0
+
+        @jax.jit
+        def f(a):
+            nonlocal n
+            n += 1
+
+        f(a1)
+        f(a2)
+
+        assert n == 1
+
+    def test_opaque_field(self):
+        @dataclass
+        class A(to.Tree):
+            id: str = to.field(node=False, opaque=True)
+
+        a1 = A("1")
+        a2 = A("2")
 
         n = 0
 

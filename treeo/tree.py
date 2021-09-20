@@ -68,12 +68,12 @@ class FieldInfo:
         self,
         name: tp.Optional[str],
         value: tp.Any,
-        annotation: tp.Type[tp.Any],
+        kind: tp.Type[tp.Any],
         module: tp.Optional["Tree"],
     ):
         self.name = name
         self.value = value
-        self.annotation = annotation
+        self.kind = kind
         self.module = module
 
 
@@ -99,12 +99,14 @@ class TreeMeta(ABCMeta):
                 obj._field_metadata[field] = types.FieldMetadata(
                     node=True,
                     kind=type(value),
+                    opaque=False,
+                    opaque_is_equal=None,
                 )
 
         return obj
 
 
-class Tree(types.FieldMixin, metaclass=TreeMeta):
+class Tree(types.KindMixin, metaclass=TreeMeta):
     _init_called: bool = False
     _field_metadata: tp.Dict[str, types.FieldMetadata]
     _factory_fields: tp.Dict[str, tp.Callable[[], tp.Any]]
@@ -119,6 +121,12 @@ class Tree(types.FieldMixin, metaclass=TreeMeta):
         field: str,
         node: tp.Optional[bool] = None,
         kind: tp.Optional[type] = None,
+        opaque: tp.Optional[bool] = None,
+        opaque_is_equal: tp.Union[
+            tp.Callable[[utils.Opaque, tp.Any], bool],
+            None,
+            types.Missing,
+        ] = types.MISSING,
     ) -> T:
         module = self.copy()
         field_metadata = module._field_metadata[field]
@@ -128,6 +136,12 @@ class Tree(types.FieldMixin, metaclass=TreeMeta):
 
         if kind is not None:
             field_metadata.kind = kind
+
+        if opaque is not None:
+            field_metadata.opaque = opaque
+
+        if opaque_is_equal is not types.MISSING:
+            field_metadata.opaque_is_equal = opaque_is_equal
 
         self._field_metadata[field] = field_metadata
 
@@ -161,6 +175,8 @@ class Tree(types.FieldMixin, metaclass=TreeMeta):
                     cls._field_metadata[field] = types.FieldMetadata(
                         node=value.metadata["node"],
                         kind=value.metadata["kind"],
+                        opaque=value.metadata["opaque"],
+                        opaque_is_equal=value.metadata["opaque_is_equal"],
                     )
 
         for field, value in annotations.items():
@@ -170,6 +186,8 @@ class Tree(types.FieldMixin, metaclass=TreeMeta):
                 cls._field_metadata[field] = types.FieldMetadata(
                     node=True,
                     kind=value,
+                    opaque=False,
+                    opaque_is_equal=None,
                 )
 
     def tree_flatten(self):
@@ -185,37 +203,48 @@ class Tree(types.FieldMixin, metaclass=TreeMeta):
             not_tree = fields
         else:
             for field, value in fields.items():
-                # auto-annotations
+                # maybe update metadata
                 if field not in self._field_metadata and isinstance(value, Tree):
                     self._field_metadata[field] = types.FieldMetadata(
                         node=True,
                         kind=type(value),
+                        opaque=False,
+                        opaque_is_equal=None,
                     )
 
                 field_annotation = self._field_metadata.get(field, None)
 
-                if field_annotation is not None and field_annotation.node:
-                    if _CONTEXT.add_field_info:
-                        # leaves, treedef
-                        tree[field], not_tree[field] = jax.tree_flatten(
-                            value,
-                            # is_leaf=lambda x: isinstance(x, types.Initializer),
-                        )
-                        tree[field] = [
-                            FieldInfo(
-                                name=field,
-                                value=x,
-                                annotation=field_annotation.kind,
-                                module=self,
-                            )
-                            if not isinstance(x, FieldInfo)
-                            else x
-                            for x in tree[field]
-                        ]
-                    else:
+                if field_annotation is not None:
+                    if field_annotation.node:
                         tree[field] = value
+                    elif not field_annotation.node and field_annotation.opaque:
+                        not_tree[field] = utils.Opaque(
+                            value,
+                            opaque_is_equal=field_annotation.opaque_is_equal,
+                        )
+                    else:
+                        not_tree[field] = value
+
                 else:
                     not_tree[field] = value
+
+        # maybe convert to FieldInfo
+        if _CONTEXT.add_field_info:
+            for field, value in tree.items():
+                field_annotation = self._field_metadata[field]
+                # leaves, treedef
+                tree[field], not_tree[field] = jax.tree_flatten(value)
+                tree[field] = [
+                    FieldInfo(
+                        name=field,
+                        value=x,
+                        kind=field_annotation.kind,
+                        module=self,
+                    )
+                    if not isinstance(x, FieldInfo)
+                    else x
+                    for x in tree[field]
+                ]
 
         children = (tree,)
 
@@ -233,6 +262,15 @@ class Tree(types.FieldMixin, metaclass=TreeMeta):
                 tree[field] = jax.tree_unflatten(treedef, leaves)
 
         module.__dict__.update(tree, **not_tree)
+
+        # extract value from Opaque
+        for field, value in not_tree.items():
+            if (
+                isinstance(value, utils.Opaque)
+                and field in module._field_metadata
+                and module._field_metadata[field].opaque
+            ):
+                setattr(module, field, value.value)
 
         return module
 
@@ -345,7 +383,7 @@ def filter(obj: A, *filters: Filter) -> A:
      FieldInfo(
         name=None,
         value=leaf_value,
-        annotation=type(None),
+        kind=type(None),
         module=None,
     )
     ```
@@ -376,14 +414,16 @@ def filter(obj: A, *filters: Filter) -> A:
 
     """
 
-    filters = tuple(_get_filter(f) if isinstance(f, tp.Type) else f for f in filters)
+    filters = tuple(
+        _get_kind_filter(f) if isinstance(f, tp.Type) else f for f in filters
+    )
 
     def apply_filters(info: tp.Any) -> tp.Any:
         if not isinstance(info, FieldInfo):
             info = FieldInfo(
                 name=None,
                 value=info,
-                annotation=type(None),
+                kind=type(None),
                 module=None,
             )
         assert isinstance(info, FieldInfo)
@@ -452,14 +492,14 @@ def _looser_tree_map(
     return treedef.unflatten(f(*xs) for xs in zip(*all_leaves))
 
 
-def _get_filter(
+def _get_kind_filter(
     t: type,
 ) -> tp.Callable[[FieldInfo], bool]:
     def _filter(info: FieldInfo) -> bool:
         return (
-            info.annotation is not None
+            info.kind is not None
             and isinstance(t, tp.Type)
-            and issubclass(info.annotation, t)
+            and issubclass(info.kind, t)
         )
 
     return _filter

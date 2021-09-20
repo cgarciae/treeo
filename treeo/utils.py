@@ -5,9 +5,48 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+A = tp.TypeVar("A")
+B = tp.TypeVar("B")
+
 key = jax.random.PRNGKey
 _pymap = map
 _pyfilter = filter
+
+OpaqueIsEqual = tp.Optional[tp.Callable[["Opaque", tp.Any], bool]]
+
+
+@tp.runtime_checkable
+class ArrayLike(tp.Protocol):
+    shape: tp.Tuple[int, ...]
+    dtype: np.dtype
+
+
+class Opaque(tp.Generic[A]):
+    def __init__(self, value: A, opaque_is_equal: tp.Optional[OpaqueIsEqual]):
+        self.value = value
+        self.opaque_is_equal = opaque_is_equal
+
+    def __repr__(self):
+        return f"Hidden({self.value})"
+
+    def __eq__(self, other):
+        if self.opaque_is_equal is not None:
+            return self.opaque_is_equal(self, other)
+        else:
+            # if both are Opaque and their values are of the same type
+            if isinstance(other, Opaque) and type(self.value) == type(other.value):
+                # if they are array-like also compare their shapes and dtypes
+                if isinstance(self.value, ArrayLike):
+                    other_value = tp.cast(ArrayLike, other.value)
+                    return (
+                        self.value.shape == other_value.shape
+                        and self.value.dtype == other_value.dtype
+                    )
+                else:
+                    # else they are equal
+                    return True
+            else:
+                return False
 
 
 def field(
@@ -20,11 +59,18 @@ def field(
     repr: bool = True,
     hash: tp.Optional[bool] = None,
     compare: bool = True,
+    opaque: bool = False,
+    opaque_is_equal: tp.Optional[tp.Callable[[Opaque, tp.Any], bool]] = None,
 ) -> tp.Any:
 
     return dataclasses.field(
         default=default,
-        metadata={"node": node, "kind": kind},
+        metadata={
+            "node": node,
+            "kind": kind,
+            "opaque": opaque,
+            "opaque_is_equal": opaque_is_equal,
+        },
         default_factory=default_factory,
         init=init,
         repr=repr,
@@ -42,6 +88,8 @@ def node(
     repr: bool = True,
     hash: tp.Optional[bool] = None,
     compare: bool = True,
+    opaque: bool = False,
+    opaque_is_equal: tp.Optional[tp.Callable[[Opaque, tp.Any], bool]] = None,
 ) -> tp.Any:
     return field(
         default=default,
@@ -52,6 +100,8 @@ def node(
         repr=repr,
         hash=hash,
         compare=compare,
+        opaque=opaque,
+        opaque_is_equal=opaque_is_equal,
     )
 
 
@@ -64,6 +114,8 @@ def static(
     repr: bool = True,
     hash: tp.Optional[bool] = None,
     compare: bool = True,
+    opaque: bool = False,
+    opaque_is_equal: tp.Optional[tp.Callable[[Opaque, tp.Any], bool]] = None,
 ) -> tp.Any:
     return field(
         default,
@@ -74,6 +126,8 @@ def static(
         repr=repr,
         hash=hash,
         compare=compare,
+        opaque=opaque,
+        opaque_is_equal=opaque_is_equal,
     )
 
 
