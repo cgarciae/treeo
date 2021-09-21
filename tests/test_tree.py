@@ -503,3 +503,35 @@ class TestTreeo:
         f(tree)
 
         assert n == 2
+
+    def test_generics(self):
+        class A(to.Tree):
+            w: jnp.ndarray = Parameter.node()
+
+            def __init__(self, w: jnp.ndarray):
+                self.w = w
+
+        class MyTree(to.Tree):
+            tree_or_array: tp.List[tp.Union[jnp.ndarray, A]]
+
+            def __init__(self, tree_or_array: tp.List[tp.Union[jnp.ndarray, A]]):
+                self.tree_or_array = tree_or_array
+
+        module = MyTree(
+            [
+                jnp.ones(shape=[10, 5]),
+                A(jnp.array([10.0])),
+            ]
+        )
+        assert isinstance(module.tree_or_array[1], A)
+
+        params = to.filter(module, Parameter)
+
+        assert module.field_metadata["tree_or_array"].kind == type(None)
+        assert module.tree_or_array[1].field_metadata["w"].kind == Parameter
+
+        with to.add_field_info():
+            infos = jax.tree_leaves(module)
+
+        assert infos[0].kind == type(None)
+        assert infos[1].kind == Parameter

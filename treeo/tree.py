@@ -180,12 +180,12 @@ class Tree(types.KindMixin, metaclass=TreeMeta):
                     )
 
         for field, value in annotations.items():
-            if field not in cls._field_metadata and any(
-                issubclass(t, Tree) for t in utils._all_types(value)
-            ):
+
+            if field not in cls._field_metadata:
+                is_node = any(issubclass(t, Tree) for t in utils._all_types(value))
                 cls._field_metadata[field] = types.FieldMetadata(
-                    node=True,
-                    kind=value,
+                    node=is_node,
+                    kind=type(None),
                     opaque=False,
                     opaque_is_equal=None,
                 )
@@ -204,27 +204,24 @@ class Tree(types.KindMixin, metaclass=TreeMeta):
         else:
             for field, value in fields.items():
                 # maybe update metadata
-                if field not in self._field_metadata and isinstance(value, Tree):
+                if field not in self._field_metadata:
+                    is_node = isinstance(value, Tree)
                     self._field_metadata[field] = types.FieldMetadata(
-                        node=True,
-                        kind=type(value),
+                        node=is_node,
+                        kind=type(None),
                         opaque=False,
                         opaque_is_equal=None,
                     )
 
-                field_annotation = self._field_metadata.get(field, None)
+                field_annotation = self._field_metadata[field]
 
-                if field_annotation is not None:
-                    if field_annotation.node:
-                        tree[field] = value
-                    elif not field_annotation.node and field_annotation.opaque:
-                        not_tree[field] = utils.Opaque(
-                            value,
-                            opaque_is_equal=field_annotation.opaque_is_equal,
-                        )
-                    else:
-                        not_tree[field] = value
-
+                if field_annotation.node:
+                    tree[field] = value
+                elif not field_annotation.node and field_annotation.opaque:
+                    not_tree[field] = utils.Opaque(
+                        value,
+                        opaque_is_equal=field_annotation.opaque_is_equal,
+                    )
                 else:
                     not_tree[field] = value
 

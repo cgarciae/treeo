@@ -1,13 +1,13 @@
 # Treeo
 
-_A simple library for creating and manipulating custom JAX Pytree classes_
+_A small library for creating and manipulating custom JAX Pytree classes_
 
 * **Light-weight**: has no dependencies other than `jax`.
 * **Compatible**: Treeo `Tree` objects are compatible with any `jax` function that accepts Pytrees.
 * **Standards-based**: `treeo.field` is built on top of python's `dataclasses.field`
 * **Flexible**: Treeo is compatible with both dataclass and non-dataclass classes.
 
-Treeo was extracted from the core of [Treex](https://github.com/cgarciae/treex) and (although the author was not aware of this at the time) shares a lot in common with [flax.struct](https://flax.readthedocs.io/en/latest/flax.struct.html#module-flax.struct). Treeo has nothing in particular to do with Deep Learning, but some of the examples are motivated by it.
+Treeo was originally extracted from the core of [Treex](https://github.com/cgarciae/treex) and (although the author was not aware of this at the time) shares a lot in common with [flax.struct](https://flax.readthedocs.io/en/latest/flax.struct.html#module-flax.struct). Treeo has nothing in particular to do with Deep Learning, but some of the examples are motivated by it.
 
 [Documentation](https://cgarciae.github.io/treeo) | [Guide](#guide)
 
@@ -130,6 +130,7 @@ class Game(to.Tree):
         self.boss = Agent(...) # runtime node
 ```
 
+**Note:** the `kind` of all fields that are not explicitly declarated is set to `NoneType`.
 
 ### Opaque static fields
 When the value of a static field changes `jit` and friends will recompile to reflect posible changes in the computation logic. While this is good quality in many cases, sometimes certain fields are just there for metadata and should not part of the actual computation. For example, `name` in the `Person` example above will probably not affect the logic yet in this example it will force recompilation:
