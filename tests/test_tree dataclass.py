@@ -404,7 +404,7 @@ class TestTreeoDataclass:
         def map_fn(x):
             x.a = 2
 
-        module2 = to.object_apply(map_fn, module)
+        module2 = to.apply(map_fn, module)
 
         assert module.a == 1
         assert module2.a == 2

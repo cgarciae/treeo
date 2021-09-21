@@ -1,29 +1,26 @@
 site_name: Treeo
-repo_name: cgarciae/treex
-repo_url: https://github.com/cgarciae/treex
-site_url: https://cgarciae.github.io/treex
+repo_name: cgarciae/treeo
+repo_url: https://github.com/cgarciae/treeo
+site_url: https://cgarciae.github.io/treeo
 nav:
 - Introduction: index.md
 - API Reference:
-    BatchNorm: api/BatchNorm.md
-    BatchStat: api/BatchStat.md
-    Conv: api/Conv.md
-    Dropout: api/Dropout.md
-    Initializer: api/Initializer.md
-    Lambda: api/Lambda.md
-    Linear: api/Linear.md
-    MLP: api/MLP.md
-    Module: api/Module.md
+    FieldInfo: api/FieldInfo.md
+    FieldMetadata: api/FieldMetadata.md
+    Hashable: api/Hashable.md
+    KindMixin: api/KindMixin.md
+    Missing: api/Missing.md
     Nothing: api/Nothing.md
-    OptState: api/OptState.md
-    Optimizer: api/Optimizer.md
-    Parameter: api/Parameter.md
-    Rng: api/Rng.md
-    Sequence: api/Sequence.md
-    State: api/State.md
-    TreeObject: api/TreeObject.md
-    TreePart: api/TreePart.md
-    sequence: api/sequence.md
+    Opaque: api/Opaque.md
+    Tree: api/Tree.md
+    TreeMeta: api/TreeMeta.md
+    apply: api/apply.md
+    field: api/field.md
+    filter: api/filter.md
+    map: api/map.md
+    node: api/node.md
+    static: api/static.md
+    update: api/update.md
 extra:
   search:
     language: en

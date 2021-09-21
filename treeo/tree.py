@@ -30,7 +30,7 @@ PAD = r"{pad}"
 LEAF_TYPES = (types.Nothing, type(None))
 
 
-class FlattenMode(enum.Enum):
+class _FlattenMode(enum.Enum):
     normal = enum.auto()
     all_static = enum.auto()
     all_dynamic = enum.auto()
@@ -39,7 +39,7 @@ class FlattenMode(enum.Enum):
 @dataclass
 class _Context(threading.local):
     add_field_info: bool = False
-    flatten_mode: FlattenMode = FlattenMode.normal
+    flatten_mode: _FlattenMode = _FlattenMode.normal
 
     def __enter__(self):
         global _CONTEXT
@@ -197,9 +197,9 @@ class Tree(types.KindMixin, metaclass=TreeMeta):
         tree = {}
         not_tree = {}
 
-        if _CONTEXT.flatten_mode == FlattenMode.all_dynamic:
+        if _CONTEXT.flatten_mode == _FlattenMode.all_dynamic:
             tree = fields
-        elif _CONTEXT.flatten_mode == FlattenMode.all_static:
+        elif _CONTEXT.flatten_mode == _FlattenMode.all_static:
             not_tree = fields
         else:
             for field, value in fields.items():
@@ -281,7 +281,7 @@ class Tree(types.KindMixin, metaclass=TreeMeta):
         jax.tree_map(lambda x: x, self)
         ```
         """
-        with _CONTEXT.update(flatten_mode=FlattenMode.all_dynamic):
+        with _CONTEXT.update(flatten_mode=_FlattenMode.all_dynamic):
             return jax.tree_map(lambda x: x, self)
 
 
@@ -290,12 +290,10 @@ class Tree(types.KindMixin, metaclass=TreeMeta):
 # --------------------------------------------------
 
 
-def object_apply(
-    f: tp.Callable[..., None], obj: A, *rest: A, inplace: bool = False
-) -> A:
+def apply(f: tp.Callable[..., None], obj: A, *rest: A, inplace: bool = False) -> A:
     """
-    Applies a function to all TreeObjects in a Pytree. Function very similar to `jax.tree_map`,
-    but works on TreeObjects instead of values and `f` should apply the changes inplace to the
+    Applies a function to all `to.Tree`s in a Pytree. Function very similar to `jax.tree_map`,
+    but works on Trees instead of values and `f` should apply the changes inplace to the
     first object.
 
     If `inplace` is `False`, a copy of the first object is returned with the changes applied.
@@ -303,12 +301,12 @@ def object_apply(
 
     Arguments:
         f: The function to apply.
-        obj: a pytree possibly containing TreeObjects.
+        obj: a pytree possibly containing Trees.
         *rest: additional pytrees.
         inplace: If `True`, the input `obj` is mutated.
 
     Returns:
-        A new pytree with the updated TreeObjects or the same input `obj` if `inplace` is `True`.
+        A new pytree with the updated Trees or the same input `obj` if `inplace` is `True`.
     """
     rest = jax.tree_map(lambda x: x, rest)
 
@@ -319,7 +317,7 @@ def object_apply(
 
     def nested_fn(obj, *rest):
         if isinstance(obj, Tree):
-            object_apply(f, obj, *rest, inplace=True)
+            apply(f, obj, *rest, inplace=True)
 
     jax.tree_map(
         nested_fn,
@@ -336,14 +334,14 @@ def object_apply(
 def map(f: tp.Callable, obj: A, *filters: Filter) -> A:
     """
     Functional version of `Tree.map` but it can be applied to any pytree, useful if
-    you have TreeObjects that are embedded in a pytree. The `filters` are applied according
-    to `tx.filter`.
+    you have Trees that are embedded in a pytree. The `filters` are applied according
+    to `to.filter`.
 
     Example:
 
     ```python
     tree = dict(a=1, b=MyModule().init(42))
-    tree = tx.map(jnp.zeros, tree, tx.BatchStat)
+    tree = to.map(jnp.zeros, tree, to.BatchStat)
 
     # "a" is not modified
     assert tree["a"] == 1
@@ -375,7 +373,7 @@ def map(f: tp.Callable, obj: A, *filters: Filter) -> A:
 def filter(obj: A, *filters: Filter) -> A:
     """
     Functional version of `Tree.filter` but can filter arbitrary pytrees. This is useful
-    if you have TreeObjects that are embedded in a larger pytree e.g. a list of TreeObjects.
+    if you have Trees that are embedded in a larger pytree e.g. a list of Trees.
 
     Leaves that are not part of a Tree will get assigned the following `FieldInfo`:
 
@@ -391,16 +389,16 @@ def filter(obj: A, *filters: Filter) -> A:
     filtered with a query like:
 
     ```python
-    tree = dict(a=1, b=tx.Linear(3, 4))
-    filtered = filter(tree, tx.Parameter)
+    tree = dict(a=1, b=to.Linear(3, 4))
+    filtered = filter(tree, to.Parameter)
 
-    assert isinstance(filtered["a"], tx.Nothing)
+    assert isinstance(filtered["a"], to.Nothing)
     ```
 
     However, you query non-Tree based on their value:
 
     ```python
-    tree = dict(a=1, b=tx.Linear(3, 4))
+    tree = dict(a=1, b=to.Linear(3, 4))
     filtered = filter(tree, lambda field: isintance(field.value, int))
 
     assert filtered["a"] == 1

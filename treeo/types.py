@@ -92,7 +92,7 @@ class KindMixin:
         )
 
 
-class TrivialPytree:
+class _TrivialPytree:
     def tree_flatten(self):
         tree = vars(self)
         children = (tree,)
@@ -112,7 +112,7 @@ class TrivialPytree:
 
 
 @dataclasses.dataclass
-class FieldMetadata(TrivialPytree):
+class FieldMetadata(_TrivialPytree):
     node: bool
     kind: type
     opaque: bool

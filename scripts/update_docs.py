@@ -9,7 +9,9 @@ import jax
 import jinja2
 import yaml
 
-import treex
+import treeo as MODULE
+
+MODULE_NAME = "treeo"
 
 
 @dataclass
@@ -21,8 +23,8 @@ class Structure:
 
 
 def getinfo():
-    module = treex
-    name_path = "treex"
+    module = MODULE
+    name_path = MODULE_NAME
 
     all_members = (
         module.__all__
@@ -30,11 +32,11 @@ def getinfo():
         else [
             name
             for name, obj in inspect.getmembers(module)
-            if (isinstance(obj, ModuleType) and obj.__name__.startswith("treex"))
+            if (isinstance(obj, ModuleType) and obj.__name__.startswith(MODULE_NAME))
             or (
                 hasattr(obj, "__module__")
                 and obj.__class__.__module__ != "typing"
-                and "treex" in obj.__module__
+                and MODULE_NAME in obj.__module__
                 and (inspect.isclass(obj) or inspect.isfunction(obj))
             )
         ]
@@ -68,7 +70,8 @@ with open("mkdocs.yml", "r") as f:
 
 
 api_reference = jax.tree_map(
-    lambda s: s.name_path.replace("treex", "api").replace(".", "/") + ".md", docs_info
+    lambda s: s.name_path.replace(MODULE_NAME, "api").replace(".", "/") + ".md",
+    docs_info,
 )
 
 docs["nav"][api_reference_index] = {"API Reference": api_reference}
@@ -96,7 +99,7 @@ shutil.rmtree(api_path, ignore_errors=True)
 
 for structure in jax.tree_leaves(docs_info):
     filepath: Path = api_path / (
-        structure.name_path.replace("treex.", "").replace(".", "/") + ".md"
+        structure.name_path.replace(f"{MODULE_NAME}.", "").replace(".", "/") + ".md"
     )
     markdown = jinja2.Template(template).render(
         name_path=structure.name_path,
