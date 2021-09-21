@@ -127,7 +127,8 @@ class Tree(types.KindMixin, metaclass=TreeMeta):
             types.Missing,
         ] = types.MISSING,
     ) -> T:
-        module = self.copy()
+        module = copy(self)
+
         field_metadata = module._field_metadata[field]
 
         if node is not None:
@@ -270,27 +271,28 @@ class Tree(types.KindMixin, metaclass=TreeMeta):
 
         return module
 
-    def copy(self: T) -> T:
-        """
-        Returns a deep copy of the module, implemented as:
-        ```python
-        jax.tree_map(lambda x: x, self)
-        ```
-        """
-        with _CONTEXT.update(flatten_mode=_FlattenMode.all_dynamic):
-            return jax.tree_map(lambda x: x, self)
-
 
 # --------------------------------------------------
 # functions
 # --------------------------------------------------
 
 
+def copy(obj: A) -> A:
+    """
+    Returns a deep copy of the tree, almost equivalent to:
+    ```python
+    jax.tree_map(lambda x: x, self)
+    ```
+    but Treeo will try to copy static nodes as well.
+    """
+    with _CONTEXT.update(flatten_mode=_FlattenMode.all_dynamic):
+        return jax.tree_map(lambda x: x, obj)
+
+
 def apply(f: tp.Callable[..., None], obj: A, *rest: A, inplace: bool = False) -> A:
     """
-    Applies a function to all `to.Tree`s in a Pytree. Function very similar to `jax.tree_map`,
-    but works on Trees instead of values and `f` should apply the changes inplace to the
-    first object.
+    Applies a function to all `to.Tree`s in a Pytree. Works very similar to `jax.tree_map`,
+    but its values are `to.Tree`s instead of leaves, also `f` should apply the changes inplace to Tree object.
 
     If `inplace` is `False`, a copy of the first object is returned with the changes applied.
     The `rest` of the objects are always copied.
@@ -304,10 +306,10 @@ def apply(f: tp.Callable[..., None], obj: A, *rest: A, inplace: bool = False) ->
     Returns:
         A new pytree with the updated Trees or the same input `obj` if `inplace` is `True`.
     """
-    rest = jax.tree_map(lambda x: x, rest)
+    rest = copy(rest)
 
     if not inplace:
-        obj = jax.tree_map(lambda x: x, obj)
+        obj = copy(obj)
 
     objs = (obj,) + rest
 
