@@ -1,5 +1,5 @@
-from inspect import Parameter
 import typing as tp
+from inspect import Parameter
 
 import jax
 import jax.numpy as jnp

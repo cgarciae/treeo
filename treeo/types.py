@@ -1,7 +1,6 @@
 import dataclasses
 import typing as tp
 from abc import ABCMeta
-import dataclasses
 
 import jax
 import jax.numpy as jnp

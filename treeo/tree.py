@@ -15,7 +15,6 @@ import jax.numpy as jnp
 import jax.tree_util
 import numpy as np
 
-
 from treeo import types, utils
 
 A = tp.TypeVar("A")

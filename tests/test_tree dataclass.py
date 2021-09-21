@@ -1,6 +1,6 @@
+import typing as tp
 from dataclasses import dataclass
 from inspect import Parameter
-import typing as tp
 
 import jax
 import jax.numpy as jnp
