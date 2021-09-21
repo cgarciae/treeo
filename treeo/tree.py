@@ -466,6 +466,15 @@ def update(module: A, other: A, *rest: A) -> A:
     return module
 
 
+@contextmanager
+def add_field_info():
+    """
+    A context manager that makes `Tree`s return leaves as `FieldInfo` when flattening.
+    """
+    with _CONTEXT.update(add_field_info=True):
+        yield
+
+
 # --------------------------------------------------
 # utils
 # --------------------------------------------------
