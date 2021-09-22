@@ -21,7 +21,7 @@ isort = "^5.9.3"
 mkdocs = "^1.2.2"
 mkdocstrings = "^0.15.2"
 mkdocs-jupyter = { version = "^0.17.3", python = ">=3.7" }
-mkdocs-material = "^7.2.5"
+mkdocs-material = "^7.2.8"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

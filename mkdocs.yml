@@ -3,17 +3,35 @@ repo_name: cgarciae/treeo
 repo_url: https://github.com/cgarciae/treeo
 site_url: https://cgarciae.github.io/treeo
 nav:
-- Introduction: index.md
+- Getting Started: index.md
+- User Guide:
+    Defining Fields: user-guide/defining-fields.md
+    Field Kinds: user-guide/field-kinds.md
+    Node policy: user-guide/node-policy.md
+    Opaque static fields: user-guide/opaque-static-fields.md
+    Field Metadata: user-guide/field-metadata.md
+    "Sugar \U0001F36C": user-guide/sugar.md
+    API:
+      Intro: user-guide/api/intro.md
+      Filter: user-guide/api/filter.md
+      Update: user-guide/api/update.md
+      Map: user-guide/api/map.md
+    State Management: user-guide/state-management.md
+    Non-hashable static fields: user-guide/non-hashable-static-fields.md
 - API Reference:
+    ArrayLike: api/ArrayLike.md
     FieldInfo: api/FieldInfo.md
     FieldMetadata: api/FieldMetadata.md
     Hashable: api/Hashable.md
     KindMixin: api/KindMixin.md
+    MISSING: api/MISSING.md
     Missing: api/Missing.md
+    NOTHING: api/NOTHING.md
     Nothing: api/Nothing.md
     Opaque: api/Opaque.md
     Tree: api/Tree.md
     TreeMeta: api/TreeMeta.md
+    add_field_info: api/add_field_info.md
     apply: api/apply.md
     field: api/field.md
     filter: api/filter.md
@@ -40,6 +58,8 @@ theme:
 markdown_extensions:
 - pymdownx.arithmatex
 - admonition
+- pymdownx.highlight
+- pymdownx.superfences
 - codehilite:
     guess_lang: false
     use_pygments: true

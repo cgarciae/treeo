@@ -29,16 +29,16 @@ PAD = r"{pad}"
 LEAF_TYPES = (types.Nothing, type(None))
 
 
-class _FlattenMode(enum.Enum):
+class FlattenMode(enum.Enum):
+    no_fields = enum.auto()
     normal = enum.auto()
-    all_static = enum.auto()
-    all_dynamic = enum.auto()
+    all_fields = enum.auto()
 
 
 @dataclass
 class _Context(threading.local):
     add_field_info: bool = False
-    flatten_mode: _FlattenMode = _FlattenMode.normal
+    flatten_mode: tp.Optional[FlattenMode] = None
 
     def __enter__(self):
         global _CONTEXT
@@ -194,14 +194,14 @@ class Tree(types.KindMixin, metaclass=TreeMeta):
 
         fields = vars(self)
 
-        tree = {}
-        not_tree = {}
+        node_fields = {}
+        static_fields = {}
 
-        if _CONTEXT.flatten_mode == _FlattenMode.all_dynamic:
-            tree = fields
-        elif _CONTEXT.flatten_mode == _FlattenMode.all_static:
-            not_tree = fields
-        else:
+        if _CONTEXT.flatten_mode == FlattenMode.all_fields:
+            node_fields = fields
+        elif _CONTEXT.flatten_mode == FlattenMode.no_fields:
+            static_fields = fields
+        else:  # normal or None
             for field, value in fields.items():
                 # maybe update metadata
                 if field not in self._field_metadata:
@@ -216,22 +216,22 @@ class Tree(types.KindMixin, metaclass=TreeMeta):
                 field_annotation = self._field_metadata[field]
 
                 if field_annotation.node:
-                    tree[field] = value
+                    node_fields[field] = value
                 elif not field_annotation.node and field_annotation.opaque:
-                    not_tree[field] = utils.Opaque(
+                    static_fields[field] = utils.Opaque(
                         value,
                         opaque_is_equal=field_annotation.opaque_is_equal,
                     )
                 else:
-                    not_tree[field] = value
+                    static_fields[field] = value
 
         # maybe convert to FieldInfo
         if _CONTEXT.add_field_info:
-            for field, value in tree.items():
+            for field, value in node_fields.items():
                 field_annotation = self._field_metadata[field]
                 # leaves, treedef
-                tree[field], not_tree[field] = jax.tree_flatten(value)
-                tree[field] = [
+                node_fields[field], static_fields[field] = jax.tree_flatten(value)
+                node_fields[field] = [
                     FieldInfo(
                         name=field,
                         value=x,
@@ -240,28 +240,28 @@ class Tree(types.KindMixin, metaclass=TreeMeta):
                     )
                     if not isinstance(x, FieldInfo)
                     else x
-                    for x in tree[field]
+                    for x in node_fields[field]
                 ]
 
-        children = (tree,)
+        children = (node_fields,)
 
-        return children, not_tree
+        return children, static_fields
 
     @classmethod
-    def tree_unflatten(cls, not_tree, children):
+    def tree_unflatten(cls, static_fields, children):
 
         module = cls.__new__(cls)
-        (tree,) = children
+        (node_fields,) = children
 
         if _CONTEXT.add_field_info:
-            for field, leaves in tree.items():
-                treedef = not_tree.pop(field)
-                tree[field] = jax.tree_unflatten(treedef, leaves)
+            for field, leaves in node_fields.items():
+                treedef = static_fields.pop(field)
+                node_fields[field] = jax.tree_unflatten(treedef, leaves)
 
-        module.__dict__.update(tree, **not_tree)
+        module.__dict__.update(node_fields, **static_fields)
 
         # extract value from Opaque
-        for field, value in not_tree.items():
+        for field, value in static_fields.items():
             if (
                 isinstance(value, utils.Opaque)
                 and field in module._field_metadata
@@ -277,6 +277,242 @@ class Tree(types.KindMixin, metaclass=TreeMeta):
 # --------------------------------------------------
 
 
+def filter(
+    obj: A,
+    *filters: Filter,
+    inplace: bool = False,
+    flatten_mode: tp.Union[FlattenMode, str, None] = None,
+) -> A:
+    """
+    Functional version of `Tree.filter` but can filter arbitrary pytrees. This is useful
+    if you have Trees that are embedded in a larger pytree e.g. a list of Trees.
+
+    Leaves that are not part of a Tree will get assigned the following `FieldInfo`:
+
+    ```python
+     FieldInfo(
+        name=None,
+        value=leaf_value,
+        kind=type(None),
+        module=None,
+    )
+    ```
+    where `leaf_value` is the value of the leaf. This means that non-Tree leaves will be
+    filtered with a query like:
+
+    ```python
+    tree = dict(a=1, b=to.Linear(3, 4))
+    filtered = filter(tree, to.Parameter)
+
+    assert isinstance(filtered["a"], to.Nothing)
+    ```
+
+    However, you query non-Tree based on their value:
+
+    ```python
+    tree = dict(a=1, b=to.Linear(3, 4))
+    filtered = filter(tree, lambda field: isintance(field.value, int))
+
+    assert filtered["a"] == 1
+    ```
+
+    If `inplace` is `True`, the input `obj` is mutated and returned.
+
+    Arguments:
+        obj: A pytree (possibly containing `to.Tree`s) to be filtered.
+        filters: Types to filter by, membership is determined by `issubclass`, or
+            callables that take in a `FieldInfo` and return a `bool`.
+        inplace: If `True`, the input `obj` is mutated and returned.
+    Returns:
+        The new module with the filtered fields. If `inplace` is `True`, `obj` is returned.
+
+    """
+    if inplace and not hasattr(obj, "__dict__"):
+        raise ValueError(
+            f"Cannot filter inplace on objects with no __dict__ property, got {obj}"
+        )
+
+    input_obj = obj
+
+    filters = tuple(
+        _get_kind_filter(f) if isinstance(f, tp.Type) else f for f in filters
+    )
+
+    def apply_filters(info: tp.Any) -> tp.Any:
+        if not isinstance(info, FieldInfo):
+            info = FieldInfo(
+                name=None,
+                value=info,
+                kind=type(None),
+                module=None,
+            )
+        assert isinstance(info, FieldInfo)
+
+        return info.value if all(f(info) for f in filters) else types.NOTHING
+
+    with _Context(add_field_info=True), _flatten_context(flatten_mode):
+        obj = jax.tree_map(apply_filters, obj)
+
+    if inplace:
+        input_obj.__dict__.update(obj.__dict__)
+        return input_obj
+    else:
+        return obj
+
+
+def update(
+    obj: A,
+    other: A,
+    *rest: A,
+    inplace: bool = False,
+    flatten_mode: tp.Union[FlattenMode, str, None] = None,
+) -> A:
+    """
+    Creates a new Tree with the same structure, but its values
+    updated based on the values from the incoming Trees. Updates are performed using
+    the following rules:
+
+    * For a list of equivalent leaves `l1, l2, ..., ln`, it returns the first non-`Nothing` leaf in reverse order.
+    * If no `flatten_mode()` context manager is active, and `flatten_mode` is `None`, all fields will be treated as nodes, else current flatten mode will be used unless `flatten_mode` is specified.
+
+    Example:
+
+    ```python
+    a = MyModule(x=Nothing, y=2, z=3)
+    b = MyModule(x=1, y=Nothing, z=4)
+
+    a.update(b) # MyModule(x=1, y=2, z=4)
+    ```
+    Notice the following:
+
+    * The value of `x` and `z` were updated since they were present in `b`.
+    * The value of `y` was not updated since `b.y` was `Nothing`.
+
+    When using `update` with multiple modules the following equivalence holds:
+
+    ```
+    m1.update(m2, m3) = m1.update(m2).update(m3)
+    ```
+
+    If you want to update the current module instead of creating a new one use `inplace=True`.
+    This is useful when applying transformation inside a method where reassigning `self` is not possible:
+
+    ```python
+    def double_params(self):
+        # this is not doing what you expect
+        self = jax.tree_map(lambda x: 2 * x, self)
+    ```
+    Instead do this:
+
+    ```python
+    def double_params(self):
+        doubled = jax.tree_map(lambda x: 2 * x, self)
+        self.update(doubled, inplace=True)
+    ```
+
+    If `inplace` is `True`, the input `obj` is mutated and returned.
+
+    Arguments:
+        obj: Main pytree to update.
+        other: The pytree first to get the values to update from.
+        *rest: Additional pytree to perform the update in order from left to right.
+        inplace: If `True`, the input `obj` is mutated and returned.
+        static_from_first: If `True`, the static fields for the output are taken from the first input.
+
+    Returns:
+        A new pytree with the updated values.
+    """
+
+    if inplace and not hasattr(obj, "__dict__"):
+        raise ValueError(
+            f"Cannot update inplace on objects with no __dict__ property, got {obj}"
+        )
+
+    if flatten_mode is None and _CONTEXT.flatten_mode is None:
+        flatten_mode = FlattenMode.all_fields
+
+    input_obj = obj
+
+    def merge_fn(*xs):
+        for x in reversed(xs):
+            if not isinstance(x, types.Nothing):
+                return x
+        return types.NOTHING
+
+    with _flatten_context(flatten_mode):
+        obj = _looser_tree_map(
+            merge_fn,
+            obj,
+            other,
+            *rest,
+            is_leaf=lambda x: isinstance(x, LEAF_TYPES),
+        )
+
+    if inplace:
+        input_obj.__dict__.update(obj.__dict__)
+        return input_obj
+    else:
+        return obj
+
+
+def map(
+    f: tp.Callable,
+    obj: A,
+    *filters: Filter,
+    inplace: bool = False,
+    flatten_mode: tp.Union[FlattenMode, str, None] = None,
+) -> A:
+    """
+    Functional version of `Tree.map` but it can be applied to any pytree, useful if
+    you have Trees that are embedded in a pytree. The `filters` are applied according
+    to `to.filter`.
+
+    Example:
+
+    ```python
+    tree = dict(a=1, b=MyModule().init(42))
+    tree = to.map(jnp.zeros, tree, to.BatchStat)
+
+    # "a" is not modified
+    assert tree["a"] == 1
+    ```
+
+    Arguments:
+        f: The function to apply to the leaves.
+        obj: a pytree possibly containing `to.Tree`s.
+        *filters: The filters used to select the leaves to which the function will be applied.
+        inplace: If `True`, the input `obj` is mutated and returned.
+
+    Returns:
+        The object with the changes applied. If `inplace` is `True`, the input `obj` is returned.
+    """
+    if inplace and not hasattr(obj, "__dict__"):
+        raise ValueError(
+            f"Cannot map inplace on objects with no __dict__ property, got {obj}"
+        )
+
+    input_obj = obj
+
+    has_filters = len(filters) > 0
+
+    with _flatten_context(flatten_mode):
+        if has_filters:
+            new_obj = filter(obj, *filters)
+        else:
+            new_obj = obj
+
+        new_obj: A = jax.tree_map(f, new_obj)
+
+        if has_filters:
+            new_obj = update(obj, new_obj)
+
+    if inplace:
+        input_obj.__dict__.update(new_obj.__dict__)
+        return input_obj
+    else:
+        return new_obj
+
+
 def copy(obj: A) -> A:
     """
     Returns a deep copy of the tree, almost equivalent to:
@@ -285,7 +521,7 @@ def copy(obj: A) -> A:
     ```
     but Treeo will try to copy static nodes as well.
     """
-    with _CONTEXT.update(flatten_mode=_FlattenMode.all_dynamic):
+    with _CONTEXT.update(flatten_mode=FlattenMode.all_fields):
         return jax.tree_map(lambda x: x, obj)
 
 
@@ -329,149 +565,56 @@ def apply(f: tp.Callable[..., None], obj: A, *rest: A, inplace: bool = False) ->
     return obj
 
 
-def map(f: tp.Callable, obj: A, *filters: Filter) -> A:
-    """
-    Functional version of `Tree.map` but it can be applied to any pytree, useful if
-    you have Trees that are embedded in a pytree. The `filters` are applied according
-    to `to.filter`.
-
-    Example:
-
-    ```python
-    tree = dict(a=1, b=MyModule().init(42))
-    tree = to.map(jnp.zeros, tree, to.BatchStat)
-
-    # "a" is not modified
-    assert tree["a"] == 1
-    ```
-
-    Arguments:
-        f: The function to apply to the leaves.
-        filters: The filters used to select the leaves to which the function will be applied.
-
-    Returns:
-        The object with the changes applied.
-    """
-
-    has_filters = len(filters) > 0
-
-    if has_filters:
-        new_obj = filter(obj, *filters)
-    else:
-        new_obj = obj
-
-    new_obj: A = jax.tree_map(f, new_obj)
-
-    if has_filters:
-        new_obj = update(obj, new_obj)
-
-    return new_obj
-
-
-def filter(obj: A, *filters: Filter) -> A:
-    """
-    Functional version of `Tree.filter` but can filter arbitrary pytrees. This is useful
-    if you have Trees that are embedded in a larger pytree e.g. a list of Trees.
-
-    Leaves that are not part of a Tree will get assigned the following `FieldInfo`:
-
-    ```python
-     FieldInfo(
-        name=None,
-        value=leaf_value,
-        kind=type(None),
-        module=None,
-    )
-    ```
-    where `leaf_value` is the value of the leaf. This means that non-Tree leaves will be
-    filtered with a query like:
-
-    ```python
-    tree = dict(a=1, b=to.Linear(3, 4))
-    filtered = filter(tree, to.Parameter)
-
-    assert isinstance(filtered["a"], to.Nothing)
-    ```
-
-    However, you query non-Tree based on their value:
-
-    ```python
-    tree = dict(a=1, b=to.Linear(3, 4))
-    filtered = filter(tree, lambda field: isintance(field.value, int))
-
-    assert filtered["a"] == 1
-    ```
-
-    Arguments:
-        filters: Types to filter by, membership is determined by `issubclass`, or
-            callables that take in a `FieldInfo` and return a `bool`.
-    Returns:
-        The new module with the filtered fields.
-
-    """
-
-    filters = tuple(
-        _get_kind_filter(f) if isinstance(f, tp.Type) else f for f in filters
-    )
-
-    def apply_filters(info: tp.Any) -> tp.Any:
-        if not isinstance(info, FieldInfo):
-            info = FieldInfo(
-                name=None,
-                value=info,
-                kind=type(None),
-                module=None,
-            )
-        assert isinstance(info, FieldInfo)
-
-        return info.value if all(f(info) for f in filters) else types.NOTHING
-
-    with _Context(add_field_info=True):
-        obj = jax.tree_map(apply_filters, obj)
-
-    return obj
-
-
-def update(module: A, other: A, *rest: A) -> A:
-    """
-    Functional version of `Module.update`, it accepts arbitray pytree structures
-    that may optionally contain `Module`s and performs the `update` logic.
-
-    Arguments:
-        module: Main pytree to update.
-        other: The pytree first to get the values to update from.
-        rest: Additional pytree to perform the update in order from left to right.
-
-    Returns:
-        A new pytree with the updated values.
-    """
-
-    def merge_fn(*xs):
-        acc, *xs = xs
-        for x in xs:
-            if not isinstance(x, types.Nothing):
-                acc = x
-        return acc
-
-    module = _looser_tree_map(
-        merge_fn,
-        module,
-        other,
-        *rest,
-        is_leaf=lambda x: isinstance(x, LEAF_TYPES),
-    )
-
-    return module
-
-
 @contextmanager
 def add_field_info():
     """
-    A context manager that makes `Tree`s return leaves as `FieldInfo` when flattening.
+    A context manager that makes `Tree`s produce leaves as `FieldInfo` when flattening.
     """
     with _CONTEXT.update(add_field_info=True):
         yield
 
+
+@contextmanager
+def flatten_mode(mode: tp.Optional[tp.Union[FlattenMode, str]]):
+    """
+    A context manager that defines how `Tree`s are flattened. Options are:
+
+    * `'normal'`: Fields are selected as nodes as declared in the class definition (default behavior).
+    * `'all_fields'`: All fields are treated as nodes during flattening.
+    * `'no_fields'`: All fields are treated as static, `Tree`s produce no leaves.
+    * `None`: Context is not changed, current flatten mode is preserved.
+
+    Example:
+
+    ```python
+    @dataclass
+    class MyTree(Tree):
+        x: int # static
+        y: int = to.node()
+
+    tree = MyTree(x=1, y=3)
+
+    jax.tree_map(lambda x: x * 2, tree) # MyTree(x=1, y=6)
+
+    with flatten_mode('all_fields'):
+        jax.tree_map(lambda x: x + 1, tree) # MyTree(x=2, y=6)
+    ```
+
+    Arguments:
+        mode: The new flatten mode.
+    """
+    if mode is not None:
+        if isinstance(mode, str):
+            mode = FlattenMode(mode)
+
+        with _CONTEXT.update(flatten_mode=mode):
+            yield
+    else:
+        yield
+
+
+# alias for internal use
+_flatten_context = flatten_mode
 
 # --------------------------------------------------
 # utils
