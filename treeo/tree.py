@@ -373,25 +373,22 @@ def update(
     the following rules:
 
     * For a list of equivalent leaves `l1, l2, ..., ln`, it returns the first non-`Nothing` leaf in reverse order.
-    * If no `flatten_mode()` context manager is active, and `flatten_mode` is `None`, all fields will be treated as nodes, else current flatten mode will be used unless `flatten_mode` is specified.
+    * If no `flatten_mode()` context manager is active, and `flatten_mode` is not given, all fields will be updated.
+    * If `flatten_mode="normal"` is set, the output will have the exact same static components as the first input (`obj`).
 
     Example:
 
     ```python
-    a = MyModule(x=Nothing, y=2, z=3)
-    b = MyModule(x=1, y=Nothing, z=4)
+    t1 = MyTree(x=Nothing, y=2, z=3)
+    t2 = MyTree(x=1, y=Nothing, z=4)
 
-    a.update(b) # MyModule(x=1, y=2, z=4)
+    update(t1, t2) # MyTree(x=1, y=2, z=4)
     ```
-    Notice the following:
 
-    * The value of `x` and `z` were updated since they were present in `b`.
-    * The value of `y` was not updated since `b.y` was `Nothing`.
-
-    When using `update` with multiple modules the following equivalence holds:
+    When using `update` with multiple Trees the following equivalence holds:
 
     ```
-    m1.update(m2, m3) = m1.update(m2).update(m3)
+    update(m1, m2, m3) = update(m1, update(m2, m3))
     ```
 
     If you want to update the current module instead of creating a new one use `inplace=True`.
@@ -407,10 +404,10 @@ def update(
     ```python
     def double_params(self):
         doubled = jax.tree_map(lambda x: 2 * x, self)
-        self.update(doubled, inplace=True)
+        update(self, doubled, inplace=True)
     ```
 
-    If `inplace` is `True`, the input `obj` is mutated and returned.
+    If `inplace` is `True`, the input `obj` is mutated and returned. You can only update inplace if the input `obj` has a `__dict__` attribute, else a TypeError is raised.
 
     Arguments:
         obj: Main pytree to update.
@@ -420,11 +417,11 @@ def update(
         static_from_first: If `True`, the static fields for the output are taken from the first input.
 
     Returns:
-        A new pytree with the updated values.
+        A new pytree with the updated values. If `inplace` is `True`, `obj` is returned.
     """
 
     if inplace and not hasattr(obj, "__dict__"):
-        raise ValueError(
+        raise TypeError(
             f"Cannot update inplace on objects with no __dict__ property, got {obj}"
         )
 

@@ -31,9 +31,22 @@ to.filter(
     and field.name == "kernel"
 ) 
 # MyTree(a=Nothing, b=Nothing)
+
 ```
+
+Since `filter` works with pytrees in general, the following is possible:
+
+```python
+def array_like(field):
+    return hasattr(field.value, "shape") and hasattr(field.value, "dtype")
+
+tree = [1, np.array(2), jnp.array([3.0, 4.0])]
+
+to.filter(tree, array_like) # [Nothing, np.array(2), jnp.array([3.0, 4.0])]
+```
+
 ## multiple filters
-The previous could be abbreviated using multiple filters which you can pass as `*args`. For a field to be kept it will required that **all filters pass**. Since passing types by themselves are "kind filters", the previous example could be written as:
+You can some queries by using multiple filters as `*args`. For a field to be kept it will required that **all filters pass**. Since passing types by themselves are "kind filters", one of the previous examples could be written as:
 ```python
 # all Parameters whose field name is "kernel"
 to.filter(

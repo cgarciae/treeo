@@ -1,3 +1,4 @@
+from treeo.tree import Tree
 import typing as tp
 from inspect import Parameter
 
@@ -535,3 +536,82 @@ class TestTreeo:
 
         assert infos[0].kind == type(None)
         assert infos[1].kind == Parameter
+
+    def test_update_all_fields(self):
+        class A(to.Tree):
+            x: int = to.field(node=True)
+            y: int = to.field(node=False)
+
+            def __init__(self, x: int, y: int):
+                self.x = x
+                self.y = y
+
+        a1 = A(1, 2)
+        a2 = A(to.NOTHING, 4)
+        a3 = A(5, to.NOTHING)
+
+        aout = to.update(a1, a2, a3)
+
+        assert aout.x == 5
+        assert aout.y == 4
+
+    def test_update_normal(self):
+        """
+        In this test the static part of `a1` is use of `aout` since `flatten_mode` is set to `normal`.
+        """
+
+        class A(to.Tree):
+            x: int = to.field(node=True)
+            y: int = to.field(node=False)
+
+            def __init__(self, x: int, y: int):
+                self.x = x
+                self.y = y
+
+        a1 = A(1, 2)
+        a2 = A(to.NOTHING, 4)
+        a3 = A(5, to.NOTHING)
+
+        aout = to.update(a1, a2, a3, flatten_mode=to.FlattenMode.normal)
+
+        assert aout.x == 5
+        assert aout.y == 2
+
+    def test_update_inplace(self):
+        """
+        In this test the static part of `a1` is use of `aout` since `flatten_mode` is set to `normal`.
+        """
+
+        class A(to.Tree):
+            x: int = to.field(node=True)
+            y: int = to.field(node=False)
+
+            def __init__(self, x: int, y: int):
+                self.x = x
+                self.y = y
+
+        a1 = A(1, 2)
+        a2 = A(to.NOTHING, 4)
+        a3 = A(5, to.NOTHING)
+
+        to.update(a1, a2, a3, inplace=True)
+
+        assert a1.x == 5
+        assert a1.y == 4
+
+    def test_update_inplace_error(self):
+        """
+        In this test the static part of `a1` is use of `aout` since `flatten_mode` is set to `normal`.
+        """
+
+        a1 = (1, 2)
+        a2 = (to.NOTHING, 4)
+        a3 = (5, to.NOTHING)
+
+        with pytest.raises(TypeError):
+            to.update(a1, a2, a3, inplace=True)
+
+        aout = to.update(a1, a2, a3)
+
+        assert aout[0] == 5
+        assert aout[1] == 4
