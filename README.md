@@ -5,7 +5,6 @@ _A small library for creating and manipulating custom JAX Pytree classes_
 * **Light-weight**: has no dependencies other than `jax`.
 * **Compatible**: Treeo `Tree` objects are compatible with any `jax` function that accepts Pytrees.
 * **Standards-based**: `treeo.field` is built on top of python's `dataclasses.field`.
-* **Minimal**: Treeo has a very small API.
 * **Flexible**: Treeo is compatible with both dataclass and non-dataclass classes.
 
 Treeo was originally extracted from the core of [Treex](https://github.com/cgarciae/treex) and (although the author was not aware of this at the time) shares a lot in common with [flax.struct](https://flax.readthedocs.io/en/latest/flax.struct.html#module-flax.struct). Treeo has nothing in particular to do with Deep Learning, but some of the examples are motivated by it.
