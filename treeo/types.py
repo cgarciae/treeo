@@ -115,7 +115,7 @@ class FieldMetadata(_TrivialPytree):
     node: bool
     kind: type
     opaque: bool
-    opaque_is_equal: tp.Optional[tp.Callable[["Opaque", tp.Any], bool]]
+    opaque_is_equal: tp.Optional[tp.Callable[[utils.Opaque, tp.Any], bool]]
 
 
 @jax.tree_util.register_pytree_node_class

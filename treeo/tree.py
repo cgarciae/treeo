@@ -106,7 +106,6 @@ class TreeMeta(ABCMeta):
 
 
 class Tree(types.KindMixin, metaclass=TreeMeta):
-    _init_called: bool = False
     _field_metadata: tp.Dict[str, types.FieldMetadata]
     _factory_fields: tp.Dict[str, tp.Callable[[], tp.Any]]
     _default_field_values: tp.Dict[str, tp.Any]
@@ -227,21 +226,21 @@ class Tree(types.KindMixin, metaclass=TreeMeta):
 
         # maybe convert to FieldInfo
         if _CONTEXT.add_field_info:
-            for field, value in node_fields.items():
+            for field in node_fields.keys():
                 field_annotation = self._field_metadata[field]
                 # leaves, treedef
-                node_fields[field], static_fields[field] = jax.tree_flatten(value)
-                node_fields[field] = [
-                    FieldInfo(
+                node_fields[field] = jax.tree_map(
+                    lambda x: FieldInfo(
                         name=field,
                         value=x,
                         kind=field_annotation.kind,
                         module=self,
                     )
-                    if not isinstance(x, FieldInfo)
-                    else x
-                    for x in node_fields[field]
-                ]
+                    if not isinstance(x, Tree)
+                    else x,
+                    node_fields[field],
+                    is_leaf=lambda x: isinstance(x, Tree),
+                )
 
         children = (node_fields,)
 
@@ -254,9 +253,12 @@ class Tree(types.KindMixin, metaclass=TreeMeta):
         (node_fields,) = children
 
         if _CONTEXT.add_field_info:
-            for field, leaves in node_fields.items():
-                treedef = static_fields.pop(field)
-                node_fields[field] = jax.tree_unflatten(treedef, leaves)
+            for field in node_fields.keys():
+                node_fields[field] = jax.tree_map(
+                    lambda x: x.value if isinstance(x, FieldInfo) else x,
+                    node_fields[field],
+                    is_leaf=lambda x: isinstance(x, Tree),
+                )
 
         module.__dict__.update(node_fields, **static_fields)
 
@@ -366,6 +368,7 @@ def update(
     *rest: A,
     inplace: bool = False,
     flatten_mode: tp.Union[FlattenMode, str, None] = None,
+    ignore_static: bool = False,
 ) -> A:
     """
     Creates a new Tree with the same structure, but its values
@@ -409,6 +412,8 @@ def update(
 
     If `inplace` is `True`, the input `obj` is mutated and returned. You can only update inplace if the input `obj` has a `__dict__` attribute, else a TypeError is raised.
 
+    If `ignore_static` is `True`, static fields (according to the flattening mode) will be bypassed during the update process, the final output will have the same static components as the first input (`obj`). This strategy is a bit less safe in general as it will flatten all trees using `jax.tree_leaves` instead of `PyTreeDef.flatten_up_to`, this skips some checks so it effectively ignores their static components, the only requirement is that the flattened struture of all trees matches.
+
     Arguments:
         obj: Main pytree to update.
         other: The pytree first to get the values to update from.
@@ -436,8 +441,10 @@ def update(
                 return x
         return types.NOTHING
 
+    tree_map_fn = _looser_tree_map if ignore_static else jax.tree_map
+
     with _flatten_context(flatten_mode):
-        obj = _looser_tree_map(
+        obj = tree_map_fn(
             merge_fn,
             obj,
             other,

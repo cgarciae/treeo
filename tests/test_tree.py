@@ -562,6 +562,28 @@ class TestTreeo:
 
         class A(to.Tree):
             x: int = to.field(node=True)
+            y: int = to.field(node=False, opaque=True)
+
+            def __init__(self, x: int, y: int):
+                self.x = x
+                self.y = y
+
+        a1 = A(1, 2)
+        a2 = A(to.NOTHING, 3)
+        a3 = A(5, 4)
+
+        aout = to.update(a1, a2, a3, flatten_mode=to.FlattenMode.normal)
+
+        assert aout.x == 5
+        assert aout.y == 2
+
+    def test_update_normal_ignore_static(self):
+        """
+        ignore_static enables you to ignore differences in the static structure of the trees.
+        """
+
+        class A(to.Tree):
+            x: int = to.field(node=True)
             y: int = to.field(node=False)
 
             def __init__(self, x: int, y: int):
@@ -569,13 +591,37 @@ class TestTreeo:
                 self.y = y
 
         a1 = A(1, 2)
-        a2 = A(to.NOTHING, 4)
+        a2 = A(to.NOTHING, 3)
         a3 = A(5, to.NOTHING)
 
-        aout = to.update(a1, a2, a3, flatten_mode=to.FlattenMode.normal)
+        aout = to.update(
+            a1, a2, a3, flatten_mode=to.FlattenMode.normal, ignore_static=True
+        )
 
         assert aout.x == 5
         assert aout.y == 2
+
+    def test_update_normal_ignore_static_false_raises(self):
+        """
+        ignore_static enables you to ignore differences in the static structure of the trees.
+        """
+
+        class A(to.Tree):
+            x: int = to.field(node=True)
+            y: int = to.field(node=False)
+
+            def __init__(self, x: int, y: int):
+                self.x = x
+                self.y = y
+
+        a1 = A(1, 2)
+        a2 = A(to.NOTHING, 3)
+        a3 = A(5, to.NOTHING)
+
+        with pytest.raises(ValueError):
+            aout = to.update(
+                a1, a2, a3, flatten_mode=to.FlattenMode.normal, ignore_static=False
+            )
 
     def test_update_inplace(self):
         """
