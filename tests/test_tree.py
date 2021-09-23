@@ -615,3 +615,29 @@ class TestTreeo:
 
         assert aout[0] == 5
         assert aout[1] == 4
+
+    def test_jit_on_method(self):
+        n = 0
+
+        class A(to.Tree):
+            x: int = to.field(node=True)
+
+            def __init__(self, x: int):
+                self.x = x
+
+            @jax.jit
+            def f(self):
+                nonlocal n
+                n += 1
+                self.x = self.x + 1
+                return self
+
+        a = A(1)
+
+        a = a.f()
+        assert a.x == 2
+        assert n == 1
+
+        a = a.f()
+        assert a.x == 3
+        assert n == 1
