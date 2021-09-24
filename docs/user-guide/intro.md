@@ -4,7 +4,7 @@ Before we start it would be useful to define some terminology that will be used 
 
 ### Terminology
 
-* **Type Annotation**: (a.k.a. type hints) these are types you set while defining a variable after the `:` symbol.
+* **Type Annotation**: ([type hints](https://docs.python.org/3/library/typing.html)) types you set while defining a variable after the `:` symbol.
 * **Field Declaration**: default values for class variables that are set using the `field` function.
 * **Node Field**: A field that is declared as a node, that is, its content is part of the tree leaves.
 * **Static Field**: A field that is declared as a static, that is, its content is not part of the leaves.

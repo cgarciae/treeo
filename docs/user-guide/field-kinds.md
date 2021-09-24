@@ -1,5 +1,5 @@
 <!-- ### Field kinds -->
-You can define a `kind` for a field, this is useful for for filtering field value using the [treeo.filter](#filter) function. A `kind` is can be any `type`, it is only there fore metadata that `filter` can leverage. For example, here is a possible definition for a `BatchNorm` module using `kind`s:
+Kinds are associated types that give semantic meaning to a field (what it represents). A kind is just a type you pass to `field` via its `kind` argument. Kinds aremostly useful as metadata filtering via [treeo.filter](#filter). For example, here is a possible definition for a `BatchNorm` module using kinds:
 
 ```python
 import treeo as to
@@ -18,7 +18,7 @@ class BatchNorm(to.Tree):
     var: jnp.ndarray = to.field(node=True, kind=BatchStat)
     ...
 ```
-Based on this definition, `filter` can query specific kind of fields:
+Now with this definition you use `filter` to select specific kind of fields:
 
 ```python
 model = BatchNorm(...) 
@@ -29,3 +29,5 @@ params = to.filter(model, Parameter) # filter by kind
 # BatchNorm(scale=Nothing, bias=Nothing, mean=array(...), var=array(...))
 batch_stats = to.filter(model, BatchStat)
 ```
+
+This can be very useful to operate over specific subsets of your Trees e.g. sync subset of parameters across devices in a distributed computation.

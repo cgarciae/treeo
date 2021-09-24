@@ -9,16 +9,16 @@ nav:
     Defining Fields: user-guide/defining-fields.md
     Field Kinds: user-guide/field-kinds.md
     Node policy: user-guide/node-policy.md
-    Opaque static fields: user-guide/opaque-static-fields.md
-    Field Metadata: user-guide/field-metadata.md
-    "Sugar \U0001F36C": user-guide/sugar.md
-    API:
+    Functional API:
       Intro: user-guide/api/intro.md
       Filter: user-guide/api/filter.md
       Update: user-guide/api/update.md
       Map: user-guide/api/map.md
+    "Sugar \U0001F36C": user-guide/sugar.md
     State Management: user-guide/state-management.md
+    Opaque static fields: user-guide/opaque-static-fields.md
     Non-hashable static fields: user-guide/non-hashable-static-fields.md
+    Field Metadata: user-guide/field-metadata.md
 - API Reference:
     ArrayLike: api/ArrayLike.md
     FieldInfo: api/FieldInfo.md

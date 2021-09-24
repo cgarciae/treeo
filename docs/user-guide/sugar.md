@@ -1,12 +1,12 @@
 <!-- ### Sugar 🍬 -->
 For pedagogical reason, `field` has been used throught the documentation to reinforce the concepts, however, Treeo has a couple of shortcuts to make it easier and more understandable to define Trees.
 
-| normal                                  | shortcut              |
-| --------------------------------------- | --------------------- |
-| `to.field(node=True)`                   | `to.node()`           |
-| `to.field(node=False)`                  | `to.static()`         |
-| `to.field(node=True, kind=TreeOrKind)`  | `TreeOrKind.node()`   |
-| `to.field(node=False, kind=TreeOrKind)` | `TreeOrKind.static()` |
+| normal                            | shortcut        |
+| --------------------------------- | --------------- |
+| `to.field(node=True)`             | `to.node()`     |
+| `to.field(node=False)`            | `to.static()`   |
+| `to.field(node=True, kind=Kind)`  | `Kind.node()`   |
+| `to.field(node=False, kind=Kind)` | `Kind.static()` |
 
 Based on this, you can take the following code
 
@@ -21,14 +21,15 @@ class Child(to.Tree):
     d: float = to.field(node=False, kind=Parameter)
 
 class Parent(to.Tree):
-    child1: Child = to.field(node=True, kind=Child)
-    child2: Child = to.field(node=False, kind=Child)
-    rest: List[Child] = to.field(node=True, kind=Child)
+    child1: Child = to.field(node=True)
+    child2: Child = to.field(node=False)
+    rest: List[Child] = to.field(node=True)
 ```
+
 and simplify it to:
+
 ```python
-class Parameter(to.KindMixin):
-    pass
+class Parameter(to.KindMixin): pass
 
 class Child(to.Tree):
     a: float = to.node()
@@ -37,8 +38,9 @@ class Child(to.Tree):
     d: float = Parameter.static()
 
 class Parent(to.Tree):
-    child1: Child # = Child.node(), inferred
-    child2: Child = Child.static()
-    rest: List[Child] # = Child.node(), inferred
+    child1: Child # = to.node(), inferred
+    child2: Child = to.static()
+    rest: List[Child] # = to.node(), inferred
 ```
-As you see we use the `to.KindMixin` to add some methods to the `Parameter` class. Also, since the `Tree` already inherits from `to.KindMixin`, we can use the `.node()` and `.static()` methods on the `Tree` subclass.
+
+The `to.KindMixin` provides the `.field()`, `.node()`, and `.static()` methods to subtypes, in this case the `Parameter` class.

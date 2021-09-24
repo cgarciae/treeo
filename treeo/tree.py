@@ -105,7 +105,7 @@ class TreeMeta(ABCMeta):
         return obj
 
 
-class Tree(types.KindMixin, metaclass=TreeMeta):
+class Tree(metaclass=TreeMeta):
     _field_metadata: tp.Dict[str, types.FieldMetadata]
     _factory_fields: tp.Dict[str, tp.Callable[[], tp.Any]]
     _default_field_values: tp.Dict[str, tp.Any]
