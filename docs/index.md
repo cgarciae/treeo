@@ -93,7 +93,7 @@ def update(character: Character, velocity, dt) -> Character:
 
 character = update(character velocity=jnp.array([1.0, 0.2]), dt=0.1)
 ```
-#### Stateful Trees
+### Stateful Trees
 ```python
 from dataclasses import dataclass
 import treeo as to

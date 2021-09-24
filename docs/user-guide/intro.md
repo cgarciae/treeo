@@ -1,4 +1,4 @@
-<!-- ### Terminology: -->
+# User Guide
 
 Before we start it would be useful to define some terminology that will be used the documentation.
 
