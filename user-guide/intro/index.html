@@ -64,6 +64,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#terminology" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -245,9 +250,37 @@
       
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Intro
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Intro
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#terminology" class="md-nav__link">
+    Terminology
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -707,6 +740,36 @@
               </div>
             
             
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#terminology" class="md-nav__link">
+    Terminology
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
           
           <div class="md-content" data-md-component="content">
             <article class="md-content__inner md-typeset">
@@ -721,12 +784,13 @@
                 
                 <!-- ### Terminology: -->
 
-<p>Before we start it would be useful to define some terminology that will be used the documentation:</p>
+<p>Before we start it would be useful to define some terminology that will be used the documentation.</p>
+<h3 id="terminology">Terminology</h3>
 <ul>
 <li><em>Type annotations</em> are type you set in a class variable after the <code>:</code> symbol.</li>
 <li><em>Field declarations</em> are class variables whose default value is assigned with <code>field</code>. Under the hood these are <code>dataclass.Field</code> instances.</li>
 </ul>
-<p>In code the previous terms map to the following:</p>
+<p>In code these terms map to the following:</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MyModule</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
     <span class="c1">#  field      annotation   -----------declaration-------------</span>
     <span class="c1">#    v            v        v                                 v</span>

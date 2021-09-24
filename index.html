@@ -933,10 +933,10 @@
 <div class="highlight"><pre><span></span><code>pip install treeo
 </code></pre></div></p>
 <h2 id="basics">Basics</h2>
-<p>At its core Treeo focuses on these few things:
-* Defining which fields are nodes or not within a Tree.
-* Defining kinds for node fields.
-* A filtering mechanism to select subsets of nodes.</p>
+<p>At its core Treeo focuses on 2 things:
+* Tooling for defining pytree structures via field metadata.
+* A set of functions for manipulating pytree structures that leverage the field metadata.</p>
+<p>As part of the field metadata Treeo introduce the concept of a <code>kind</code> which enables a powerful filtering mechanism.</p>
 <h4 id="fields">Fields</h4>
 <p>To define node fields for a custom Pytree, Treeo uses the <code>field</code> function which is a wrapper around <code>dataclasses.field</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">treeo</span> <span class="k">as</span> <span class="nn">to</span>
