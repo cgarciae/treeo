@@ -89,12 +89,12 @@ character = Character(position=jnp.array([0, 0]), name='Adam')
 # character can freely pass through jit
 @jax.jit
 def update(character: Character, velocity, dt) -> Character:
-    character.position += character.velocity * dt
+    character.position += velocity * dt
     return character
 
 character = update(character velocity=jnp.array([1.0, 0.2]), dt=0.1)
 ```
-### Stateful Trees
+### A Stateful Tree
 ```python
 from dataclasses import dataclass
 import treeo as to
