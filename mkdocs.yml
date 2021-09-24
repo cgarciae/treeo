@@ -5,6 +5,7 @@ site_url: https://cgarciae.github.io/treeo
 nav:
 - Getting Started: index.md
 - User Guide:
+    Intro: user-guide/intro.md
     Defining Fields: user-guide/defining-fields.md
     Field Kinds: user-guide/field-kinds.md
     Node policy: user-guide/node-policy.md

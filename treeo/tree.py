@@ -286,47 +286,54 @@ def filter(
     flatten_mode: tp.Union[FlattenMode, str, None] = None,
 ) -> A:
     """
-    Functional version of `Tree.filter` but can filter arbitrary pytrees. This is useful
-    if you have Trees that are embedded in a larger pytree e.g. a list of Trees.
-
-    Leaves that are not part of a Tree will get assigned the following `FieldInfo`:
+    Returns a new tree with any leaf that does not match all the given filter set to `Nothing`. Filters are callable of type:
 
     ```python
-     FieldInfo(
-        name=None,
-        value=leaf_value,
-        kind=type(None),
-        module=None,
-    )
+    (FieldInfo) -> bool
     ```
-    where `leaf_value` is the value of the leaf. This means that non-Tree leaves will be
-    filtered with a query like:
+
+    You can also pass types to filter by, these are know as `kind` filters and, for a type `t`, are roughly equivalent to:
 
     ```python
-    tree = dict(a=1, b=to.Linear(3, 4))
-    filtered = filter(tree, to.Parameter)
-
-    assert isinstance(filtered["a"], to.Nothing)
+    def kind_filter(field: FieldInfo) -> bool:
+        return issubclass(field.kind, t)
     ```
 
-    However, you query non-Tree based on their value:
+    Example:
+    ```python
+    class Parameter: pass
+    class BatchStat: pass
+
+    @dataclass
+    class MyTree(to.Tree):
+        a: int = to.field(node=True, kind=Parameter)
+        b: int = to.field(node=True, kind=BatchStat)
+
+    tree = MyTree(1, 2)
+
+    to.filter(tree, lambda field: issubclass(field.kind, Parameter)) # MyTree(a=1, b=Nothing)
+    to.filter(tree, lambda field: issubclass(field.kind, BatchStat)) # MyTree(a=Nothing, b=2)
+    ```
+
+    The previous can be more compactly expressed using `kind` filters as:
 
     ```python
-    tree = dict(a=1, b=to.Linear(3, 4))
-    filtered = filter(tree, lambda field: isintance(field.value, int))
+    tree = MyTree(1, 2)
 
-    assert filtered["a"] == 1
+    to.filter(tree, Parameter) # MyTree(a=1, b=Nothing)
+    to.filter(tree, BatchStat) # MyTree(a=Nothing, b=2)
     ```
 
-    If `inplace` is `True`, the input `obj` is mutated and returned.
+    If `inplace` is `True`, the input `obj` is mutated and returned. You can only update inplace if the input `obj` has a `__dict__` attribute, else a TypeError is raised.
 
     Arguments:
         obj: A pytree (possibly containing `to.Tree`s) to be filtered.
         filters: Types to filter by, membership is determined by `issubclass`, or
             callables that take in a `FieldInfo` and return a `bool`.
         inplace: If `True`, the input `obj` is mutated and returned.
+        flatten_mode: Sets a new `FlattenMode` context for the operation.
     Returns:
-        The new module with the filtered fields. If `inplace` is `True`, `obj` is returned.
+        A new pytree with the filtered fields. If `inplace` is `True`, `obj` is returned.
 
     """
     if inplace and not hasattr(obj, "__dict__"):
@@ -419,7 +426,8 @@ def update(
         other: The pytree first to get the values to update from.
         *rest: Additional pytree to perform the update in order from left to right.
         inplace: If `True`, the input `obj` is mutated and returned.
-        static_from_first: If `True`, the static fields for the output are taken from the first input.
+        flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used. If the current flatten context is `None` and `flatten_mode` is not passed then `FlattenMode.all_fields` is used.
+        ignore_static: If `True`, bypasses static fields during the process and the statics fields for output are taken from the first input (`obj`).
 
     Returns:
         A new pytree with the updated values. If `inplace` is `True`, `obj` is returned.
@@ -467,28 +475,37 @@ def map(
     flatten_mode: tp.Union[FlattenMode, str, None] = None,
 ) -> A:
     """
-    Functional version of `Tree.map` but it can be applied to any pytree, useful if
-    you have Trees that are embedded in a pytree. The `filters` are applied according
-    to `to.filter`.
+    Applies a function to all leaves in a pytree using `jax.tree_map`. If `filters` are given then
+    the function will be applied only to the subset of leaves that match the filters.
+
+    For example, if we want to zero all batch stats we can do:
 
     Example:
-
     ```python
-    tree = dict(a=1, b=MyModule().init(42))
-    tree = to.map(jnp.zeros, tree, to.BatchStat)
+    class Parameter: pass
+    class BatchStat: pass
 
-    # "a" is not modified
-    assert tree["a"] == 1
+    @dataclass
+    class MyTree(to.Tree):
+        a: int = to.field(node=True, kind=Parameter)
+        b: int = to.field(node=True, kind=BatchStat)
+
+    tree = MyTree(1, 2)
+
+    to.map(lambda _: 0, tree, BatchStat) # MyTree(a=1, b=0)
     ```
+
+    If `inplace` is `True`, the input `obj` is mutated and returned. You can only update inplace if the input `obj` has a `__dict__` attribute, else a TypeError is raised.
 
     Arguments:
         f: The function to apply to the leaves.
         obj: a pytree possibly containing `to.Tree`s.
         *filters: The filters used to select the leaves to which the function will be applied.
         inplace: If `True`, the input `obj` is mutated and returned.
+        flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used.
 
     Returns:
-        The object with the changes applied. If `inplace` is `True`, the input `obj` is returned.
+        A new pytree with the changes applied. If `inplace` is `True`, the input `obj` is returned.
     """
     if inplace and not hasattr(obj, "__dict__"):
         raise ValueError(

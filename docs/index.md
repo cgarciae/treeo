@@ -5,7 +5,6 @@ _A small library for creating and manipulating custom JAX Pytree classes_
 * **Light-weight**: has no dependencies other than `jax`.
 * **Compatible**: Treeo `Tree` objects are compatible with any `jax` function that accepts Pytrees.
 * **Standards-based**: `treeo.field` is built on top of python's `dataclasses.field`.
-* **Minimal**: Treeo has a very small API.
 * **Flexible**: Treeo is compatible with both dataclass and non-dataclass classes.
 
 Treeo was originally extracted from the core of [Treex](https://github.com/cgarciae/treex) and (although the author was not aware of this at the time) shares a lot in common with [flax.struct](https://flax.readthedocs.io/en/latest/flax.struct.html#module-flax.struct). Treeo has nothing in particular to do with Deep Learning, but some of the examples are motivated by it.
@@ -19,18 +18,24 @@ pip install treeo
 ```
 
 ## Basics
-Treeo consists of two parts, the first is a simple mechanism for specifying node fields within a custom Pytree:
+At its core Treeo focuses on these few things:
+* Defining which fields are nodes or not within a Tree.
+* Defining kinds for node fields.
+* A filtering mechanism to select subsets of nodes.
+
+#### Fields
+To define node fields for a custom Pytree, Treeo uses the `field` function which is a wrapper around `dataclasses.field`:
 
 ```python
 import treeo as to
 
 @dataclass
 class Person(to.Tree):
-    height: jnp.array  = to.field(node=True) # I am a node field!
+    height: jnp.array = to.field(node=True) # I am a node field!
     name: str = to.field(node=False) # I am a static field!
 ```
 
-`field` under the hood just returns normal `dataclasses.Field` object with some Treeo specific metadata. Based on this you can use your `Tree` with the various `jax` functions that accept Pytrees.
+Using this information Treeo specifies a Pytree you can use with various `jax` functions.
 
 ```python
 p = Person(height=jnp.array(1.8), name="John")
@@ -41,8 +46,8 @@ jax.jit(lambda person: person)(p) # Person(height=array(1.8), name='John')
 # Trees can be mapped!
 jax.tree_map(lambda x: 2 * x, p) # Person(height=array(3.6), name='John')
 ```
-
-The second is a simple API for filtering and updating Pytrees:
+#### Kinds
+Kinds allow you to imbue semantic information into your Pytree, this is critcal for filtering operations where cannot know the purpose of a leaf based on its type. Using the `kind` argument of `field` and Treeo's `filter` function you select only the nodes you want to keep:
 
 ```python hl_lines="10"
 class Parameter: pass
@@ -64,8 +69,6 @@ params = to.filter(model, Parameter) # BatchNorm(scale=array(...), mean=Nothing)
 
 grads = jax.grad(loss_fn)(params, model, ...)
 ```
-
-Filtering is very flexible and powerful, it is specially useful when you want to apply a specific transformation to a subset of fields / parameters.
 
 ## Examples
 
