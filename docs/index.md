@@ -49,7 +49,7 @@ jax.jit(lambda person: person)(p) # Person(height=array(1.8), name='John')
 jax.tree_map(lambda x: 2 * x, p) # Person(height=array(3.6), name='John')
 ```
 #### Kinds
-Kinds allow you to imbue semantic information into your Pytree, this is critcal for filtering operations where cannot know the purpose of a leaf based on its type. Using the `kind` argument of `field` and Treeo's `filter` function you select only the nodes you want to keep:
+Kinds are associated types that give semantic meaning to a field (what it represents). A kind is just a type you pass to `field` via its `kind` argument. Kinds are useful as metadata for filtering via [treeo.filter](#filter):
 
 ```python hl_lines="10"
 class Parameter: pass

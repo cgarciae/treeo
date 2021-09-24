@@ -1,5 +1,5 @@
 <!-- ### Field kinds -->
-Kinds are associated types that give semantic meaning to a field (what it represents). A kind is just a type you pass to `field` via its `kind` argument. Kinds aremostly useful as metadata filtering via [treeo.filter](#filter). For example, here is a possible definition for a `BatchNorm` module using kinds:
+Kinds are associated types that give semantic meaning to a field (what it represents). A kind is just a type you pass to `field` via its `kind` argument. Kinds are mostly useful as metadata filtering via [treeo.filter](#filter). For example, here is a possible definition for a `BatchNorm` module using kinds:
 
 ```python
 import treeo as to
