@@ -76,76 +76,27 @@ grads = jax.grad(loss_fn)(params, model, ...)
 
 ### A simple Tree
 ```python
-from dataclasses import dataclass
-import treeo as to
-
-@dataclass
-class Character(to.Tree):
-    position: jnp.ndarray = to.field(node=True)    # node field
-    name: str = to.field(node=False, opaque=True)  # static field
-
-character = Character(position=jnp.array([0, 0]), name='Adam')
-
-# character can freely pass through jit
-@jax.jit
-def update(character: Character, velocity, dt) -> Character:
-    character.position += velocity * dt
-    return character
-
-character = update(character velocity=jnp.array([1.0, 0.2]), dt=0.1)
-```
-### A Stateful Tree
-```python
-from dataclasses import dataclass
-import treeo as to
-
-@dataclass
-class Counter(to.Tree):
-    n: jnp.array = to.field(default=jnp.array(0), node=True) # node
-    step: int = to.field(default=1, node=False) # static
-
-    def inc(self):
-        self.n += self.step
-
-counter = Counter(step=2) # Counter(n=jnp.array(0), step=2)
-
-@jax.jit
-def update(counter: Counter):
-    counter.inc()
-    return counter
-
-counter = update(counter) # Counter(n=jnp.array(2), step=2)
-
-# map over the tree
-```
-
-### Full Example - Linear Regression
-
-```python
+import jax
+import jax.numpy as jnp
 import matplotlib.pyplot as plt
 import numpy as np
+
 import treeo as to
 
 
-class Parameter:
-    pass
-
 class Linear(to.Tree):
-    din: int # static
-    dout: int # static
-
-    w: jnp.ndarray = to.field(node=True, kind=Parameter)
-    b: jnp.ndarray = to.field(node=True, kind=Parameter)
+    w: jnp.ndarray = to.node()
+    b: jnp.ndarray = to.node()
 
     def __init__(self, din, dout, key):
-        self.din = din
-        self.dout = dout
+        self.w = jax.random.uniform(key, shape=(din, dout))
         self.b = jnp.zeros(shape=(dout,))
 
     def __call__(self, x):
         return jnp.dot(x, self.w) + self.b
 
 
+@jax.value_and_grad
 def loss_fn(model, x, y):
 
     y_pred = model(x)
@@ -158,9 +109,11 @@ def sgd(param, grad):
     return param - 0.1 * grad
 
 
+@jax.jit
 def train_step(model, x, y):
     loss, grads = loss_fn(model, x, y)
 
+    model = jax.tree_map(sgd, model, grads)
 
     return loss, model
 
@@ -168,6 +121,7 @@ def train_step(model, x, y):
 x = np.random.uniform(size=(500, 1))
 y = 1.4 * x - 0.3 + np.random.normal(scale=0.1, size=(500, 1))
 
+key = jax.random.PRNGKey(0)
 model = Linear(1, 1, key=key)
 
 for step in range(1000):
