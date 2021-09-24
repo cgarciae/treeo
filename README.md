@@ -109,6 +109,7 @@ class Counter(to.Tree):
 
 counter = Counter(step=2) # Counter(n=jnp.array(0), step=2)
 
+@jax.jit
 def update(counter: Counter):
     counter.inc()
     return counter
