@@ -23,7 +23,7 @@ At its core Treeo focuses on 2 things:
 * Tooling for defining pytree structures via field metadata.
 * A set of functions for manipulating pytree structures that leverage the field metadata.
 
-As part of the field metadata Treeo introduce the concept of a `kind` which enables a powerful filtering mechanism.
+Treeo also introduce the concept of a field `kind` which enables a powerful filtering mechanism.
 
 #### Fields
 To define node fields for a custom Pytree, Treeo uses the `field` function which is a wrapper around `dataclasses.field`:

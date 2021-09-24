@@ -7,7 +7,7 @@ _A small library for creating and manipulating custom JAX Pytree classes_
 * **Standards-based**: `treeo.field` is built on top of python's `dataclasses.field`.
 * **Flexible**: Treeo is compatible with both dataclass and non-dataclass classes.
 
-Treeo was originally extracted from the core of [Treex](https://github.com/cgarciae/treex) and (although the author was not aware of this at the time) shares a lot in common with [flax.struct](https://flax.readthedocs.io/en/latest/flax.struct.html#module-flax.struct). Treeo has nothing in particular to do with Deep Learning, but some of the examples are motivated by it.
+Treeo was originally extracted from the core of [Treex](https://github.com/cgarciae/treex) and shares a lot in common with [flax.struct](https://flax.readthedocs.io/en/latest/flax.struct.html#module-flax.struct). Treeo has nothing in particular to do with Deep Learning, but some of the examples are motivated by it.
 
 [Documentation](https://cgarciae.github.io/treeo) | [Guide](https://cgarciae.github.io/treeo/user-guide/intro)
 
@@ -23,7 +23,7 @@ At its core Treeo focuses on 2 things:
 * Tooling for defining pytree structures via field metadata.
 * A set of functions for manipulating pytree structures that leverage the field metadata.
 
-As part of the field metadata Treeo introduce the concept of a `kind` which enables a powerful filtering mechanism.
+Treeo also introduce the concept of a field `kind` which enables a powerful filtering mechanism.
 
 #### Fields
 To define node fields for a custom Pytree, Treeo uses the `field` function which is a wrapper around `dataclasses.field`:
@@ -109,6 +109,7 @@ class Counter(to.Tree):
 
 counter = Counter(step=2) # Counter(n=jnp.array(0), step=2)
 
+@jax.jit
 def update(counter: Counter):
     counter.inc()
     return counter
