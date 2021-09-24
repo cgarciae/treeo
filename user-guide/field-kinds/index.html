@@ -723,11 +723,8 @@
 <p>Kinds are associated types that give semantic meaning to a field (what it represents). A kind is just a type you pass to <code>field</code> via its <code>kind</code> argument. Kinds aremostly useful as metadata filtering via <a href="#filter">treeo.filter</a>. For example, here is a possible definition for a <code>BatchNorm</code> module using kinds:</p>
 <p><div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">treeo</span> <span class="k">as</span> <span class="nn">to</span>
 
-<span class="k">class</span> <span class="nc">Parameter</span><span class="p">:</span>
-    <span class="k">pass</span>
-
-<span class="k">class</span> <span class="nc">BatchStat</span><span class="p">:</span>
-    <span class="k">pass</span>
+<span class="k">class</span> <span class="nc">Parameter</span><span class="p">:</span> <span class="k">pass</span>
+<span class="k">class</span> <span class="nc">BatchStat</span><span class="p">:</span> <span class="k">pass</span>
 
 <span class="k">class</span> <span class="nc">BatchNorm</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
     <span class="n">scale</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="p">)</span>
