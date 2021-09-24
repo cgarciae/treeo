@@ -20,7 +20,6 @@ class Linear(to.Tree):
 
 @jax.value_and_grad
 def loss_fn(model, x, y):
-
     y_pred = model(x)
     loss = jnp.mean((y_pred - y) ** 2)
 
@@ -34,7 +33,6 @@ def sgd(param, grad):
 @jax.jit
 def train_step(model, x, y):
     loss, grads = loss_fn(model, x, y)
-
     model = jax.tree_map(sgd, model, grads)
 
     return loss, model
