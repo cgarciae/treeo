@@ -5,6 +5,8 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
+import typing_extensions as tpe
+
 A = tp.TypeVar("A")
 B = tp.TypeVar("B")
 
@@ -15,7 +17,7 @@ _pyfilter = filter
 OpaqueIsEqual = tp.Optional[tp.Callable[["Opaque", tp.Any], bool]]
 
 
-@tp.runtime_checkable
+@tpe.runtime_checkable
 class ArrayLike(tp.Protocol):
     shape: tp.Tuple[int, ...]
     dtype: np.dtype
