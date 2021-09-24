@@ -76,6 +76,52 @@ grads = jax.grad(loss_fn)(params, model, ...)
 
 ### A simple Tree
 ```python
+from dataclasses import dataclass
+import treeo as to
+
+@dataclass
+class Character(to.Tree):
+    position: jnp.ndarray = to.field(node=True)    # node field
+    name: str = to.field(node=False, opaque=True)  # static field
+
+character = Character(position=jnp.array([0, 0]), name='Adam')
+
+# character can freely pass through jit
+@jax.jit
+def update(character: Character, velocity, dt) -> Character:
+    character.position += velocity * dt
+    return character
+
+character = update(character velocity=jnp.array([1.0, 0.2]), dt=0.1)
+```
+### A Stateful Tree
+```python
+from dataclasses import dataclass
+import treeo as to
+
+@dataclass
+class Counter(to.Tree):
+    n: jnp.array = to.field(default=jnp.array(0), node=True) # node
+    step: int = to.field(default=1, node=False) # static
+
+    def inc(self):
+        self.n += self.step
+
+counter = Counter(step=2) # Counter(n=jnp.array(0), step=2)
+
+@jax.jit
+def update(counter: Counter):
+    counter.inc()
+    return counter
+
+counter = update(counter) # Counter(n=jnp.array(2), step=2)
+
+# map over the tree
+```
+
+### Full Example - Linear Regression
+
+```python
 import jax
 import jax.numpy as jnp
 import matplotlib.pyplot as plt
@@ -111,8 +157,8 @@ def sgd(param, grad):
 
 @jax.jit
 def train_step(model, x, y):
+    
     loss, grads = loss_fn(model, x, y)
-
     model = jax.tree_map(sgd, model, grads)
 
     return loss, model
