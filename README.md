@@ -19,6 +19,7 @@ pip install treeo
 
 ## Basics
 At its core Treeo focuses on 2 things:
+
 * Tooling for defining pytree structures via field metadata.
 * A set of functions for manipulating pytree structures that leverage the field metadata.
 
