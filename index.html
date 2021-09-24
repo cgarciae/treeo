@@ -291,20 +291,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#a-stateful-tree" class="md-nav__link">
-    A Stateful Tree
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#full-example-linear-regression" class="md-nav__link">
-    Full Example - Linear Regression
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -955,20 +941,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#a-stateful-tree" class="md-nav__link">
-    A Stateful Tree
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#full-example-linear-regression" class="md-nav__link">
-    Full Example - Linear Regression
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -1053,72 +1025,27 @@
 </code></pre></div>
 <h2 id="examples">Examples</h2>
 <h3 id="a-simple-tree">A simple Tree</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">import</span> <span class="nn">treeo</span> <span class="k">as</span> <span class="nn">to</span>
-
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">Character</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
-    <span class="n">position</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>    <span class="c1"># node field</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">opaque</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># static field</span>
-
-<span class="n">character</span> <span class="o">=</span> <span class="n">Character</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Adam&#39;</span><span class="p">)</span>
-
-<span class="c1"># character can freely pass through jit</span>
-<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
-<span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">character</span><span class="p">:</span> <span class="n">Character</span><span class="p">,</span> <span class="n">velocity</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Character</span><span class="p">:</span>
-    <span class="n">character</span><span class="o">.</span><span class="n">position</span> <span class="o">+=</span> <span class="n">velocity</span> <span class="o">*</span> <span class="n">dt</span>
-    <span class="k">return</span> <span class="n">character</span>
-
-<span class="n">character</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">character</span> <span class="n">velocity</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">]),</span> <span class="n">dt</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-</code></pre></div>
-<h3 id="a-stateful-tree">A Stateful Tree</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">import</span> <span class="nn">treeo</span> <span class="k">as</span> <span class="nn">to</span>
-
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">Counter</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
-    <span class="n">n</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># node</span>
-    <span class="n">step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># static</span>
-
-    <span class="k">def</span> <span class="nf">inc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">n</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">step</span>
-
-<span class="n">counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">step</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="c1"># Counter(n=jnp.array(0), step=2)</span>
-
-<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
-<span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="n">counter</span><span class="p">:</span> <span class="n">Counter</span><span class="p">):</span>
-    <span class="n">counter</span><span class="o">.</span><span class="n">inc</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">counter</span>
-
-<span class="n">counter</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">counter</span><span class="p">)</span> <span class="c1"># Counter(n=jnp.array(2), step=2)</span>
-
-<span class="c1"># map over the tree</span>
-</code></pre></div>
-<h3 id="full-example-linear-regression">Full Example - Linear Regression</h3>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">jax</span>
+<span class="kn">import</span> <span class="nn">jax.numpy</span> <span class="k">as</span> <span class="nn">jnp</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
 <span class="kn">import</span> <span class="nn">treeo</span> <span class="k">as</span> <span class="nn">to</span>
 
-
-<span class="k">class</span> <span class="nc">Parameter</span><span class="p">:</span>
-    <span class="k">pass</span>
 
 <span class="k">class</span> <span class="nc">Linear</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
-    <span class="n">din</span><span class="p">:</span> <span class="nb">int</span> <span class="c1"># static</span>
-    <span class="n">dout</span><span class="p">:</span> <span class="nb">int</span> <span class="c1"># static</span>
-
-    <span class="n">w</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="p">)</span>
-    <span class="n">b</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="p">)</span>
+    <span class="n">w</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
+    <span class="n">b</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">din</span><span class="p">,</span> <span class="n">dout</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">din</span> <span class="o">=</span> <span class="n">din</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dout</span> <span class="o">=</span> <span class="n">dout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">din</span><span class="p">,</span> <span class="n">dout</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">jnp</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">dout</span><span class="p">,))</span>
 
     <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">jnp</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span>
 
 
+<span class="nd">@jax</span><span class="o">.</span><span class="n">value_and_grad</span>
 <span class="k">def</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
 
     <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
@@ -1131,9 +1058,11 @@
     <span class="k">return</span> <span class="n">param</span> <span class="o">-</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">grad</span>
 
 
+<span class="nd">@jax</span><span class="o">.</span><span class="n">jit</span>
 <span class="k">def</span> <span class="nf">train_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="n">loss</span><span class="p">,</span> <span class="n">grads</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 
+    <span class="n">model</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">sgd</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">grads</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">loss</span><span class="p">,</span> <span class="n">model</span>
 
@@ -1141,6 +1070,7 @@
 <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 <span class="n">y</span> <span class="o">=</span> <span class="mf">1.4</span> <span class="o">*</span> <span class="n">x</span> <span class="o">-</span> <span class="mf">0.3</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
+<span class="n">key</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PRNGKey</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">model</span> <span class="o">=</span> <span class="n">Linear</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
 
 <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
