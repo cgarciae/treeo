@@ -9,7 +9,7 @@ _A small library for creating and manipulating custom JAX Pytree classes_
 
 Treeo was originally extracted from the core of [Treex](https://github.com/cgarciae/treex) and shares a lot in common with [flax.struct](https://flax.readthedocs.io/en/latest/flax.struct.html#module-flax.struct). Treeo has nothing in particular to do with Deep Learning, but some of the examples are motivated by it.
 
-[Documentation](https://cgarciae.github.io/treeo) | [Guide](https://cgarciae.github.io/treeo/user-guide/intro)
+[Documentation](https://cgarciae.github.io/treeo) | [User Guide](https://cgarciae.github.io/treeo/user-guide/intro)
 
 ## Installation
 Install using pip:
