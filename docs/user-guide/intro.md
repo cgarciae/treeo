@@ -4,8 +4,11 @@ Before we start it would be useful to define some terminology that will be used 
 
 ### Terminology
 
-* _Type annotations_ are type you set in a class variable after the `:` symbol.
-* _Field declarations_ are class variables whose default value is assigned with `field`. Under the hood these are `dataclass.Field` instances.
+* **Type Annotation**: (a.k.a. type hints) these are types you set while defining a variable after the `:` symbol.
+* **Field Declaration**: default values for class variables that are set using the `field` function.
+* **Node Field**: A field that is declared as a node, that is, its content is part of the tree leaves.
+* **Static Field**: A field that is declared as a static, that is, its content is not part of the leaves.
+* **Field Kind**: An associated type, separate from the type annotation, that gives semantic meaning to the field.
 
 In code these terms map to the following:
 
