@@ -1,4 +1,3 @@
-from treeo.tree import Tree
 import typing as tp
 from inspect import Parameter
 
@@ -9,6 +8,7 @@ import numpy as np
 import pytest
 
 import treeo as to
+from treeo.tree import Tree
 
 
 class Parameter(to.KindMixin):

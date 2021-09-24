@@ -4,11 +4,8 @@ Kinds are associated types that give semantic meaning to a field (what it repres
 ```python
 import treeo as to
 
-class Parameter:
-    pass
-
-class BatchStat:
-    pass
+class Parameter: pass
+class BatchStat: pass
 
 class BatchNorm(to.Tree):
     scale: jnp.ndarray = to.field(node=True, kind=Parameter)
