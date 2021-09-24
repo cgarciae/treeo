@@ -330,56 +330,20 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../opaque-static-fields/" class="md-nav__link">
-        Opaque static fields
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../field-metadata/" class="md-nav__link">
-        Field Metadata
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../sugar/" class="md-nav__link">
-        Sugar 🍬
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
     
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
       
-      <label class="md-nav__link" for="__nav_2_8">
-        API
+      <label class="md-nav__link" for="__nav_2_5">
+        Functional API
         <span class="md-nav__icon md-icon"></span>
       </label>
-      <nav class="md-nav" aria-label="API" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_8">
+      <nav class="md-nav" aria-label="Functional API" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
           <span class="md-nav__icon md-icon"></span>
-          API
+          Functional API
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -442,6 +406,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../sugar/" class="md-nav__link">
+        Sugar 🍬
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../state-management/" class="md-nav__link">
         State Management
       </a>
@@ -454,8 +430,32 @@
   
   
     <li class="md-nav__item">
+      <a href="../opaque-static-fields/" class="md-nav__link">
+        Opaque static fields
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../non-hashable-static-fields/" class="md-nav__link">
         Non-hashable static fields
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../field-metadata/" class="md-nav__link">
+        Field Metadata
       </a>
     </li>
   
@@ -790,8 +790,11 @@
 <p>Before we start it would be useful to define some terminology that will be used throughout the documentation.</p>
 <h3 id="terminology">Terminology</h3>
 <ul>
-<li><em>Type annotations</em> are type you set in a class variable after the <code>:</code> symbol.</li>
-<li><em>Field declarations</em> are class variables whose default value is assigned with <code>field</code>. Under the hood these are <code>dataclass.Field</code> instances.</li>
+<li><strong>Type Annotation</strong>: (<a href="https://docs.python.org/3/library/typing.html">type hints</a>) types you set while defining a variable after the <code>:</code> symbol.</li>
+<li><strong>Field Declaration</strong>: default values for class variables that are set using the <code>field</code> function.</li>
+<li><strong>Node Field</strong>: A field that is declared as a node, that is, its content is part of the tree leaves.</li>
+<li><strong>Static Field</strong>: A field that is declared as a static, that is, its content is not part of the leaves.</li>
+<li><strong>Field Kind</strong>: An associated type, separate from the type annotation, that gives semantic meaning to the field.</li>
 </ul>
 <p>In code these terms map to the following:</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MyModule</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>

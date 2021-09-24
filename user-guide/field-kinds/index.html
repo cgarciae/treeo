@@ -293,56 +293,20 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../opaque-static-fields/" class="md-nav__link">
-        Opaque static fields
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../field-metadata/" class="md-nav__link">
-        Field Metadata
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../sugar/" class="md-nav__link">
-        Sugar 🍬
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
     
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
       
-      <label class="md-nav__link" for="__nav_2_8">
-        API
+      <label class="md-nav__link" for="__nav_2_5">
+        Functional API
         <span class="md-nav__icon md-icon"></span>
       </label>
-      <nav class="md-nav" aria-label="API" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_8">
+      <nav class="md-nav" aria-label="Functional API" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
           <span class="md-nav__icon md-icon"></span>
-          API
+          Functional API
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -405,6 +369,18 @@
   
   
     <li class="md-nav__item">
+      <a href="../sugar/" class="md-nav__link">
+        Sugar 🍬
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../state-management/" class="md-nav__link">
         State Management
       </a>
@@ -417,8 +393,32 @@
   
   
     <li class="md-nav__item">
+      <a href="../opaque-static-fields/" class="md-nav__link">
+        Opaque static fields
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../non-hashable-static-fields/" class="md-nav__link">
         Non-hashable static fields
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../field-metadata/" class="md-nav__link">
+        Field Metadata
       </a>
     </li>
   
@@ -720,7 +720,7 @@
                   <h1>Field Kinds</h1>
                 
                 <!-- ### Field kinds -->
-<p>You can define a <code>kind</code> for a field, this is useful for for filtering field value using the <a href="#filter">treeo.filter</a> function. A <code>kind</code> is can be any <code>type</code>, it is only there fore metadata that <code>filter</code> can leverage. For example, here is a possible definition for a <code>BatchNorm</code> module using <code>kind</code>s:</p>
+<p>Kinds are associated types that give semantic meaning to a field (what it represents). A kind is just a type you pass to <code>field</code> via its <code>kind</code> argument. Kinds aremostly useful as metadata filtering via <a href="#filter">treeo.filter</a>. For example, here is a possible definition for a <code>BatchNorm</code> module using kinds:</p>
 <p><div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">treeo</span> <span class="k">as</span> <span class="nn">to</span>
 
 <span class="k">class</span> <span class="nc">Parameter</span><span class="p">:</span>
@@ -737,7 +737,7 @@
     <span class="n">var</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">BatchStat</span><span class="p">)</span>
     <span class="o">...</span>
 </code></pre></div>
-Based on this definition, <code>filter</code> can query specific kind of fields:</p>
+Now with this definition you use <code>filter</code> to select specific kind of fields:</p>
 <div class="highlight"><pre><span></span><code><span class="n">model</span> <span class="o">=</span> <span class="n">BatchNorm</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> 
 
 <span class="c1"># BatchNorm(scale=array(...), bias=array(...), mean=Nothing, var=Nothing)</span>
@@ -746,6 +746,7 @@ Based on this definition, <code>filter</code> can query specific kind of fields:
 <span class="c1"># BatchNorm(scale=Nothing, bias=Nothing, mean=array(...), var=array(...))</span>
 <span class="n">batch_stats</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">BatchStat</span><span class="p">)</span>
 </code></pre></div>
+<p>This can be very useful to operate over specific subsets of your Trees e.g. sync subset of parameters across devices in a distributed computation.</p>
                 
               
               

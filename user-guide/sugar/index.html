@@ -285,64 +285,20 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../opaque-static-fields/" class="md-nav__link">
-        Opaque static fields
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../field-metadata/" class="md-nav__link">
-        Field Metadata
-      </a>
-    </li>
-  
-
-          
-            
-  
-  
-    
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        Sugar 🍬
-      </a>
-      
-    </li>
-  
-
-          
-            
-  
-  
-  
     
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_8" type="checkbox" id="__nav_2_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
       
-      <label class="md-nav__link" for="__nav_2_8">
-        API
+      <label class="md-nav__link" for="__nav_2_5">
+        Functional API
         <span class="md-nav__icon md-icon"></span>
       </label>
-      <nav class="md-nav" aria-label="API" data-md-level="2">
-        <label class="md-nav__title" for="__nav_2_8">
+      <nav class="md-nav" aria-label="Functional API" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
           <span class="md-nav__icon md-icon"></span>
-          API
+          Functional API
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
@@ -403,6 +359,26 @@
             
   
   
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Sugar 🍬
+      </a>
+      
+    </li>
+  
+
+          
+            
+  
+  
   
     <li class="md-nav__item">
       <a href="../state-management/" class="md-nav__link">
@@ -417,8 +393,32 @@
   
   
     <li class="md-nav__item">
+      <a href="../opaque-static-fields/" class="md-nav__link">
+        Opaque static fields
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../non-hashable-static-fields/" class="md-nav__link">
         Non-hashable static fields
+      </a>
+    </li>
+  
+
+          
+            
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../field-metadata/" class="md-nav__link">
+        Field Metadata
       </a>
     </li>
   
@@ -738,17 +738,17 @@
 <td><code>to.static()</code></td>
 </tr>
 <tr>
-<td><code>to.field(node=True, kind=TreeOrKind)</code></td>
-<td><code>TreeOrKind.node()</code></td>
+<td><code>to.field(node=True, kind=Kind)</code></td>
+<td><code>Kind.node()</code></td>
 </tr>
 <tr>
-<td><code>to.field(node=False, kind=TreeOrKind)</code></td>
-<td><code>TreeOrKind.static()</code></td>
+<td><code>to.field(node=False, kind=Kind)</code></td>
+<td><code>Kind.static()</code></td>
 </tr>
 </tbody>
 </table>
 <p>Based on this, you can take the following code</p>
-<p><div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Parameter</span><span class="p">:</span>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Parameter</span><span class="p">:</span>
     <span class="k">pass</span>
 
 <span class="k">class</span> <span class="nc">Child</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
@@ -758,13 +758,12 @@
     <span class="n">d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">Parent</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
-    <span class="n">child1</span><span class="p">:</span> <span class="n">Child</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Child</span><span class="p">)</span>
-    <span class="n">child2</span><span class="p">:</span> <span class="n">Child</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Child</span><span class="p">)</span>
-    <span class="n">rest</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Child</span><span class="p">]</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Child</span><span class="p">)</span>
+    <span class="n">child1</span><span class="p">:</span> <span class="n">Child</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">child2</span><span class="p">:</span> <span class="n">Child</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">rest</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Child</span><span class="p">]</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
-and simplify it to:
-<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Parameter</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">KindMixin</span><span class="p">):</span>
-    <span class="k">pass</span>
+<p>and simplify it to:</p>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Parameter</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">KindMixin</span><span class="p">):</span> <span class="k">pass</span>
 
 <span class="k">class</span> <span class="nc">Child</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
     <span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
@@ -773,11 +772,11 @@ and simplify it to:
     <span class="n">d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">static</span><span class="p">()</span>
 
 <span class="k">class</span> <span class="nc">Parent</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
-    <span class="n">child1</span><span class="p">:</span> <span class="n">Child</span> <span class="c1"># = Child.node(), inferred</span>
-    <span class="n">child2</span><span class="p">:</span> <span class="n">Child</span> <span class="o">=</span> <span class="n">Child</span><span class="o">.</span><span class="n">static</span><span class="p">()</span>
-    <span class="n">rest</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Child</span><span class="p">]</span> <span class="c1"># = Child.node(), inferred</span>
+    <span class="n">child1</span><span class="p">:</span> <span class="n">Child</span> <span class="c1"># = to.node(), inferred</span>
+    <span class="n">child2</span><span class="p">:</span> <span class="n">Child</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">static</span><span class="p">()</span>
+    <span class="n">rest</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Child</span><span class="p">]</span> <span class="c1"># = to.node(), inferred</span>
 </code></pre></div>
-As you see we use the <code>to.KindMixin</code> to add some methods to the <code>Parameter</code> class. Also, since the <code>Tree</code> already inherits from <code>to.KindMixin</code>, we can use the <code>.node()</code> and <code>.static()</code> methods on the <code>Tree</code> subclass.</p>
+<p>The <code>to.KindMixin</code> provides the <code>.field()</code>, <code>.node()</code>, and <code>.static()</code> methods to subtypes, in this case the <code>Parameter</code> class.</p>
                 
               
               
@@ -797,7 +796,7 @@ As you see we use the <code>to.KindMixin</code> to add some methods to the <code
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../field-metadata/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Field Metadata" rel="prev">
+        <a href="../api/map/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Map" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -806,20 +805,20 @@ As you see we use the <code>to.KindMixin</code> to add some methods to the <code
               <span class="md-footer__direction">
                 Previous
               </span>
-              Field Metadata
+              Map
             </div>
           </div>
         </a>
       
       
         
-        <a href="../api/intro/" class="md-footer__link md-footer__link--next" aria-label="Next: Intro" rel="next">
+        <a href="../state-management/" class="md-footer__link md-footer__link--next" aria-label="Next: State Management" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Intro
+              State Management
             </div>
           </div>
           <div class="md-footer__button md-icon">
