@@ -1,21 +1,23 @@
 
-<!-- #### Map -->
-The `map` function provides a convenient way to map a function over the fields of a pytree:
+# Map
 
-```python hl_lines="5"
-import treeo as to
+Applies a function to all leaves in a pytree using `jax.tree_map`. If `filters` are given then the function will be applied only to the subset of leaves that match the filters.
 
-tree = MyTree(a=jnp.array(1), b=jnp.array(2))
-params = to.filter(tree, Parameter) # MyTree(a=array(1), b=Nothing)
-negative = to.map(lambda x: -x, params) # MyTree(a=array(-1), b=Nothing)
-tree = to.update(tree, negative) # MyTree(a=array(-1), b=array(2))
+For example, if we want to zero all batch stats we can do:
+
+Example:
+
+```python
+@dataclass
+class MyTree(to.Tree):
+    a: int = to.field(node=True, kind=Parameter)
+    b: int = to.field(node=True, kind=BatchStat)
+
+tree = MyTree(a=1, b=2)
+
+to.map(lambda _: 0, tree, BatchStat) # MyTree(a=1, b=0)
 ```
 
-Up to this point `map` is behaving just like `jax.tree_map`, however, the pattern in the previous example is so common that `map`s main use is providing a shortcut for applying `filter -> tree_map -> update` in sequence:
+`map` is equivalent to `filter -> tree_map -> update` in sequence.
 
-```python hl_lines="2"
-tree = MyTree(a=jnp.array(1), b=jnp.array(2))
-tree = to.map(lambda x: -x, tree, Parameter) # MyTree(a=array(-1), b=array(2))
-```
-
-As shown here, `map` accepts the same `*args` as `filter` and calls `update` at the end if filters are given.
+If `inplace` is `True`, the input `obj` is mutated and returned. You can only update inplace if the input `obj` has a `__dict__` attribute, else a `TypeError` is raised.

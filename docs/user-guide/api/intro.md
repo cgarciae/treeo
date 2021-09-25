@@ -2,14 +2,11 @@ Throught these examples for the functional API we will use the following definti
 ```python
 import treeo as to
 
-class Parameter:
-    pass
-
-class BatchStat:
-    pass
+class Parameter: pass
+class BatchStat: pass
 
 @dataclass
 class MyTree(to.Tree):
-    a: jnp.ndarray = to.field(node=True, kind=Parameter)
-    b: jnp.ndarray = to.field(node=True, kind=BatchStat)
+    a: int = to.field(node=True, kind=Parameter)
+    b: int = to.field(node=True, kind=BatchStat)
 ```

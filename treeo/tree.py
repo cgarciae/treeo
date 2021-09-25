@@ -286,45 +286,11 @@ def filter(
     flatten_mode: tp.Union[FlattenMode, str, None] = None,
 ) -> A:
     """
-    Returns a new tree with any leaf that does not match all the given filter set to `Nothing`. Filters are callable of type:
+    The `filter` function allows you to select a subtree by filtering based on a predicate or `kind` type,
+    leaves who all filters are kept, the rest are set to `Nothing`. For more information see
+    [filter's user guide](https://cgarciae.github.io/treeo/user-guide/api/filter).
 
-    ```python
-    (FieldInfo) -> bool
-    ```
 
-    You can also pass types to filter by, these are know as `kind` filters and, for a type `t`, are roughly equivalent to:
-
-    ```python
-    def kind_filter(field: FieldInfo) -> bool:
-        return issubclass(field.kind, t)
-    ```
-
-    Example:
-    ```python
-    class Parameter: pass
-    class BatchStat: pass
-
-    @dataclass
-    class MyTree(to.Tree):
-        a: int = to.field(node=True, kind=Parameter)
-        b: int = to.field(node=True, kind=BatchStat)
-
-    tree = MyTree(1, 2)
-
-    to.filter(tree, lambda field: issubclass(field.kind, Parameter)) # MyTree(a=1, b=Nothing)
-    to.filter(tree, lambda field: issubclass(field.kind, BatchStat)) # MyTree(a=Nothing, b=2)
-    ```
-
-    The previous can be more compactly expressed using `kind` filters as:
-
-    ```python
-    tree = MyTree(1, 2)
-
-    to.filter(tree, Parameter) # MyTree(a=1, b=Nothing)
-    to.filter(tree, BatchStat) # MyTree(a=Nothing, b=2)
-    ```
-
-    If `inplace` is `True`, the input `obj` is mutated and returned. You can only update inplace if the input `obj` has a `__dict__` attribute, else a TypeError is raised.
 
     Arguments:
         obj: A pytree (possibly containing `to.Tree`s) to be filtered.
@@ -378,48 +344,8 @@ def update(
     ignore_static: bool = False,
 ) -> A:
     """
-    Creates a new Tree with the same structure, but its values
-    updated based on the values from the incoming Trees. Updates are performed using
-    the following rules:
-
-    * For a list of equivalent leaves `l1, l2, ..., ln`, it returns the first non-`Nothing` leaf in reverse order.
-    * If no `flatten_mode()` context manager is active, and `flatten_mode` is not given, all fields will be updated.
-    * If `flatten_mode="normal"` is set, the output will have the exact same static components as the first input (`obj`).
-
-    Example:
-
-    ```python
-    t1 = MyTree(x=Nothing, y=2, z=3)
-    t2 = MyTree(x=1, y=Nothing, z=4)
-
-    update(t1, t2) # MyTree(x=1, y=2, z=4)
-    ```
-
-    When using `update` with multiple Trees the following equivalence holds:
-
-    ```
-    update(m1, m2, m3) = update(m1, update(m2, m3))
-    ```
-
-    If you want to update the current module instead of creating a new one use `inplace=True`.
-    This is useful when applying transformation inside a method where reassigning `self` is not possible:
-
-    ```python
-    def double_params(self):
-        # this is not doing what you expect
-        self = jax.tree_map(lambda x: 2 * x, self)
-    ```
-    Instead do this:
-
-    ```python
-    def double_params(self):
-        doubled = jax.tree_map(lambda x: 2 * x, self)
-        update(self, doubled, inplace=True)
-    ```
-
-    If `inplace` is `True`, the input `obj` is mutated and returned. You can only update inplace if the input `obj` has a `__dict__` attribute, else a TypeError is raised.
-
-    If `ignore_static` is `True`, static fields (according to the flattening mode) will be bypassed during the update process, the final output will have the same static components as the first input (`obj`). This strategy is a bit less safe in general as it will flatten all trees using `jax.tree_leaves` instead of `PyTreeDef.flatten_up_to`, this skips some checks so it effectively ignores their static components, the only requirement is that the flattened struture of all trees matches.
+    Creates a new Tree with the same structure but its values updated based on the values from the incoming Trees. For more information see
+    [update's user guide](https://cgarciae.github.io/treeo/user-guide/api/update).
 
     Arguments:
         obj: Main pytree to update.
@@ -475,27 +401,10 @@ def map(
     flatten_mode: tp.Union[FlattenMode, str, None] = None,
 ) -> A:
     """
-    Applies a function to all leaves in a pytree using `jax.tree_map`. If `filters` are given then
-    the function will be applied only to the subset of leaves that match the filters.
+    Applies a function to all leaves in a pytree using `jax.tree_map`, if `filters` are given then
+    the function will be applied only to the subset of leaves that match the filters. For more information see
+    [map's user guide](https://cgarciae.github.io/treeo/user-guide/api/map).
 
-    For example, if we want to zero all batch stats we can do:
-
-    Example:
-    ```python
-    class Parameter: pass
-    class BatchStat: pass
-
-    @dataclass
-    class MyTree(to.Tree):
-        a: int = to.field(node=True, kind=Parameter)
-        b: int = to.field(node=True, kind=BatchStat)
-
-    tree = MyTree(1, 2)
-
-    to.map(lambda _: 0, tree, BatchStat) # MyTree(a=1, b=0)
-    ```
-
-    If `inplace` is `True`, the input `obj` is mutated and returned. You can only update inplace if the input `obj` has a `__dict__` attribute, else a TypeError is raised.
 
     Arguments:
         f: The function to apply to the leaves.
@@ -540,7 +449,7 @@ def copy(obj: A) -> A:
     ```python
     jax.tree_map(lambda x: x, self)
     ```
-    but Treeo will try to copy static nodes as well.
+    but will try to copy static nodes as well.
     """
     with _CONTEXT.update(flatten_mode=FlattenMode.all_fields):
         return jax.tree_map(lambda x: x, obj)
