@@ -287,14 +287,14 @@ def filter(
 ) -> A:
     """
     The `filter` function allows you to select a subtree by filtering based on a predicate or `kind` type,
-    leaves who all filters are kept, the rest are set to `Nothing`. For more information see
+    leaves that pass all filters are kept, the rest are set to `Nothing`. For more information see
     [filter's user guide](https://cgarciae.github.io/treeo/user-guide/api/filter).
 
 
 
     Arguments:
         obj: A pytree (possibly containing `to.Tree`s) to be filtered.
-        filters: Types to filter by, membership is determined by `issubclass`, or
+        *filters: Types to filter by, membership is determined by `issubclass`, or
             callables that take in a `FieldInfo` and return a `bool`.
         inplace: If `True`, the input `obj` is mutated and returned.
         flatten_mode: Sets a new `FlattenMode` context for the operation.
