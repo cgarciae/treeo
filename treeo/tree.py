@@ -92,15 +92,7 @@ class TreeMeta(ABCMeta):
         obj.__init__(*args, **kwargs)
 
         # auto-annotations
-        for field, value in vars(obj).items():
-
-            if field not in obj._field_metadata and isinstance(value, Tree):
-                obj._field_metadata[field] = types.FieldMetadata(
-                    node=True,
-                    kind=type(value),
-                    opaque=False,
-                    opaque_is_equal=None,
-                )
+        obj._update_local_metadata()
 
         return obj
 
@@ -145,6 +137,24 @@ class Tree(metaclass=TreeMeta):
         self._field_metadata[field] = field_metadata
 
         return module
+
+    def check_metadata_updates(self):
+        """
+        Checks for new fields, if found, adds them to the metadata.
+        """
+        with _CONTEXT.update(flatten_mode=FlattenMode.all_fields):
+            jax.tree_flatten(self)
+
+    def _update_local_metadata(self):
+        for field, value in vars(self).items():
+
+            if field not in self._field_metadata:
+                self._field_metadata[field] = types.FieldMetadata(
+                    node=isinstance(value, Tree),
+                    kind=type(value),
+                    opaque=False,
+                    opaque_is_equal=None,
+                )
 
     def __init_subclass__(cls):
         jax.tree_util.register_pytree_node_class(cls)
@@ -196,22 +206,15 @@ class Tree(metaclass=TreeMeta):
         node_fields = {}
         static_fields = {}
 
+        # auto-annotations
+        self._update_local_metadata()
+
         if _CONTEXT.flatten_mode == FlattenMode.all_fields:
             node_fields = fields
         elif _CONTEXT.flatten_mode == FlattenMode.no_fields:
             static_fields = fields
         else:  # normal or None
             for field, value in fields.items():
-                # maybe update metadata
-                if field not in self._field_metadata:
-                    is_node = isinstance(value, Tree)
-                    self._field_metadata[field] = types.FieldMetadata(
-                        node=is_node,
-                        kind=type(None),
-                        opaque=False,
-                        opaque_is_equal=None,
-                    )
-
                 field_annotation = self._field_metadata[field]
 
                 if field_annotation.node:

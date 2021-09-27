@@ -8,6 +8,7 @@ import jax.tree_util
 import numpy as np
 
 from treeo import utils
+import typing_extensions as tpe
 
 A = tp.TypeVar("A")
 B = tp.TypeVar("B")
