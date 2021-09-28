@@ -191,7 +191,7 @@ class TestTreeo:
         mlp_params = to.filter(mlp, Parameter)
         mlp_states = to.filter(mlp, State)
 
-        mlp_next = to.update(mlp_params, mlp_states)
+        mlp_next = to.merge(mlp_params, mlp_states)
 
         assert not isinstance(mlp_next.linear1.w, to.Nothing)
         assert not isinstance(mlp_next.linear1.b, to.Nothing)
@@ -208,7 +208,7 @@ class TestTreeo:
         mlp_params = to.filter(mlp, Parameter)
         mlp_states = to.filter(mlp, State)
 
-        to.update(mlp_params, mlp_states)
+        to.merge(mlp_params, mlp_states)
 
         assert not isinstance(mlp_params.linear1.w, to.Nothing)
         assert not isinstance(mlp_params.linear1.b, to.Nothing)
@@ -550,7 +550,7 @@ class TestTreeo:
         a2 = A(to.NOTHING, 4)
         a3 = A(5, to.NOTHING)
 
-        aout = to.update(a1, a2, a3)
+        aout = to.merge(a1, a2, a3)
 
         assert aout.x == 5
         assert aout.y == 4
@@ -572,7 +572,7 @@ class TestTreeo:
         a2 = A(to.NOTHING, 3)
         a3 = A(5, 4)
 
-        aout = to.update(a1, a2, a3, flatten_mode=to.FlattenMode.normal)
+        aout = to.merge(a1, a2, a3, flatten_mode=to.FlattenMode.normal)
 
         assert aout.x == 5
         assert aout.y == 2
@@ -594,7 +594,7 @@ class TestTreeo:
         a2 = A(to.NOTHING, 3)
         a3 = A(5, to.NOTHING)
 
-        aout = to.update(
+        aout = to.merge(
             a1, a2, a3, flatten_mode=to.FlattenMode.normal, ignore_static=True
         )
 
@@ -619,7 +619,7 @@ class TestTreeo:
         a3 = A(5, to.NOTHING)
 
         with pytest.raises(ValueError):
-            aout = to.update(
+            aout = to.merge(
                 a1, a2, a3, flatten_mode=to.FlattenMode.normal, ignore_static=False
             )
 
@@ -640,7 +640,7 @@ class TestTreeo:
         a2 = A(to.NOTHING, 4)
         a3 = A(5, to.NOTHING)
 
-        to.update(a1, a2, a3, inplace=True)
+        to.merge(a1, a2, a3, inplace=True)
 
         assert a1.x == 5
         assert a1.y == 4
@@ -655,9 +655,9 @@ class TestTreeo:
         a3 = (5, to.NOTHING)
 
         with pytest.raises(TypeError):
-            to.update(a1, a2, a3, inplace=True)
+            to.merge(a1, a2, a3, inplace=True)
 
-        aout = to.update(a1, a2, a3)
+        aout = to.merge(a1, a2, a3)
 
         assert aout[0] == 5
         assert aout[1] == 4

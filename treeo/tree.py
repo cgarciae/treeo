@@ -338,7 +338,7 @@ def filter(
         return obj
 
 
-def update(
+def merge(
     obj: A,
     other: A,
     *rest: A,
@@ -437,7 +437,7 @@ def map(
         new_obj: A = jax.tree_map(f, new_obj)
 
         if has_filters:
-            new_obj = update(obj, new_obj)
+            new_obj = merge(obj, new_obj)
 
     if inplace:
         input_obj.__dict__.update(new_obj.__dict__)

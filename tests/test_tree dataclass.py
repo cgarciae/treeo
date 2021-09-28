@@ -194,7 +194,7 @@ class TestTreeoDataclass:
         mlp_params = to.filter(mlp, Parameter)
         mlp_states = to.filter(mlp, State)
 
-        mlp_next = to.update(mlp_params, mlp_states)
+        mlp_next = to.merge(mlp_params, mlp_states)
 
         assert not isinstance(mlp_next.linear1.w, to.Nothing)
         assert not isinstance(mlp_next.linear1.b, to.Nothing)
@@ -211,7 +211,7 @@ class TestTreeoDataclass:
         mlp_params = to.filter(mlp, Parameter)
         mlp_states = to.filter(mlp, State)
 
-        to.update(mlp_params, mlp_states)
+        to.merge(mlp_params, mlp_states)
 
         assert not isinstance(mlp_params.linear1.w, to.Nothing)
         assert not isinstance(mlp_params.linear1.b, to.Nothing)

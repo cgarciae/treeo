@@ -29,5 +29,5 @@ __all__ = [
     "map",
     "node",
     "static",
-    "update",
+    "merge",
 ]
