@@ -3,12 +3,11 @@ __version__ = "0.0.3"
 # optimizers first
 # rest
 
+from treeo.api import *
+from treeo.mixins import *
 from treeo.tree import *
 from treeo.types import *
 from treeo.utils import *
-from treeo.api import *
-from treeo.mixins import *
-from treeo.mixins import *
 
 from . import tree, types, utils
 

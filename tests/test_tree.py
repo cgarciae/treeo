@@ -1,6 +1,5 @@
-from dataclasses import dataclass
-from treeo.api import T, add_field_info
 import typing as tp
+from dataclasses import dataclass
 from inspect import Parameter
 
 import jax
@@ -10,6 +9,7 @@ import numpy as np
 import pytest
 
 import treeo as to
+from treeo.api import T, add_field_info
 from treeo.tree import Tree
 
 

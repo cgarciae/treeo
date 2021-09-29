@@ -6,9 +6,9 @@ import jax
 import jax.numpy as jnp
 import jax.tree_util
 import numpy as np
+import typing_extensions as tpe
 
 from treeo import utils
-import typing_extensions as tpe
 
 A = tp.TypeVar("A")
 B = tp.TypeVar("B")
