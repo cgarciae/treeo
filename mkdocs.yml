@@ -13,6 +13,8 @@ nav:
       Filter: user-guide/api/filter.md
       Merge: user-guide/api/merge.md
       Map: user-guide/api/map.md
+      Apply: user-guide/api/apply.md
+      Copy: user-guide/api/copy.md
     "Sugar \U0001F36C": user-guide/sugar.md
     State Management: user-guide/state-management.md
     Opaque static fields: user-guide/opaque-static-fields.md
