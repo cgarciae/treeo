@@ -105,13 +105,13 @@ def merge(
     ignore_static: bool = False,
 ) -> A:
     """
-    Creates a new Tree with the same structure but its values updated based on the values from the incoming Trees. For more information see
-    [update's user guide](https://cgarciae.github.io/treeo/user-guide/api/update).
+    Creates a new Tree with the same structure but its values merged based on the values from the incoming Trees. For more information see
+    [merge's user guide](https://cgarciae.github.io/treeo/user-guide/api/merge).
 
     Arguments:
-        obj: Main pytree to update.
-        other: The pytree first to get the values to update from.
-        *rest: Additional pytree to perform the update in order from left to right.
+        obj: Main pytree to merge.
+        other: The pytree first to get the values to merge with.
+        *rest: Additional pytree to perform the merge in order from left to right.
         inplace: If `True`, the input `obj` is mutated and returned.
         flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used. If the current flatten context is `None` and `flatten_mode` is not passed then `FlattenMode.all_fields` is used.
         ignore_static: If `True`, bypasses static fields during the process and the statics fields for output are taken from the first input (`obj`).

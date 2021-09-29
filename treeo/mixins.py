@@ -142,14 +142,14 @@ class Merge:
         `merge` is a wrapper over `treeo.merge` that passes `self` as the first argument.
 
         Arguments:
-            other: The pytree first to get the values to update from.
-            *rest: Additional pytree to perform the update in order from left to right.
+            other: The pytree first to get the values to merge with.
+            *rest: Additional pytree to perform the merge in order from left to right.
             inplace: If `True`, the input `obj` is mutated and returned.
             flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used. If the current flatten context is `None` and `flatten_mode` is not passed then `FlattenMode.all_fields` is used.
             ignore_static: If `True`, bypasses static fields during the process and the statics fields for output are taken from the first input (`obj`).
 
         Returns:
-            A new pytree with the updated values. If `inplace` is `True`, `obj` is returned.
+            A new pytree with the merged values. If `inplace` is `True`, `obj` is returned.
         """
         return api.merge(
             self,

@@ -25,7 +25,7 @@ A standard solution to this problem is: **always output the Tree to update state
 ```python
 @partial(jax.value_and_grad, has_aux=True)
 def grad_fn(params, model, x, y):
-    model = to.update(model, params)
+    model = to.merge(model, params)
 
     y_pred = model(x) # state is updated
     loss = jnp.mean((y_pred - y) ** 2)

@@ -61,7 +61,7 @@ class BatchNorm(to.Tree):
 
 def loss_fn(params, model, ...):
     # merge params back into model
-    model = to.update(model, params)
+    model = to.merge(model, params)
     ...
 
 model = BatchNorm(...)

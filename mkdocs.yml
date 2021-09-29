@@ -11,7 +11,7 @@ nav:
     Node policy: user-guide/node-policy.md
     Functional API:
       Filter: user-guide/api/filter.md
-      Update: user-guide/api/update.md
+      Merge: user-guide/api/merge.md
       Map: user-guide/api/map.md
     "Sugar \U0001F36C": user-guide/sugar.md
     State Management: user-guide/state-management.md
