@@ -1,3 +1,5 @@
+import logging
+import re
 import typing as tp
 from contextlib import contextmanager
 from io import StringIO
@@ -17,6 +19,7 @@ except ImportError:
     Text = None
     Console = None
 
+RICH_WARNING_COUNT = 0
 
 A = tp.TypeVar("A")
 B = tp.TypeVar("B")
@@ -26,7 +29,9 @@ Filter = tp.Union[
     tp.Callable[["FieldInfo"], bool],
 ]
 
-PAD = r"__PAD__"
+PAD_START = r"__PAD_START__"
+PAD_END = r"__PAD_END__"
+FIND_PAD = re.compile(f"{PAD_START}(.*){PAD_END}")
 LEAF_TYPES = (types.Nothing, type(None))
 
 
@@ -331,7 +336,7 @@ def _to_dict(
 ) -> tp.Any:
 
     if isinstance(obj, Tree):
-        fields = obj.__dict__.copy()
+        fields = vars(obj).copy()
 
         if not private_fields:
             fields = {k: v for k, v in fields.items() if not k.startswith("_")}
@@ -393,22 +398,21 @@ def to_string(
         type_info=True,
         field_info=True,
     )
-
-    rep = _to_string(dict_, level=0, inline=False, color=color)
+    global RICH_WARNING_COUNT
+    rep = _to_string(dict_, level=0, inline=False, color=color, space="    ")
     rep = _add_padding(rep)
 
     if color:
         if Console is None or Text is None:
-            raise EnvironmentError(
-                f"'rich' library not available. You can only use set `color` to `True` when 'rich' is installed."
-            )
-
-        rep = _get_rich_repr(Text.from_markup(rep))
+            if RICH_WARNING_COUNT < 1:
+                RICH_WARNING_COUNT += 1
+                logging.warning(
+                    f"'rich' library not available, install `rich` to get colors."
+                )
+        else:
+            rep = _get_rich_repr(Text.from_markup(rep))
 
     return rep
-
-
-SPACE = "    "
 
 
 def _to_string(
@@ -417,58 +421,72 @@ def _to_string(
     level: int,
     inline: bool,
     color: bool,
+    space: str,
 ) -> str:
 
-    indent_level = SPACE * level
+    indent_level = space * level
 
     DIM = "[dim]" if color else ""
-    GREEN = "[green]" if color else ""
-    END_GREEN = "[/green]" if color else ""
-    DIM_END = "[/dim]" if color else ""
+    END = "[/dim]" if color else ""
 
     if isinstance(obj, tp.Mapping):
         obj_type = obj["__type__"]
         body = [
             indent_level
-            + SPACE
-            + f"{field}: {_to_string(value, level=level + 1, inline=True, color=color)}"
+            + space
+            + f"{field}: {_to_string(value, level=level + 1, inline=True, color=color, space=space)},"
             for field, value in obj.items()
             if field != "__type__"
         ]
         body_str = "\n".join(body)
         type_str = f"{obj_type.__name__}" if inline else obj_type.__name__
-        return f"{type_str} {{\n{body_str}\n{indent_level}}}"
+
+        if len(obj) > 1:  # zero fields excluding __type__
+            return f"{type_str} {{\n{body_str}\n{indent_level}}}"
+        else:
+            return f"{type_str} {{}}"
+
         # return f"\n{body_str}"
     elif isinstance(obj, tp.Sequence) and not isinstance(obj, str):
         obj_type = obj[-1]
         body = [
             indent_level
-            + SPACE
-            + f"{_to_string(value, level=level + 1, inline=False, color=color)}"
+            + space
+            + f"{_to_string(value, level=level + 1, inline=False, color=color, space=space)},"
             for i, value in enumerate(obj[:-1])
         ]
         body_str = "\n".join(body)
         type_str = f"{obj_type.__name__}" if inline else obj_type.__name__
-        return f"{type_str} [\n{body_str}\n{indent_level}]"
+
+        if len(obj) > 1:  # zero fields excluding __type__
+            return f"{type_str} [\n{body_str}\n{indent_level}]"
+        else:
+            return f"{type_str} []"
 
     elif isinstance(obj, FieldInfo):
         value = obj.value
-        kind_name = obj.kind.__name__ if obj.kind != type(None) else "array"
+        kind_name = obj.kind.__name__ if obj.kind != type(None) else ""
 
         if isinstance(value, (np.ndarray, jnp.ndarray)):
 
             value_type = type(value)
-            shape_str = ", ".join(str(x) for x in value.shape)
-            value_rep = f"{value_type.__module__}.{value_type.__name__}(({shape_str}), {value.dtype})"
+            type_module = value_type.__module__.split(".")[0]
+            value_rep = (
+                f"{type_module}.{value_type.__name__}({value.shape}, {value.dtype})"
+            )
         elif isinstance(value, str):
             value_rep = f'"{value}"'
         else:
             value_rep = str(value)
 
-        return f"{value_rep}    {PAD}{DIM}{kind_name}{DIM_END}"
+        return (
+            f"{value_rep}{PAD_START}{DIM}{kind_name}{END}{PAD_END}"
+            if kind_name
+            else value_rep
+        )
 
     else:
-        raise TypeError(f"Unsupported type: {type(obj)}")
+        return str(obj)
 
 
 # alias for internal use
@@ -524,12 +542,20 @@ def _add_padding(text):
 
     space = " "
     lines = text.split("\n")
-    lenghts = [len(line.split(PAD)[0]) for line in lines]
+    padded_info = []
+    for i in range(len(lines)):
+        match = FIND_PAD.search(lines[i])
+        if match:
+            lines[i] = FIND_PAD.sub("", lines[i])
+            padded_info.append(match[1])
+        else:
+            padded_info.append("")
+    lenghts = [len(line) for line in lines]
     max_length = max(lenghts)
 
     text = "\n".join(
-        line.replace(PAD, space * (max_length - length)) if PAD in line else line
-        for line, length in zip(lines, lenghts)
+        line + space * (max_length - length) + f"    {info}" if info else line
+        for line, length, info in zip(lines, lenghts, padded_info)
     )
 
     return text

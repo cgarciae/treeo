@@ -63,7 +63,7 @@ class FieldInfo:
         self.module = module
 
     def __repr__(self) -> str:
-        return f"FieldInfo(name={self.name!r}, value={self.value!r}, kind={self.kind!r}, module={self.module!r})"
+        return f"FieldInfo(name={self.name!r}, value={self.value!r}, kind={self.kind!r}, module={type(self.module).__name__})"
 
 
 class TreeMeta(ABCMeta):
@@ -195,7 +195,7 @@ class Tree(metaclass=TreeMeta):
 
     def tree_flatten(self):
 
-        fields = vars(self)
+        fields = vars(self).copy()
 
         node_fields = {}
         static_fields = {}

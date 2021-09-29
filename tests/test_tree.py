@@ -811,11 +811,11 @@ class TestTreeo:
             dict_of_a: tp.Dict[str, A] = to.field(node=False)
 
         a1 = A(np.zeros((2, 4)), "abc")
-        a2 = A(np.zeros((2, 4)), "def")
+        a2 = A(jnp.zeros((2, 4)), "def")
         a3 = A(np.zeros((2, 4)), "ghi")
-        a4 = A(np.zeros((2, 4)), "jkl")
+        a4 = A(jnp.zeros((2, 4)), "jkl")
         a5 = A(np.zeros((2, 4)), "mno")
-        a6 = A(np.zeros((2, 4)), "pqr")
+        a6 = A(jnp.zeros((2, 4)), "pqr")
 
         b = B([a1, a2, a3], {"a": a4, "b": a5, "c": a6})
 
