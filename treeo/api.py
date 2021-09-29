@@ -204,18 +204,6 @@ def map(
         return new_obj
 
 
-def copy(obj: A) -> A:
-    """
-    Returns a deep copy of the tree, almost equivalent to:
-    ```python
-    jax.tree_map(lambda x: x, self)
-    ```
-    but will try to copy static nodes as well.
-    """
-    with tree_m._CONTEXT.update(flatten_mode=FlattenMode.all_fields):
-        return jax.tree_map(lambda x: x, obj)
-
-
 def apply(f: tp.Callable[..., None], obj: A, *rest: A, inplace: bool = False) -> A:
     """
     Applies a function to all `to.Tree`s in a Pytree. Works very similar to `jax.tree_map`,
@@ -233,10 +221,10 @@ def apply(f: tp.Callable[..., None], obj: A, *rest: A, inplace: bool = False) ->
     Returns:
         A new pytree with the updated Trees or the same input `obj` if `inplace` is `True`.
     """
-    rest = copy(rest)
+    rest = tree_m.copy(rest)
 
     if not inplace:
-        obj = copy(obj)
+        obj = tree_m.copy(obj)
 
     objs = (obj,) + rest
 

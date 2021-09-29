@@ -14,6 +14,7 @@ import jax.tree_util
 from treeo import types, utils
 
 T = tp.TypeVar("T", bound="Tree")
+A = tp.TypeVar("A")
 
 
 class FlattenMode(enum.Enum):
@@ -277,5 +278,15 @@ class Tree(metaclass=TreeMeta):
 TREE_PRIVATE_FIELDS = {
     x for x in list(vars(Tree)) + list(Tree.__annotations__) if x.startswith("_")
 }
-# import copy from api, this is done at the end to avoid circular imports
-from .api import copy
+
+
+def copy(obj: A) -> A:
+    """
+    Returns a deep copy of the tree, almost equivalent to:
+    ```python
+    jax.tree_map(lambda x: x, self)
+    ```
+    but will try to copy static nodes as well.
+    """
+    with _CONTEXT.update(flatten_mode=FlattenMode.all_fields):
+        return jax.tree_map(lambda x: x, obj)

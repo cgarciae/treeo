@@ -18,7 +18,7 @@ class Parent(to.Tree):
 
 tree = Parent(...)
 ```
-And then want to update all `.trainin` fields to `False` you can do this:
+And then want to update all `.training` fields to `False` you can do this:
 
 ```python
 def set_training_false(tree):
