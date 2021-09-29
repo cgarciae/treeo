@@ -1,6 +1,6 @@
 # Merge
 
-Creates a new Tree with the same structure but its values updated based on the values from the incoming Trees. 
+Creates a new Tree with the same structure but its values merged based on the values from the incoming Trees. 
 
 ```python
 @dataclass
@@ -17,8 +17,8 @@ merge(t1, t2) # MyTree(x=1, y=2, z=4)
 Updates are performed using the following rules:
 
 * For a list of equivalent leaves `l1, l2, ..., ln`, it returns the first non-`Nothing` leaf from right to left.
-* If no `flatten_mode()` context manager is active and `flatten_mode` is not given, all fields will be updated.
-* If `flatten_mode="normal"` is set then static fields won't be updated and the output will have the exact same static components as the first input (`obj`).
+* If no `flatten_mode()` context manager is active and `flatten_mode` is not given, all fields will be merged.
+* If `flatten_mode="normal"` is set then static fields won't be merged and the output will have the exact same static components as the first input (`obj`).
 
 When using `merge` with multiple Trees the following equivalence holds:
 
