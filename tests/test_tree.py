@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+from treeo.api import T, add_field_info
 import typing as tp
 from inspect import Parameter
 
@@ -687,3 +689,136 @@ class TestTreeo:
         a = a.f()
         assert a.x == 3
         assert n == 1
+
+    def test_to_dict(self):
+        @dataclass
+        class A(to.Tree):
+            x: int = to.field(node=True)
+            y: str = to.field(node=False)
+
+        @dataclass
+        class B(to.Tree):
+            list_of_a: tp.List[A] = to.field(node=True)
+            dict_of_a: tp.Dict[str, A] = to.field(node=False)
+
+        a1 = A(1, "abc")
+        a2 = A(3, "def")
+        a3 = A(5, "ghi")
+        a4 = A(7, "jkl")
+        a5 = A(9, "mno")
+        a6 = A(11, "pqr")
+
+        b = B([a1, a2, a3], {"a": a4, "b": a5, "c": a6})
+
+        d = to.to_dict(b)
+
+        assert d == {
+            "list_of_a": [
+                {"x": 1, "y": "abc"},
+                {"x": 3, "y": "def"},
+                {"x": 5, "y": "ghi"},
+            ],
+            "dict_of_a": {
+                "a": {"x": 7, "y": "jkl"},
+                "b": {"x": 9, "y": "mno"},
+                "c": {"x": 11, "y": "pqr"},
+            },
+        }
+
+    def test_to_dict_type_info(self):
+        @dataclass
+        class A(to.Tree):
+            x: int = to.field(node=True)
+            y: str = to.field(node=False)
+
+        @dataclass
+        class B(to.Tree):
+            list_of_a: tp.List[A] = to.field(node=True)
+            dict_of_a: tp.Dict[str, A] = to.field(node=False)
+
+        a1 = A(1, "abc")
+        a2 = A(3, "def")
+        a3 = A(5, "ghi")
+        a4 = A(7, "jkl")
+        a5 = A(9, "mno")
+        a6 = A(11, "pqr")
+
+        b = B([a1, a2, a3], {"a": a4, "b": a5, "c": a6})
+
+        d = to.to_dict(b, type_info=True)
+
+        assert d == {
+            "list_of_a": [
+                {"x": 1, "y": "abc", "__type__": A},
+                {"x": 3, "y": "def", "__type__": A},
+                {"x": 5, "y": "ghi", "__type__": A},
+                list,
+            ],
+            "dict_of_a": {
+                "a": {"x": 7, "y": "jkl", "__type__": A},
+                "b": {"x": 9, "y": "mno", "__type__": A},
+                "c": {"x": 11, "y": "pqr", "__type__": A},
+                "__type__": dict,
+            },
+            "__type__": B,
+        }
+
+    def test_to_dict_field_info(self):
+        @dataclass
+        class A(to.Tree):
+            x: int = to.field(node=True)
+            y: str = to.field(node=False)
+
+        @dataclass
+        class B(to.Tree):
+            list_of_a: tp.List[A] = to.field(node=True)
+            dict_of_a: tp.Dict[str, A] = to.field(node=False)
+
+        a1 = A(1, "abc")
+        a2 = A(3, "def")
+        a3 = A(5, "ghi")
+        a4 = A(7, "jkl")
+        a5 = A(9, "mno")
+        a6 = A(11, "pqr")
+
+        b = B([a1, a2, a3], {"a": a4, "b": a5, "c": a6})
+
+        d = to.to_dict(b, field_info=True)
+
+        assert isinstance(d["list_of_a"][0]["x"], to.FieldInfo)
+        assert isinstance(d["list_of_a"][0]["y"], to.FieldInfo)
+        assert isinstance(d["list_of_a"][1]["x"], to.FieldInfo)
+        assert isinstance(d["list_of_a"][1]["y"], to.FieldInfo)
+        assert isinstance(d["list_of_a"][2]["x"], to.FieldInfo)
+        assert isinstance(d["list_of_a"][2]["y"], to.FieldInfo)
+
+        assert isinstance(d["dict_of_a"]["a"]["x"], to.FieldInfo)
+        assert isinstance(d["dict_of_a"]["a"]["y"], to.FieldInfo)
+        assert isinstance(d["dict_of_a"]["b"]["x"], to.FieldInfo)
+        assert isinstance(d["dict_of_a"]["b"]["y"], to.FieldInfo)
+        assert isinstance(d["dict_of_a"]["c"]["x"], to.FieldInfo)
+        assert isinstance(d["dict_of_a"]["c"]["y"], to.FieldInfo)
+
+    def test_to_string(self):
+        @dataclass
+        class A(to.Tree):
+            x: np.ndarray = to.field(node=True, kind=Parameter)
+            y: str = to.field(node=False, kind=State)
+
+        @dataclass
+        class B(to.Tree):
+            list_of_a: tp.List[A] = to.field(node=True)
+            dict_of_a: tp.Dict[str, A] = to.field(node=False)
+
+        a1 = A(np.zeros((2, 4)), "abc")
+        a2 = A(np.zeros((2, 4)), "def")
+        a3 = A(np.zeros((2, 4)), "ghi")
+        a4 = A(np.zeros((2, 4)), "jkl")
+        a5 = A(np.zeros((2, 4)), "mno")
+        a6 = A(np.zeros((2, 4)), "pqr")
+
+        b = B([a1, a2, a3], {"a": a4, "b": a5, "c": a6})
+
+        rep = to.to_string(b, color=True)
+
+        print(rep)

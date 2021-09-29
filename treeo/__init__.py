@@ -6,6 +6,7 @@ __version__ = "0.0.3"
 from treeo.tree import *
 from treeo.types import *
 from treeo.utils import *
+from treeo.api import *
 
 from . import tree, types, utils
 

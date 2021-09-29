@@ -1,8 +1,6 @@
 import dataclasses
 import enum
-import functools
 import inspect
-import io
 import threading
 import typing as tp
 from abc import ABCMeta
@@ -11,22 +9,11 @@ from dataclasses import dataclass
 from types import MappingProxyType
 
 import jax
-import jax.numpy as jnp
 import jax.tree_util
-import numpy as np
 
 from treeo import types, utils
 
-A = tp.TypeVar("A")
-B = tp.TypeVar("B")
 T = tp.TypeVar("T", bound="Tree")
-Filter = tp.Union[
-    tp.Type[tp.Any],
-    tp.Callable[["FieldInfo"], bool],
-]
-
-PAD = r"{pad}"
-LEAF_TYPES = (types.Nothing, type(None))
 
 
 class FlattenMode(enum.Enum):
@@ -75,6 +62,9 @@ class FieldInfo:
         self.kind = kind
         self.module = module
 
+    def __repr__(self) -> str:
+        return f"FieldInfo(name={self.name!r}, value={self.value!r}, kind={self.kind!r}, module={self.module!r})"
+
 
 class TreeMeta(ABCMeta):
     def __call__(cls, *args, **kwargs) -> "Tree":
@@ -121,20 +111,24 @@ class Tree(metaclass=TreeMeta):
         module = copy(self)
 
         field_metadata = module._field_metadata[field]
+        updates = {}
 
         if node is not None:
-            field_metadata.node = node
+            updates.update(node=node)
 
         if kind is not None:
-            field_metadata.kind = kind
+            updates.update(kind=kind)
 
         if opaque is not None:
-            field_metadata.opaque = opaque
+            updates.update(opaque=opaque)
 
         if opaque_is_equal is not types.MISSING:
-            field_metadata.opaque_is_equal = opaque_is_equal
+            updates.update(opaque_is_equal=opaque_is_equal)
 
-        self._field_metadata[field] = field_metadata
+        if updates:
+            field_metadata = field_metadata.update(**updates)
+
+        module._field_metadata[field] = field_metadata
 
         return module
 
@@ -230,13 +224,16 @@ class Tree(metaclass=TreeMeta):
         # maybe convert to FieldInfo
         if _CONTEXT.add_field_info:
             for field in node_fields.keys():
-                field_annotation = self._field_metadata[field]
+                if field in TREE_PRIVATE_FIELDS:
+                    continue
+
+                kind = self._field_metadata[field].kind
                 # leaves, treedef
                 node_fields[field] = jax.tree_map(
                     lambda x: FieldInfo(
                         name=field,
                         value=x,
-                        kind=field_annotation.kind,
+                        kind=kind,
                         module=self,
                     )
                     if not isinstance(x, Tree)
@@ -277,310 +274,8 @@ class Tree(metaclass=TreeMeta):
         return module
 
 
-# --------------------------------------------------
-# functions
-# --------------------------------------------------
-
-
-def filter(
-    obj: A,
-    *filters: Filter,
-    inplace: bool = False,
-    flatten_mode: tp.Union[FlattenMode, str, None] = None,
-) -> A:
-    """
-    The `filter` function allows you to select a subtree by filtering based on a predicate or `kind` type,
-    leaves that pass all filters are kept, the rest are set to `Nothing`. For more information see
-    [filter's user guide](https://cgarciae.github.io/treeo/user-guide/api/filter).
-
-
-
-    Arguments:
-        obj: A pytree (possibly containing `to.Tree`s) to be filtered.
-        *filters: Types to filter by, membership is determined by `issubclass`, or
-            callables that take in a `FieldInfo` and return a `bool`.
-        inplace: If `True`, the input `obj` is mutated and returned.
-        flatten_mode: Sets a new `FlattenMode` context for the operation.
-    Returns:
-        A new pytree with the filtered fields. If `inplace` is `True`, `obj` is returned.
-
-    """
-    if inplace and not hasattr(obj, "__dict__"):
-        raise ValueError(
-            f"Cannot filter inplace on objects with no __dict__ property, got {obj}"
-        )
-
-    input_obj = obj
-
-    filters = tuple(
-        _get_kind_filter(f) if isinstance(f, tp.Type) else f for f in filters
-    )
-
-    def apply_filters(info: tp.Any) -> tp.Any:
-        if not isinstance(info, FieldInfo):
-            info = FieldInfo(
-                name=None,
-                value=info,
-                kind=type(None),
-                module=None,
-            )
-        assert isinstance(info, FieldInfo)
-
-        return info.value if all(f(info) for f in filters) else types.NOTHING
-
-    with _Context(add_field_info=True), _flatten_context(flatten_mode):
-        obj = jax.tree_map(apply_filters, obj)
-
-    if inplace:
-        input_obj.__dict__.update(obj.__dict__)
-        return input_obj
-    else:
-        return obj
-
-
-def merge(
-    obj: A,
-    other: A,
-    *rest: A,
-    inplace: bool = False,
-    flatten_mode: tp.Union[FlattenMode, str, None] = None,
-    ignore_static: bool = False,
-) -> A:
-    """
-    Creates a new Tree with the same structure but its values updated based on the values from the incoming Trees. For more information see
-    [update's user guide](https://cgarciae.github.io/treeo/user-guide/api/update).
-
-    Arguments:
-        obj: Main pytree to update.
-        other: The pytree first to get the values to update from.
-        *rest: Additional pytree to perform the update in order from left to right.
-        inplace: If `True`, the input `obj` is mutated and returned.
-        flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used. If the current flatten context is `None` and `flatten_mode` is not passed then `FlattenMode.all_fields` is used.
-        ignore_static: If `True`, bypasses static fields during the process and the statics fields for output are taken from the first input (`obj`).
-
-    Returns:
-        A new pytree with the updated values. If `inplace` is `True`, `obj` is returned.
-    """
-
-    if inplace and not hasattr(obj, "__dict__"):
-        raise TypeError(
-            f"Cannot update inplace on objects with no __dict__ property, got {obj}"
-        )
-
-    if flatten_mode is None and _CONTEXT.flatten_mode is None:
-        flatten_mode = FlattenMode.all_fields
-
-    input_obj = obj
-
-    def merge_fn(*xs):
-        for x in reversed(xs):
-            if not isinstance(x, types.Nothing):
-                return x
-        return types.NOTHING
-
-    tree_map_fn = _looser_tree_map if ignore_static else jax.tree_map
-
-    with _flatten_context(flatten_mode):
-        obj = tree_map_fn(
-            merge_fn,
-            obj,
-            other,
-            *rest,
-            is_leaf=lambda x: isinstance(x, LEAF_TYPES),
-        )
-
-    if inplace:
-        input_obj.__dict__.update(obj.__dict__)
-        return input_obj
-    else:
-        return obj
-
-
-def map(
-    f: tp.Callable,
-    obj: A,
-    *filters: Filter,
-    inplace: bool = False,
-    flatten_mode: tp.Union[FlattenMode, str, None] = None,
-) -> A:
-    """
-    Applies a function to all leaves in a pytree using `jax.tree_map`, if `filters` are given then
-    the function will be applied only to the subset of leaves that match the filters. For more information see
-    [map's user guide](https://cgarciae.github.io/treeo/user-guide/api/map).
-
-
-    Arguments:
-        f: The function to apply to the leaves.
-        obj: a pytree possibly containing `to.Tree`s.
-        *filters: The filters used to select the leaves to which the function will be applied.
-        inplace: If `True`, the input `obj` is mutated and returned.
-        flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used.
-
-    Returns:
-        A new pytree with the changes applied. If `inplace` is `True`, the input `obj` is returned.
-    """
-    if inplace and not hasattr(obj, "__dict__"):
-        raise ValueError(
-            f"Cannot map inplace on objects with no __dict__ property, got {obj}"
-        )
-
-    input_obj = obj
-
-    has_filters = len(filters) > 0
-
-    with _flatten_context(flatten_mode):
-        if has_filters:
-            new_obj = filter(obj, *filters)
-        else:
-            new_obj = obj
-
-        new_obj: A = jax.tree_map(f, new_obj)
-
-        if has_filters:
-            new_obj = merge(obj, new_obj)
-
-    if inplace:
-        input_obj.__dict__.update(new_obj.__dict__)
-        return input_obj
-    else:
-        return new_obj
-
-
-def copy(obj: A) -> A:
-    """
-    Returns a deep copy of the tree, almost equivalent to:
-    ```python
-    jax.tree_map(lambda x: x, self)
-    ```
-    but will try to copy static nodes as well.
-    """
-    with _CONTEXT.update(flatten_mode=FlattenMode.all_fields):
-        return jax.tree_map(lambda x: x, obj)
-
-
-def apply(f: tp.Callable[..., None], obj: A, *rest: A, inplace: bool = False) -> A:
-    """
-    Applies a function to all `to.Tree`s in a Pytree. Works very similar to `jax.tree_map`,
-    but its values are `to.Tree`s instead of leaves, also `f` should apply the changes inplace to Tree object.
-
-    If `inplace` is `False`, a copy of the first object is returned with the changes applied.
-    The `rest` of the objects are always copied.
-
-    Arguments:
-        f: The function to apply.
-        obj: a pytree possibly containing Trees.
-        *rest: additional pytrees.
-        inplace: If `True`, the input `obj` is mutated.
-
-    Returns:
-        A new pytree with the updated Trees or the same input `obj` if `inplace` is `True`.
-    """
-    rest = copy(rest)
-
-    if not inplace:
-        obj = copy(obj)
-
-    objs = (obj,) + rest
-
-    def nested_fn(obj, *rest):
-        if isinstance(obj, Tree):
-            apply(f, obj, *rest, inplace=True)
-
-    jax.tree_map(
-        nested_fn,
-        *objs,
-        is_leaf=lambda x: isinstance(x, Tree) and not x in objs,
-    )
-
-    if isinstance(obj, Tree):
-        f(obj, *rest)
-
-    return obj
-
-
-@contextmanager
-def add_field_info():
-    """
-    A context manager that makes `Tree`s produce leaves as `FieldInfo` when flattening.
-    """
-    with _CONTEXT.update(add_field_info=True):
-        yield
-
-
-@contextmanager
-def flatten_mode(mode: tp.Optional[tp.Union[FlattenMode, str]]):
-    """
-    A context manager that defines how `Tree`s are flattened. Options are:
-
-    * `'normal'`: Fields are selected as nodes as declared in the class definition (default behavior).
-    * `'all_fields'`: All fields are treated as nodes during flattening.
-    * `'no_fields'`: All fields are treated as static, `Tree`s produce no leaves.
-    * `None`: Context is not changed, current flatten mode is preserved.
-
-    Example:
-
-    ```python
-    @dataclass
-    class MyTree(Tree):
-        x: int # static
-        y: int = to.node()
-
-    tree = MyTree(x=1, y=3)
-
-    jax.tree_map(lambda x: x * 2, tree) # MyTree(x=1, y=6)
-
-    with flatten_mode('all_fields'):
-        jax.tree_map(lambda x: x + 1, tree) # MyTree(x=2, y=6)
-    ```
-
-    Arguments:
-        mode: The new flatten mode.
-    """
-    if mode is not None:
-        if isinstance(mode, str):
-            mode = FlattenMode(mode)
-
-        with _CONTEXT.update(flatten_mode=mode):
-            yield
-    else:
-        yield
-
-
-# alias for internal use
-_flatten_context = flatten_mode
-
-# --------------------------------------------------
-# utils
-# --------------------------------------------------
-
-
-def _looser_tree_map(
-    f: tp.Callable[..., tp.Any],
-    tree: tp.Any,
-    *rest: tp.Any,
-    is_leaf: tp.Optional[tp.Callable[[tp.Any], bool]] = None,
-) -> tp.Any:
-    jax.tree_map
-    leaves, treedef = jax.tree_flatten(
-        tree,
-        is_leaf=is_leaf,
-    )
-    all_leaves = [leaves] + [jax.tree_flatten(r, is_leaf=is_leaf)[0] for r in rest]
-
-    n_leaves = len(leaves)
-    assert all(len(l) == n_leaves for l in all_leaves)
-
-    return treedef.unflatten(f(*xs) for xs in zip(*all_leaves))
-
-
-def _get_kind_filter(
-    t: type,
-) -> tp.Callable[[FieldInfo], bool]:
-    def _filter(info: FieldInfo) -> bool:
-        return (
-            info.kind is not None
-            and isinstance(t, tp.Type)
-            and issubclass(info.kind, t)
-        )
-
-    return _filter
+TREE_PRIVATE_FIELDS = {
+    x for x in list(vars(Tree)) + list(Tree.__annotations__) if x.startswith("_")
+}
+# import copy from api, this is done at the end to avoid circular imports
+from .api import copy

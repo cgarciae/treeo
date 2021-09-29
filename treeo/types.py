@@ -111,12 +111,25 @@ class _TrivialPytree:
         jax.tree_util.register_pytree_node_class(cls)
 
 
-@dataclasses.dataclass
-class FieldMetadata(_TrivialPytree):
+class FieldMetadata:
     node: bool
     kind: type
     opaque: bool
     opaque_is_equal: tp.Optional[tp.Callable[[utils.Opaque, tp.Any], bool]]
+
+    def __init__(self, node, kind, opaque, opaque_is_equal):
+        self.__dict__["node"] = node
+        self.__dict__["kind"] = kind
+        self.__dict__["opaque"] = opaque
+        self.__dict__["opaque_is_equal"] = opaque_is_equal
+
+    def update(self, **kwargs) -> "FieldMetadata":
+        fields = vars(self).copy()
+        fields.update(kwargs)
+        return FieldMetadata(**fields)
+
+    def __setattr__(self, name: str, value: tp.Any) -> None:
+        raise AttributeError(f"FieldMetadata is immutable, cannot set {name}")
 
 
 @jax.tree_util.register_pytree_node_class
