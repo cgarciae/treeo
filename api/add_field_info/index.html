@@ -252,7 +252,7 @@
   
     <li class="md-nav__item">
       <a href="../../user-guide/intro/" class="md-nav__link">
-        Intro
+        User Guide
       </a>
     </li>
   
@@ -333,20 +333,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/api/intro/" class="md-nav__link">
-        Intro
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../user-guide/api/filter/" class="md-nav__link">
         Filter
       </a>
@@ -361,8 +347,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/api/update/" class="md-nav__link">
-        Update
+      <a href="../../user-guide/api/merge/" class="md-nav__link">
+        Merge
       </a>
     </li>
   
@@ -502,8 +488,50 @@
   
   
     <li class="md-nav__item">
+      <a href="../Apply/" class="md-nav__link">
+        Apply
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ArrayLike/" class="md-nav__link">
         ArrayLike
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Copy/" class="md-nav__link">
+        Copy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Extensions/" class="md-nav__link">
+        Extensions
       </a>
     </li>
   
@@ -532,6 +560,20 @@
     <li class="md-nav__item">
       <a href="../FieldMetadata/" class="md-nav__link">
         FieldMetadata
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Filter/" class="md-nav__link">
+        Filter
       </a>
     </li>
   
@@ -574,6 +616,34 @@
     <li class="md-nav__item">
       <a href="../MISSING/" class="md-nav__link">
         MISSING
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Map/" class="md-nav__link">
+        Map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Merge/" class="md-nav__link">
+        Merge
       </a>
     </li>
   
@@ -630,6 +700,48 @@
     <li class="md-nav__item">
       <a href="../Opaque/" class="md-nav__link">
         Opaque
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Repr/" class="md-nav__link">
+        Repr
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ToDict/" class="md-nav__link">
+        ToDict
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ToString/" class="md-nav__link">
+        ToString
       </a>
     </li>
   
@@ -703,8 +815,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#treeo.tree.add_field_info" class="md-nav__link">
-    treeo.tree.add_field_info
+  <a href="#treeo.api.add_field_info" class="md-nav__link">
+    treeo.api.add_field_info
   </a>
   
 </li>
@@ -780,6 +892,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../merge/" class="md-nav__link">
+        merge
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../node/" class="md-nav__link">
         node
       </a>
@@ -808,8 +934,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../update/" class="md-nav__link">
-        update
+      <a href="../to_dict/" class="md-nav__link">
+        to_dict
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../to_string/" class="md-nav__link">
+        to_string
       </a>
     </li>
   
@@ -848,8 +988,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#treeo.tree.add_field_info" class="md-nav__link">
-    treeo.tree.add_field_info
+  <a href="#treeo.api.add_field_info" class="md-nav__link">
+    treeo.api.add_field_info
   </a>
   
 </li>
@@ -876,19 +1016,19 @@
 
   <div class="doc doc-object doc-function">
 
-<a id="treeo.tree.add_field_info"></a>
+<a id="treeo.api.add_field_info"></a>
     <div class="doc doc-contents first">
 
       <p>A context manager that makes <code>Tree</code>s produce leaves as <code>FieldInfo</code> when flattening.</p>
 
         <details class="quote">
-          <summary>Source code in <code>treeo/tree.py</code></summary>
+          <summary>Source code in <code>treeo/api.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="nd">@contextmanager</span>
 <span class="k">def</span> <span class="nf">add_field_info</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A context manager that makes `Tree`s produce leaves as `FieldInfo` when flattening.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">with</span> <span class="n">_CONTEXT</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">add_field_info</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">_CONTEXT</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">add_field_info</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="k">yield</span>
 </code></pre></div>
         </details>

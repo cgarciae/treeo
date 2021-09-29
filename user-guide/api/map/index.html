@@ -64,6 +64,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#map" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -249,7 +254,7 @@
   
     <li class="md-nav__item">
       <a href="../../intro/" class="md-nav__link">
-        Intro
+        User Guide
       </a>
     </li>
   
@@ -332,20 +337,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../intro/" class="md-nav__link">
-        Intro
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../filter/" class="md-nav__link">
         Filter
       </a>
@@ -360,8 +351,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../update/" class="md-nav__link">
-        Update
+      <a href="../merge/" class="md-nav__link">
+        Merge
       </a>
     </li>
   
@@ -379,6 +370,8 @@
       
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
+      
+        
       
       
       <a href="./" class="md-nav__link md-nav__link--active">
@@ -507,8 +500,50 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../api/Apply/" class="md-nav__link">
+        Apply
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../api/ArrayLike/" class="md-nav__link">
         ArrayLike
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/Copy/" class="md-nav__link">
+        Copy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/Extensions/" class="md-nav__link">
+        Extensions
       </a>
     </li>
   
@@ -537,6 +572,20 @@
     <li class="md-nav__item">
       <a href="../../../api/FieldMetadata/" class="md-nav__link">
         FieldMetadata
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/Filter/" class="md-nav__link">
+        Filter
       </a>
     </li>
   
@@ -579,6 +628,34 @@
     <li class="md-nav__item">
       <a href="../../../api/MISSING/" class="md-nav__link">
         MISSING
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/Map/" class="md-nav__link">
+        Map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/Merge/" class="md-nav__link">
+        Merge
       </a>
     </li>
   
@@ -635,6 +712,48 @@
     <li class="md-nav__item">
       <a href="../../../api/Opaque/" class="md-nav__link">
         Opaque
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/Repr/" class="md-nav__link">
+        Repr
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ToDict/" class="md-nav__link">
+        ToDict
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/ToString/" class="md-nav__link">
+        ToString
       </a>
     </li>
   
@@ -745,6 +864,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../api/merge/" class="md-nav__link">
+        merge
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../api/node/" class="md-nav__link">
         node
       </a>
@@ -773,8 +906,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../api/update/" class="md-nav__link">
-        update
+      <a href="../../../api/to_dict/" class="md-nav__link">
+        to_dict
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../api/to_string/" class="md-nav__link">
+        to_string
       </a>
     </li>
   
@@ -794,6 +941,23 @@
               </div>
             
             
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
           
           <div class="md-content" data-md-component="content">
             <article class="md-content__inner md-typeset">
@@ -804,22 +968,21 @@
                   </a>
                 
                 
-                  <h1>Map</h1>
-                
-                <!-- #### Map -->
-<p>The <code>map</code> function provides a convenient way to map a function over the fields of a pytree:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">treeo</span> <span class="k">as</span> <span class="nn">to</span>
+                <h1 id="map">Map</h1>
+<p>Applies a function to all leaves in a pytree using <code>jax.tree_map</code>. If <code>filters</code> are given then the function will be applied only to the subset of leaves that match the filters.</p>
+<p>For example, if we want to zero all batch stats we can do:</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">MyTree</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
+    <span class="n">a</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="p">)</span>
+    <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">BatchStat</span><span class="p">)</span>
 
-<span class="n">tree</span> <span class="o">=</span> <span class="n">MyTree</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">b</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-<span class="n">params</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)</span> <span class="c1"># MyTree(a=array(1), b=Nothing)</span>
-<span class="hll"><span class="n">negative</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span> <span class="c1"># MyTree(a=array(-1), b=Nothing)</span>
-</span><span class="n">tree</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">negative</span><span class="p">)</span> <span class="c1"># MyTree(a=array(-1), b=array(2))</span>
+<span class="n">tree</span> <span class="o">=</span> <span class="n">MyTree</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">to</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">BatchStat</span><span class="p">)</span> <span class="c1"># MyTree(a=1, b=0)</span>
 </code></pre></div>
-<p>Up to this point <code>map</code> is behaving just like <code>jax.tree_map</code>, however, the pattern in the previous example is so common that <code>map</code>s main use is providing a shortcut for applying <code>filter -&gt; tree_map -&gt; update</code> in sequence:</p>
-<div class="highlight"><pre><span></span><code><span class="n">tree</span> <span class="o">=</span> <span class="n">MyTree</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">b</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-<span class="hll"><span class="n">tree</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="n">x</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)</span> <span class="c1"># MyTree(a=array(-1), b=array(2))</span>
-</span></code></pre></div>
-<p>As shown here, <code>map</code> accepts the same <code>*args</code> as <code>filter</code> and calls <code>update</code> at the end if filters are given.</p>
+<p><code>map</code> is equivalent to <code>filter -&gt; tree_map -&gt; merge</code> in sequence.</p>
+<p>If <code>inplace</code> is <code>True</code>, the input <code>obj</code> is mutated and returned. You can only update inplace if the input <code>obj</code> has a <code>__dict__</code> attribute, else a <code>TypeError</code> is raised.</p>
                 
               
               
@@ -839,7 +1002,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../update/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Update" rel="prev">
+        <a href="../merge/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Merge" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -848,7 +1011,7 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              Update
+              Merge
             </div>
           </div>
         </a>

@@ -9,14 +9,14 @@
       
       
       
-        <link rel="canonical" href="https://cgarciae.github.io/treeo/api/Nothing/">
+        <link rel="canonical" href="https://cgarciae.github.io/treeo/api/to_string/">
       
       <link rel="icon" href="../../images/favicon.png">
       <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.3.0">
     
     
       
-        <title>Nothing - Treeo</title>
+        <title>to_string - Treeo</title>
       
     
     
@@ -65,7 +65,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#treeonothing" class="md-skip">
+        <a href="#treeoto_string" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Nothing
+              to_string
             
           </span>
         </div>
@@ -682,51 +682,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Nothing
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../Nothing/" class="md-nav__link">
         Nothing
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#treeo.types.Nothing" class="md-nav__link">
-    treeo.types.Nothing
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -946,11 +906,51 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../to_string/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          to_string
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         to_string
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#treeo.api.to_string" class="md-nav__link">
+    treeo.api.to_string
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -988,8 +988,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#treeo.types.Nothing" class="md-nav__link">
-    treeo.types.Nothing
+  <a href="#treeo.api.to_string" class="md-nav__link">
+    treeo.api.to_string
   </a>
   
 </li>
@@ -1006,41 +1006,110 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/cgarciae/treeo/edit/master/docs/api/Nothing.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/cgarciae/treeo/edit/master/docs/api/to_string.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="treeonothing">treeo.Nothing</h1>
+                <h1 id="treeoto_string">treeo.to_string</h1>
 
 
-  <div class="doc doc-object doc-class">
+  <div class="doc doc-object doc-function">
 
-<a id="treeo.types.Nothing"></a>
+<a id="treeo.api.to_string"></a>
     <div class="doc doc-contents first">
 
+      <p>Converts a pytree to a string representation.</p>
 
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>obj</code></td>
+        <td><code>Any</code></td>
+        <td><p>The pytree to convert.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>private_fields</code></td>
+        <td><code>bool</code></td>
+        <td><p>If <code>True</code>, private fields are included.</p></td>
+        <td><code>False</code></td>
+      </tr>
+      <tr>
+        <td><code>static_fields</code></td>
+        <td><code>bool</code></td>
+        <td><p>If <code>True</code>, static fields are included.</p></td>
+        <td><code>True</code></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>str</code></td>
+      <td><p>A string representation of the pytree.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>treeo/api.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">to_string</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
+    <span class="n">private_fields</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">static_fields</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">color</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Converts a pytree to a string representation.</span>
 
+<span class="sd">    Arguments:</span>
+<span class="sd">        obj: The pytree to convert.</span>
+<span class="sd">        private_fields: If `True`, private fields are included.</span>
+<span class="sd">        static_fields: If `True`, static fields are included.</span>
 
+<span class="sd">    Returns:</span>
+<span class="sd">        A string representation of the pytree.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dict_</span> <span class="o">=</span> <span class="n">to_dict</span><span class="p">(</span>
+        <span class="n">obj</span><span class="p">,</span>
+        <span class="n">private_fields</span><span class="o">=</span><span class="n">private_fields</span><span class="p">,</span>
+        <span class="n">static_fields</span><span class="o">=</span><span class="n">static_fields</span><span class="p">,</span>
+        <span class="n">type_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">field_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">global</span> <span class="n">RICH_WARNING_COUNT</span>
+    <span class="n">rep</span> <span class="o">=</span> <span class="n">_to_string</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inline</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">space</span><span class="o">=</span><span class="s2">&quot;    &quot;</span><span class="p">)</span>
+    <span class="n">rep</span> <span class="o">=</span> <span class="n">_add_padding</span><span class="p">(</span><span class="n">rep</span><span class="p">)</span>
 
-  <div class="doc doc-children">
+    <span class="k">if</span> <span class="n">color</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">Console</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">Text</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">RICH_WARNING_COUNT</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">RICH_WARNING_COUNT</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;rich&#39; library not available, install `rich` to get colors.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">rep</span> <span class="o">=</span> <span class="n">_get_rich_repr</span><span class="p">(</span><span class="n">Text</span><span class="o">.</span><span class="n">from_markup</span><span class="p">(</span><span class="n">rep</span><span class="p">))</span>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  </div>
-
+    <span class="k">return</span> <span class="n">rep</span>
+</code></pre></div>
+        </details>
     </div>
 
   </div>
@@ -1063,7 +1132,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../NOTHING/" class="md-footer__link md-footer__link--prev" aria-label="Previous: NOTHING" rel="prev">
+        <a href="../to_dict/" class="md-footer__link md-footer__link--prev" aria-label="Previous: to_dict" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1072,26 +1141,11 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              NOTHING
+              to_dict
             </div>
           </div>
         </a>
       
-      
-        
-        <a href="../Opaque/" class="md-footer__link md-footer__link--next" aria-label="Next: Opaque" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Opaque
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
-          </div>
-        </a>
       
     </nav>
   

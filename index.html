@@ -258,13 +258,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fields" class="md-nav__link">
-    Fields
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#kinds" class="md-nav__link">
     Kinds
   </a>
@@ -353,7 +346,7 @@
   
     <li class="md-nav__item">
       <a href="user-guide/intro/" class="md-nav__link">
-        Intro
+        User Guide
       </a>
     </li>
   
@@ -434,20 +427,6 @@
   
   
     <li class="md-nav__item">
-      <a href="user-guide/api/intro/" class="md-nav__link">
-        Intro
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="user-guide/api/filter/" class="md-nav__link">
         Filter
       </a>
@@ -462,8 +441,8 @@
   
   
     <li class="md-nav__item">
-      <a href="user-guide/api/update/" class="md-nav__link">
-        Update
+      <a href="user-guide/api/merge/" class="md-nav__link">
+        Merge
       </a>
     </li>
   
@@ -601,8 +580,50 @@
   
   
     <li class="md-nav__item">
+      <a href="api/Apply/" class="md-nav__link">
+        Apply
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="api/ArrayLike/" class="md-nav__link">
         ArrayLike
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/Copy/" class="md-nav__link">
+        Copy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/Extensions/" class="md-nav__link">
+        Extensions
       </a>
     </li>
   
@@ -631,6 +652,20 @@
     <li class="md-nav__item">
       <a href="api/FieldMetadata/" class="md-nav__link">
         FieldMetadata
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/Filter/" class="md-nav__link">
+        Filter
       </a>
     </li>
   
@@ -673,6 +708,34 @@
     <li class="md-nav__item">
       <a href="api/MISSING/" class="md-nav__link">
         MISSING
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/Map/" class="md-nav__link">
+        Map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/Merge/" class="md-nav__link">
+        Merge
       </a>
     </li>
   
@@ -729,6 +792,48 @@
     <li class="md-nav__item">
       <a href="api/Opaque/" class="md-nav__link">
         Opaque
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/Repr/" class="md-nav__link">
+        Repr
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/ToDict/" class="md-nav__link">
+        ToDict
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/ToString/" class="md-nav__link">
+        ToString
       </a>
     </li>
   
@@ -839,6 +944,20 @@
   
   
     <li class="md-nav__item">
+      <a href="api/merge/" class="md-nav__link">
+        merge
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="api/node/" class="md-nav__link">
         node
       </a>
@@ -867,8 +986,22 @@
   
   
     <li class="md-nav__item">
-      <a href="api/update/" class="md-nav__link">
-        update
+      <a href="api/to_dict/" class="md-nav__link">
+        to_dict
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="api/to_string/" class="md-nav__link">
+        to_string
       </a>
     </li>
   
@@ -920,13 +1053,6 @@
   
     <nav class="md-nav" aria-label="Basics">
       <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#fields" class="md-nav__link">
-    Fields
-  </a>
-  
-</li>
         
           <li class="md-nav__item">
   <a href="#kinds" class="md-nav__link">
@@ -999,29 +1125,22 @@
 <li><strong>Standards-based</strong>: <code>treeo.field</code> is built on top of python's <code>dataclasses.field</code>.</li>
 <li><strong>Flexible</strong>: Treeo is compatible with both dataclass and non-dataclass classes.</li>
 </ul>
-<p>Treeo was originally extracted from the core of <a href="https://github.com/cgarciae/treex">Treex</a> and shares a lot in common with <a href="https://flax.readthedocs.io/en/latest/flax.struct.html#module-flax.struct">flax.struct</a>. Treeo has nothing in particular to do with Deep Learning, but some of the examples are motivated by it.</p>
+<p>Treeo lets you easily create class-based Pytrees so your custom objects can easily interact seamlessly with JAX. Uses of Treeo can range from just creating simple simple JAX-aware utility classes to using it as the core abstraction for full-blown frameworks. Treeo was originally extracted from the core of <a href="https://github.com/cgarciae/treex">Treex</a> and shares a lot in common with <a href="https://flax.readthedocs.io/en/latest/flax.struct.html#module-flax.struct">flax.struct</a>.</p>
 <p><a href="https://cgarciae.github.io/treeo">Documentation</a> | <a href="https://cgarciae.github.io/treeo/user-guide/intro">User Guide</a></p>
 <h2 id="installation">Installation</h2>
 <p>Install using pip:
 <div class="highlight"><pre><span></span><code>pip install treeo
 </code></pre></div></p>
 <h2 id="basics">Basics</h2>
-<p>At its core Treeo focuses on 2 things:</p>
-<ul>
-<li>Tooling for defining pytree structures via field metadata.</li>
-<li>A set of functions for manipulating pytree structures that leverage the field metadata.</li>
-</ul>
-<p>Treeo also introduce the concept of a field <code>kind</code> which enables a powerful filtering mechanism.</p>
-<h4 id="fields">Fields</h4>
-<p>To define node fields for a custom Pytree, Treeo uses the <code>field</code> function which is a wrapper around <code>dataclasses.field</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">treeo</span> <span class="k">as</span> <span class="nn">to</span>
+<p>With Treeo you can easily define your own custom Pytree classes by inheriting from Treeo's <code>Tree</code> class and using the <code>field</code> function to declare which fields are nodes (childs) and which are static (metadata):</p>
+<p><div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">treeo</span> <span class="k">as</span> <span class="nn">to</span>
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">Person</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
     <span class="n">height</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">array</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="c1"># I am a node field!</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># I am a static field!</span>
 </code></pre></div>
-<p>Using this information Treeo specifies a Pytree you can use with various <code>jax</code> functions.</p>
+<code>field</code> is just a wrapper around <code>dataclasses.field</code> so you can define your Pytrees as dataclasses, but Treeo fully supports non-dataclass classes as well. Since all <code>Tree</code> instances are Pytree they work with the various functions from the<code>jax</code> library as expected:</p>
 <div class="highlight"><pre><span></span><code><span class="n">p</span> <span class="o">=</span> <span class="n">Person</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">jnp</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="mf">1.8</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;John&quot;</span><span class="p">)</span>
 
 <span class="c1"># Trees can be jitted!</span>
@@ -1031,26 +1150,32 @@
 <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="c1"># Person(height=array(3.6), name=&#39;John&#39;)</span>
 </code></pre></div>
 <h4 id="kinds">Kinds</h4>
-<p>Kinds are associated types that give semantic meaning to a field (what it represents). A kind is just a type you pass to <code>field</code> via its <code>kind</code> argument. Kinds are useful as metadata for filtering via <a href="#filter">treeo.filter</a>:</p>
+<p>Treeo also include a kind system that lets you give semantic meaning to fields (what a field represents within your application). A kind is just a type you pass to <code>field</code> via its <code>kind</code> argument: </p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Parameter</span><span class="p">:</span> <span class="k">pass</span>
 <span class="k">class</span> <span class="nc">BatchStat</span><span class="p">:</span> <span class="k">pass</span>
 
 <span class="k">class</span> <span class="nc">BatchNorm</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
     <span class="n">scale</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="p">)</span>
     <span class="n">mean</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">BatchStat</span><span class="p">)</span>
-
-<span class="k">def</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
-    <span class="c1"># merge params back into model</span>
-<span class="hll">    <span class="n">model</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-</span>    <span class="o">...</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">BatchNorm</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+</code></pre></div>
+<p>Kinds are very useful as a filtering mechanism via <a href="https://cgarciae.github.io/treeo/user-guide/api/filter">treeo.filter</a>:</p>
+<p><div class="highlight"><pre><span></span><code><span class="n">model</span> <span class="o">=</span> <span class="n">BatchNorm</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 
 <span class="c1"># select only Parameters, mean is filtered out</span>
 <span class="n">params</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)</span> <span class="c1"># BatchNorm(scale=array(...), mean=Nothing)</span>
-
-<span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss_fn</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
 </code></pre></div>
+<code>Nothing</code> behaves like <code>None</code> in Python, but it is a special value that is used to represent the absence of a value within Treeo.</p>
+<p>Treeo also offers the <a href="https://cgarciae.github.io/treeo/user-guide/api/merge">merge</a> function which lets you rejoin filtered Trees with a logic similar to Python <code>dict.update</code> but done recursively:
+<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">loss_fn</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="o">...</span><span class="p">):</span>
+    <span class="c1"># add traced params to model</span>
+<span class="hll">    <span class="n">model</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</span>    <span class="o">...</span>
+
+<span class="c1"># gradient only w.r.t. params</span>
+<span class="n">params</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)</span> <span class="c1"># BatchNorm(scale=array(...), mean=Nothing)</span>
+<span class="n">grads</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">grad</span><span class="p">(</span><span class="n">loss_fn</span><span class="p">)(</span><span class="n">params</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+</code></pre></div></p>
+<p>For a more in-depth tour check out the <a href="https://cgarciae.github.io/treeo/user-guide/intro">User Guide</a>.</p>
 <h2 id="examples">Examples</h2>
 <h3 id="a-simple-tree">A simple Tree</h3>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
@@ -1174,13 +1299,13 @@
       
       
         
-        <a href="user-guide/intro/" class="md-footer__link md-footer__link--next" aria-label="Next: Intro" rel="next">
+        <a href="user-guide/intro/" class="md-footer__link md-footer__link--next" aria-label="Next: User Guide" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Intro
+              User Guide
             </div>
           </div>
           <div class="md-footer__button md-icon">

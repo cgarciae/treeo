@@ -252,7 +252,7 @@
   
     <li class="md-nav__item">
       <a href="../../user-guide/intro/" class="md-nav__link">
-        Intro
+        User Guide
       </a>
     </li>
   
@@ -333,20 +333,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/api/intro/" class="md-nav__link">
-        Intro
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../user-guide/api/filter/" class="md-nav__link">
         Filter
       </a>
@@ -361,8 +347,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/api/update/" class="md-nav__link">
-        Update
+      <a href="../../user-guide/api/merge/" class="md-nav__link">
+        Merge
       </a>
     </li>
   
@@ -502,8 +488,50 @@
   
   
     <li class="md-nav__item">
+      <a href="../Apply/" class="md-nav__link">
+        Apply
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ArrayLike/" class="md-nav__link">
         ArrayLike
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Copy/" class="md-nav__link">
+        Copy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Extensions/" class="md-nav__link">
+        Extensions
       </a>
     </li>
   
@@ -532,6 +560,20 @@
     <li class="md-nav__item">
       <a href="../FieldMetadata/" class="md-nav__link">
         FieldMetadata
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Filter/" class="md-nav__link">
+        Filter
       </a>
     </li>
   
@@ -574,6 +616,34 @@
     <li class="md-nav__item">
       <a href="../MISSING/" class="md-nav__link">
         MISSING
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Map/" class="md-nav__link">
+        Map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Merge/" class="md-nav__link">
+        Merge
       </a>
     </li>
   
@@ -630,6 +700,48 @@
     <li class="md-nav__item">
       <a href="../Opaque/" class="md-nav__link">
         Opaque
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Repr/" class="md-nav__link">
+        Repr
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ToDict/" class="md-nav__link">
+        ToDict
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ToString/" class="md-nav__link">
+        ToString
       </a>
     </li>
   
@@ -749,6 +861,13 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#treeo.tree.Tree.check_metadata_updates" class="md-nav__link">
+    check_metadata_updates()
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -848,6 +967,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../merge/" class="md-nav__link">
+        merge
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../node/" class="md-nav__link">
         node
       </a>
@@ -876,8 +1009,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../update/" class="md-nav__link">
-        update
+      <a href="../to_dict/" class="md-nav__link">
+        to_dict
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../to_string/" class="md-nav__link">
+        to_string
       </a>
     </li>
   
@@ -986,6 +1133,13 @@
         <li class="md-nav__item">
   <a href="#treeo.tree.Tree.__init_subclass__" class="md-nav__link">
     __init_subclass__()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#treeo.tree.Tree.check_metadata_updates" class="md-nav__link">
+    check_metadata_updates()
   </a>
   
 </li>
@@ -1353,6 +1507,36 @@ overridden to extend subclasses.</p>
 
 
 
+  <div class="doc doc-object doc-method">
+
+
+
+<h2 id="treeo.tree.Tree.check_metadata_updates" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">check_metadata_updates</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>Checks for new fields, if found, adds them to the metadata.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>treeo/tree.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">check_metadata_updates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Checks for new fields, if found, adds them to the metadata.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">_CONTEXT</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">flatten_mode</span><span class="o">=</span><span class="n">FlattenMode</span><span class="o">.</span><span class="n">all_fields</span><span class="p">):</span>
+        <span class="n">jax</span><span class="o">.</span><span class="n">tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
 
 
 
@@ -1382,7 +1566,7 @@ overridden to extend subclasses.</p>
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../Opaque/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Opaque" rel="prev">
+        <a href="../ToString/" class="md-footer__link md-footer__link--prev" aria-label="Previous: ToString" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1391,7 +1575,7 @@ overridden to extend subclasses.</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Opaque
+              ToString
             </div>
           </div>
         </a>

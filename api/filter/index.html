@@ -252,7 +252,7 @@
   
     <li class="md-nav__item">
       <a href="../../user-guide/intro/" class="md-nav__link">
-        Intro
+        User Guide
       </a>
     </li>
   
@@ -333,20 +333,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/api/intro/" class="md-nav__link">
-        Intro
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../user-guide/api/filter/" class="md-nav__link">
         Filter
       </a>
@@ -361,8 +347,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/api/update/" class="md-nav__link">
-        Update
+      <a href="../../user-guide/api/merge/" class="md-nav__link">
+        Merge
       </a>
     </li>
   
@@ -502,8 +488,50 @@
   
   
     <li class="md-nav__item">
+      <a href="../Apply/" class="md-nav__link">
+        Apply
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ArrayLike/" class="md-nav__link">
         ArrayLike
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Copy/" class="md-nav__link">
+        Copy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Extensions/" class="md-nav__link">
+        Extensions
       </a>
     </li>
   
@@ -532,6 +560,20 @@
     <li class="md-nav__item">
       <a href="../FieldMetadata/" class="md-nav__link">
         FieldMetadata
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Filter/" class="md-nav__link">
+        Filter
       </a>
     </li>
   
@@ -574,6 +616,34 @@
     <li class="md-nav__item">
       <a href="../MISSING/" class="md-nav__link">
         MISSING
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Map/" class="md-nav__link">
+        Map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Merge/" class="md-nav__link">
+        Merge
       </a>
     </li>
   
@@ -630,6 +700,48 @@
     <li class="md-nav__item">
       <a href="../Opaque/" class="md-nav__link">
         Opaque
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Repr/" class="md-nav__link">
+        Repr
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ToDict/" class="md-nav__link">
+        ToDict
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ToString/" class="md-nav__link">
+        ToString
       </a>
     </li>
   
@@ -745,8 +857,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#treeo.tree.filter" class="md-nav__link">
-    treeo.tree.filter
+  <a href="#treeo.api.filter" class="md-nav__link">
+    treeo.api.filter
   </a>
   
 </li>
@@ -768,6 +880,20 @@
     <li class="md-nav__item">
       <a href="../map/" class="md-nav__link">
         map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../merge/" class="md-nav__link">
+        merge
       </a>
     </li>
   
@@ -808,8 +934,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../update/" class="md-nav__link">
-        update
+      <a href="../to_dict/" class="md-nav__link">
+        to_dict
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../to_string/" class="md-nav__link">
+        to_string
       </a>
     </li>
   
@@ -848,8 +988,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#treeo.tree.filter" class="md-nav__link">
-    treeo.tree.filter
+  <a href="#treeo.api.filter" class="md-nav__link">
+    treeo.api.filter
   </a>
   
 </li>
@@ -876,39 +1016,12 @@
 
   <div class="doc doc-object doc-function">
 
-<a id="treeo.tree.filter"></a>
+<a id="treeo.api.filter"></a>
     <div class="doc doc-contents first">
 
-      <p>Returns a new tree with any leaf that does not match all the given filter set to <code>Nothing</code>. Filters are callable of type:</p>
-<div class="highlight"><pre><span></span><code><span class="p">(</span><span class="n">FieldInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
-</code></pre></div>
-<p>You can also pass types to filter by, these are know as <code>kind</code> filters and, for a type <code>t</code>, are roughly equivalent to:</p>
-<div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">kind_filter</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">FieldInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
-</code></pre></div>
-
-<p><strong>Examples:</strong></p>
-    
-      <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Parameter</span><span class="p">:</span> <span class="k">pass</span>
-<span class="k">class</span> <span class="nc">BatchStat</span><span class="p">:</span> <span class="k">pass</span>
-
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">MyTree</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
-    <span class="n">a</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="p">)</span>
-    <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">BatchStat</span><span class="p">)</span>
-
-<span class="n">tree</span> <span class="o">=</span> <span class="n">MyTree</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-
-<span class="n">to</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">field</span><span class="p">:</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">))</span> <span class="c1"># MyTree(a=1, b=Nothing)</span>
-<span class="n">to</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">field</span><span class="p">:</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">kind</span><span class="p">,</span> <span class="n">BatchStat</span><span class="p">))</span> <span class="c1"># MyTree(a=Nothing, b=2)</span>
-</code></pre></div>
-<p>The previous can be more compactly expressed using <code>kind</code> filters as:</p>
-<div class="highlight"><pre><span></span><code><span class="n">tree</span> <span class="o">=</span> <span class="n">MyTree</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-
-<span class="n">to</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)</span> <span class="c1"># MyTree(a=1, b=Nothing)</span>
-<span class="n">to</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">BatchStat</span><span class="p">)</span> <span class="c1"># MyTree(a=Nothing, b=2)</span>
-</code></pre></div>
-<p>If <code>inplace</code> is <code>True</code>, the input <code>obj</code> is mutated and returned. You can only update inplace if the input <code>obj</code> has a <code>__dict__</code> attribute, else a TypeError is raised.</p>
+      <p>The <code>filter</code> function allows you to select a subtree by filtering based on a predicate or <code>kind</code> type,
+leaves that pass all filters are kept, the rest are set to <code>Nothing</code>. For more information see
+<a href="https://cgarciae.github.io/treeo/user-guide/api/filter">filter's user guide</a>.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -928,7 +1041,7 @@
         <td><em>required</em></td>
       </tr>
       <tr>
-        <td><code>filters</code></td>
+        <td><code>*filters</code></td>
         <td><code>Union[Type[Any], Callable[[FieldInfo], bool]]</code></td>
         <td><p>Types to filter by, membership is determined by <code>issubclass</code>, or
 callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.</p></td>
@@ -964,7 +1077,7 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>treeo/tree.py</code></summary>
+          <summary>Source code in <code>treeo/api.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">filter</span><span class="p">(</span>
     <span class="n">obj</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span>
     <span class="o">*</span><span class="n">filters</span><span class="p">:</span> <span class="n">Filter</span><span class="p">,</span>
@@ -972,49 +1085,15 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
     <span class="n">flatten_mode</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">FlattenMode</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns a new tree with any leaf that does not match all the given filter set to `Nothing`. Filters are callable of type:</span>
+<span class="sd">    The `filter` function allows you to select a subtree by filtering based on a predicate or `kind` type,</span>
+<span class="sd">    leaves that pass all filters are kept, the rest are set to `Nothing`. For more information see</span>
+<span class="sd">    [filter&#39;s user guide](https://cgarciae.github.io/treeo/user-guide/api/filter).</span>
 
-<span class="sd">    ```python</span>
-<span class="sd">    (FieldInfo) -&gt; bool</span>
-<span class="sd">    ```</span>
 
-<span class="sd">    You can also pass types to filter by, these are know as `kind` filters and, for a type `t`, are roughly equivalent to:</span>
-
-<span class="sd">    ```python</span>
-<span class="sd">    def kind_filter(field: FieldInfo) -&gt; bool:</span>
-<span class="sd">        return issubclass(field.kind, t)</span>
-<span class="sd">    ```</span>
-
-<span class="sd">    Example:</span>
-<span class="sd">    ```python</span>
-<span class="sd">    class Parameter: pass</span>
-<span class="sd">    class BatchStat: pass</span>
-
-<span class="sd">    @dataclass</span>
-<span class="sd">    class MyTree(to.Tree):</span>
-<span class="sd">        a: int = to.field(node=True, kind=Parameter)</span>
-<span class="sd">        b: int = to.field(node=True, kind=BatchStat)</span>
-
-<span class="sd">    tree = MyTree(1, 2)</span>
-
-<span class="sd">    to.filter(tree, lambda field: issubclass(field.kind, Parameter)) # MyTree(a=1, b=Nothing)</span>
-<span class="sd">    to.filter(tree, lambda field: issubclass(field.kind, BatchStat)) # MyTree(a=Nothing, b=2)</span>
-<span class="sd">    ```</span>
-
-<span class="sd">    The previous can be more compactly expressed using `kind` filters as:</span>
-
-<span class="sd">    ```python</span>
-<span class="sd">    tree = MyTree(1, 2)</span>
-
-<span class="sd">    to.filter(tree, Parameter) # MyTree(a=1, b=Nothing)</span>
-<span class="sd">    to.filter(tree, BatchStat) # MyTree(a=Nothing, b=2)</span>
-<span class="sd">    ```</span>
-
-<span class="sd">    If `inplace` is `True`, the input `obj` is mutated and returned. You can only update inplace if the input `obj` has a `__dict__` attribute, else a TypeError is raised.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        obj: A pytree (possibly containing `to.Tree`s) to be filtered.</span>
-<span class="sd">        filters: Types to filter by, membership is determined by `issubclass`, or</span>
+<span class="sd">        *filters: Types to filter by, membership is determined by `issubclass`, or</span>
 <span class="sd">            callables that take in a `FieldInfo` and return a `bool`.</span>
 <span class="sd">        inplace: If `True`, the input `obj` is mutated and returned.</span>
 <span class="sd">        flatten_mode: Sets a new `FlattenMode` context for the operation.</span>
@@ -1045,7 +1124,7 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
 
         <span class="k">return</span> <span class="n">info</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">info</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">)</span> <span class="k">else</span> <span class="n">types</span><span class="o">.</span><span class="n">NOTHING</span>
 
-    <span class="k">with</span> <span class="n">_Context</span><span class="p">(</span><span class="n">add_field_info</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">_flatten_context</span><span class="p">(</span><span class="n">flatten_mode</span><span class="p">):</span>
+    <span class="k">with</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">_CONTEXT</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">add_field_info</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">_flatten_context</span><span class="p">(</span><span class="n">flatten_mode</span><span class="p">):</span>
         <span class="n">obj</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">apply_filters</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>

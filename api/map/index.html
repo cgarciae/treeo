@@ -252,7 +252,7 @@
   
     <li class="md-nav__item">
       <a href="../../user-guide/intro/" class="md-nav__link">
-        Intro
+        User Guide
       </a>
     </li>
   
@@ -333,20 +333,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/api/intro/" class="md-nav__link">
-        Intro
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../user-guide/api/filter/" class="md-nav__link">
         Filter
       </a>
@@ -361,8 +347,8 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/api/update/" class="md-nav__link">
-        Update
+      <a href="../../user-guide/api/merge/" class="md-nav__link">
+        Merge
       </a>
     </li>
   
@@ -502,8 +488,50 @@
   
   
     <li class="md-nav__item">
+      <a href="../Apply/" class="md-nav__link">
+        Apply
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../ArrayLike/" class="md-nav__link">
         ArrayLike
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Copy/" class="md-nav__link">
+        Copy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Extensions/" class="md-nav__link">
+        Extensions
       </a>
     </li>
   
@@ -532,6 +560,20 @@
     <li class="md-nav__item">
       <a href="../FieldMetadata/" class="md-nav__link">
         FieldMetadata
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Filter/" class="md-nav__link">
+        Filter
       </a>
     </li>
   
@@ -574,6 +616,34 @@
     <li class="md-nav__item">
       <a href="../MISSING/" class="md-nav__link">
         MISSING
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Map/" class="md-nav__link">
+        Map
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Merge/" class="md-nav__link">
+        Merge
       </a>
     </li>
   
@@ -630,6 +700,48 @@
     <li class="md-nav__item">
       <a href="../Opaque/" class="md-nav__link">
         Opaque
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Repr/" class="md-nav__link">
+        Repr
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ToDict/" class="md-nav__link">
+        ToDict
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ToString/" class="md-nav__link">
+        ToString
       </a>
     </li>
   
@@ -759,8 +871,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#treeo.tree.map" class="md-nav__link">
-    treeo.tree.map
+  <a href="#treeo.api.map" class="md-nav__link">
+    treeo.api.map
   </a>
   
 </li>
@@ -769,6 +881,20 @@
   
 </nav>
       
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../merge/" class="md-nav__link">
+        merge
+      </a>
     </li>
   
 
@@ -808,8 +934,22 @@
   
   
     <li class="md-nav__item">
-      <a href="../update/" class="md-nav__link">
-        update
+      <a href="../to_dict/" class="md-nav__link">
+        to_dict
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../to_string/" class="md-nav__link">
+        to_string
       </a>
     </li>
   
@@ -848,8 +988,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#treeo.tree.map" class="md-nav__link">
-    treeo.tree.map
+  <a href="#treeo.api.map" class="md-nav__link">
+    treeo.api.map
   </a>
   
 </li>
@@ -876,28 +1016,12 @@
 
   <div class="doc doc-object doc-function">
 
-<a id="treeo.tree.map"></a>
+<a id="treeo.api.map"></a>
     <div class="doc doc-contents first">
 
-      <p>Applies a function to all leaves in a pytree using <code>jax.tree_map</code>. If <code>filters</code> are given then
-the function will be applied only to the subset of leaves that match the filters.</p>
-<p>For example, if we want to zero all batch stats we can do:</p>
-
-<p><strong>Examples:</strong></p>
-    
-      <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">Parameter</span><span class="p">:</span> <span class="k">pass</span>
-<span class="k">class</span> <span class="nc">BatchStat</span><span class="p">:</span> <span class="k">pass</span>
-
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">MyTree</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
-    <span class="n">a</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="p">)</span>
-    <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">BatchStat</span><span class="p">)</span>
-
-<span class="n">tree</span> <span class="o">=</span> <span class="n">MyTree</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-
-<span class="n">to</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="n">tree</span><span class="p">,</span> <span class="n">BatchStat</span><span class="p">)</span> <span class="c1"># MyTree(a=1, b=0)</span>
-</code></pre></div>
-<p>If <code>inplace</code> is <code>True</code>, the input <code>obj</code> is mutated and returned. You can only update inplace if the input <code>obj</code> has a <code>__dict__</code> attribute, else a TypeError is raised.</p>
+      <p>Applies a function to all leaves in a pytree using <code>jax.tree_map</code>, if <code>filters</code> are given then
+the function will be applied only to the subset of leaves that match the filters. For more information see
+<a href="https://cgarciae.github.io/treeo/user-guide/api/map">map's user guide</a>.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -958,7 +1082,7 @@ the function will be applied only to the subset of leaves that match the filters
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>treeo/tree.py</code></summary>
+          <summary>Source code in <code>treeo/api.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">map</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span>
     <span class="n">obj</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span>
@@ -967,27 +1091,10 @@ the function will be applied only to the subset of leaves that match the filters
     <span class="n">flatten_mode</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">FlattenMode</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Applies a function to all leaves in a pytree using `jax.tree_map`. If `filters` are given then</span>
-<span class="sd">    the function will be applied only to the subset of leaves that match the filters.</span>
+<span class="sd">    Applies a function to all leaves in a pytree using `jax.tree_map`, if `filters` are given then</span>
+<span class="sd">    the function will be applied only to the subset of leaves that match the filters. For more information see</span>
+<span class="sd">    [map&#39;s user guide](https://cgarciae.github.io/treeo/user-guide/api/map).</span>
 
-<span class="sd">    For example, if we want to zero all batch stats we can do:</span>
-
-<span class="sd">    Example:</span>
-<span class="sd">    ```python</span>
-<span class="sd">    class Parameter: pass</span>
-<span class="sd">    class BatchStat: pass</span>
-
-<span class="sd">    @dataclass</span>
-<span class="sd">    class MyTree(to.Tree):</span>
-<span class="sd">        a: int = to.field(node=True, kind=Parameter)</span>
-<span class="sd">        b: int = to.field(node=True, kind=BatchStat)</span>
-
-<span class="sd">    tree = MyTree(1, 2)</span>
-
-<span class="sd">    to.map(lambda _: 0, tree, BatchStat) # MyTree(a=1, b=0)</span>
-<span class="sd">    ```</span>
-
-<span class="sd">    If `inplace` is `True`, the input `obj` is mutated and returned. You can only update inplace if the input `obj` has a `__dict__` attribute, else a TypeError is raised.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        f: The function to apply to the leaves.</span>
@@ -1017,7 +1124,7 @@ the function will be applied only to the subset of leaves that match the filters
         <span class="n">new_obj</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">new_obj</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">has_filters</span><span class="p">:</span>
-            <span class="n">new_obj</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">new_obj</span><span class="p">)</span>
+            <span class="n">new_obj</span> <span class="o">=</span> <span class="n">merge</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">new_obj</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
         <span class="n">input_obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">new_obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
@@ -1064,13 +1171,13 @@ the function will be applied only to the subset of leaves that match the filters
       
       
         
-        <a href="../node/" class="md-footer__link md-footer__link--next" aria-label="Next: node" rel="next">
+        <a href="../merge/" class="md-footer__link md-footer__link--next" aria-label="Next: merge" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              node
+              merge
             </div>
           </div>
           <div class="md-footer__button md-icon">

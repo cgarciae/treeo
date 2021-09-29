@@ -9,14 +9,14 @@
       
       
       
-        <link rel="canonical" href="https://cgarciae.github.io/treeo/api/Nothing/">
+        <link rel="canonical" href="https://cgarciae.github.io/treeo/api/Copy/">
       
       <link rel="icon" href="../../images/favicon.png">
       <meta name="generator" content="mkdocs-1.2.2, mkdocs-material-7.3.0">
     
     
       
-        <title>Nothing - Treeo</title>
+        <title>Copy - Treeo</title>
       
     
     
@@ -65,7 +65,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#treeonothing" class="md-skip">
+        <a href="#treeocopy" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Nothing
+              Copy
             
           </span>
         </div>
@@ -514,11 +514,58 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../Copy/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Copy
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Copy
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#treeo.mixins.Copy" class="md-nav__link">
+    treeo.mixins.Copy
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#treeo.mixins.Copy.copy" class="md-nav__link">
+    copy()
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -682,51 +729,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Nothing
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../Nothing/" class="md-nav__link">
         Nothing
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#treeo.types.Nothing" class="md-nav__link">
-    treeo.types.Nothing
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -988,8 +995,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#treeo.types.Nothing" class="md-nav__link">
-    treeo.types.Nothing
+  <a href="#treeo.mixins.Copy" class="md-nav__link">
+    treeo.mixins.Copy
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#treeo.mixins.Copy.copy" class="md-nav__link">
+    copy()
   </a>
   
 </li>
@@ -1006,19 +1020,20 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/cgarciae/treeo/edit/master/docs/api/Nothing.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/cgarciae/treeo/edit/master/docs/api/Copy.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="treeonothing">treeo.Nothing</h1>
+                <h1 id="treeocopy">treeo.Copy</h1>
 
 
   <div class="doc doc-object doc-class">
 
-<a id="treeo.types.Nothing"></a>
+<a id="treeo.mixins.Copy"></a>
     <div class="doc doc-contents first">
 
+      <p>Mixin that adds a <code>.copy()</code> method to the class.</p>
 
 
 
@@ -1033,7 +1048,32 @@
 
 
 
+  <div class="doc doc-object doc-method">
 
+
+
+<h2 id="treeo.mixins.Copy.copy" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p><code>copy</code> is a wrapper over <code>treeo.copy</code> that passes <code>self</code> as the first argument.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>treeo/mixins.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    `copy` is a wrapper over `treeo.copy` that passes `self` as the first argument.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">api</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
 
 
 
@@ -1063,7 +1103,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../NOTHING/" class="md-footer__link md-footer__link--prev" aria-label="Previous: NOTHING" rel="prev">
+        <a href="../ArrayLike/" class="md-footer__link md-footer__link--prev" aria-label="Previous: ArrayLike" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1072,20 +1112,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              NOTHING
+              ArrayLike
             </div>
           </div>
         </a>
       
       
         
-        <a href="../Opaque/" class="md-footer__link md-footer__link--next" aria-label="Next: Opaque" rel="next">
+        <a href="../Extensions/" class="md-footer__link md-footer__link--next" aria-label="Next: Extensions" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Opaque
+              Extensions
             </div>
           </div>
           <div class="md-footer__button md-icon">
