@@ -7,7 +7,7 @@ _A small library for creating and manipulating custom JAX Pytree classes_
 * **Standards-based**: `treeo.field` is built on top of python's `dataclasses.field`.
 * **Flexible**: Treeo is compatible with both dataclass and non-dataclass classes.
 
-Treeo was originally extracted from the core of [Treex](https://github.com/cgarciae/treex) and shares a lot in common with [flax.struct](https://flax.readthedocs.io/en/latest/flax.struct.html#module-flax.struct). Treeo has nothing in particular to do with Deep Learning, but some of the examples are motivated by it.
+Treeo lets you easily create class-based Pytrees so your custom objects can easily interact seamlessly with JAX. Uses of Treeo can range from just creating simple simple JAX-aware utility classes to using it as the core abstraction for full-blown frameworks. Treeo was originally extracted from the core of [Treex](https://github.com/cgarciae/treex) and shares a lot in common with [flax.struct](https://flax.readthedocs.io/en/latest/flax.struct.html#module-flax.struct).
 
 [Documentation](https://cgarciae.github.io/treeo) | [User Guide](https://cgarciae.github.io/treeo/user-guide/intro)
 
@@ -18,15 +18,7 @@ pip install treeo
 ```
 
 ## Basics
-At its core Treeo focuses on 2 things:
-
-* Tooling for defining pytree structures via field metadata.
-* A set of functions for manipulating pytree structures that leverage the field metadata.
-
-Treeo also introduce the concept of a field `kind` which enables a powerful filtering mechanism.
-
-#### Fields
-To define node fields for a custom Pytree, Treeo uses the `field` function which is a wrapper around `dataclasses.field`:
+With Treeo you can easily define your own custom Pytree classes by inheriting from Treeo's `Tree` class and using the `field` function to declare which fields are nodes (childs) and which are static (metadata):
 
 ```python
 import treeo as to
@@ -36,8 +28,7 @@ class Person(to.Tree):
     height: jnp.array = to.field(node=True) # I am a node field!
     name: str = to.field(node=False) # I am a static field!
 ```
-
-Using this information Treeo specifies a Pytree you can use with various `jax` functions.
+`field` is just a wrapper around `dataclasses.field` so you can define your Pytrees as dataclasses, but Treeo fully supports non-dataclass classes as well. Since all `Tree` instances are Pytree they work with the various functions from the`jax` library as expected:
 
 ```python
 p = Person(height=jnp.array(1.8), name="John")
@@ -49,28 +40,40 @@ jax.jit(lambda person: person)(p) # Person(height=array(1.8), name='John')
 jax.tree_map(lambda x: 2 * x, p) # Person(height=array(3.6), name='John')
 ```
 #### Kinds
-Kinds are associated types that give semantic meaning to a field (what it represents). A kind is just a type you pass to `field` via its `kind` argument. Kinds are useful as metadata for filtering via [treeo.filter](#filter):
+Treeo also include a kind system that lets you give semantic meaning to fields (what a field represents within your application). A kind is just a type you pass to `field` via its `kind` argument: 
 
-```python hl_lines="10"
+```python
 class Parameter: pass
 class BatchStat: pass
 
 class BatchNorm(to.Tree):
     scale: jnp.ndarray = to.field(node=True, kind=Parameter)
     mean: jnp.ndarray = to.field(node=True, kind=BatchStat)
+```
 
-def loss_fn(params, model, ...):
-    # merge params back into model
-    model = to.merge(model, params)
-    ...
+Kinds are very useful as a filtering mechanism via [treeo.filter](https://cgarciae.github.io/treeo/user-guide/api/filter):
 
+```python 
 model = BatchNorm(...)
 
 # select only Parameters, mean is filtered out
 params = to.filter(model, Parameter) # BatchNorm(scale=array(...), mean=Nothing)
+```
+`Nothing` behaves like `None` in Python, but it is a special value that is used to represent the absence of a value within Treeo.
 
+Treeo also offers the [merge](https://cgarciae.github.io/treeo/user-guide/api/merge) function which lets you rejoin filtered Trees with a logic similar to Python `dict.update` but done recursively:
+```python hl_lines="3"
+def loss_fn(params, model, ...):
+    # add traced params to model
+    model = to.merge(model, params)
+    ...
+
+# gradient only w.r.t. params
+params = to.filter(model, Parameter) # BatchNorm(scale=array(...), mean=Nothing)
 grads = jax.grad(loss_fn)(params, model, ...)
 ```
+
+For a more in-depth tour check out the [User Guide](https://cgarciae.github.io/treeo/user-guide/intro).
 
 ## Examples
 

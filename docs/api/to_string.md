@@ -1,6 +1,6 @@
 
-# treeo.apply
+# treeo.to_string
 
-::: treeo.api.apply
+::: treeo.api.to_string
     selection:
         inherited_members: true

@@ -19,16 +19,25 @@ nav:
     Non-hashable static fields: user-guide/non-hashable-static-fields.md
     Field Metadata: user-guide/field-metadata.md
 - API Reference:
+    Apply: api/Apply.md
     ArrayLike: api/ArrayLike.md
+    Copy: api/Copy.md
+    Extensions: api/Extensions.md
     FieldInfo: api/FieldInfo.md
     FieldMetadata: api/FieldMetadata.md
+    Filter: api/Filter.md
     Hashable: api/Hashable.md
     KindMixin: api/KindMixin.md
     MISSING: api/MISSING.md
+    Map: api/Map.md
+    Merge: api/Merge.md
     Missing: api/Missing.md
     NOTHING: api/NOTHING.md
     Nothing: api/Nothing.md
     Opaque: api/Opaque.md
+    Repr: api/Repr.md
+    ToDict: api/ToDict.md
+    ToString: api/ToString.md
     Tree: api/Tree.md
     TreeMeta: api/TreeMeta.md
     add_field_info: api/add_field_info.md
@@ -36,9 +45,11 @@ nav:
     field: api/field.md
     filter: api/filter.md
     map: api/map.md
+    merge: api/merge.md
     node: api/node.md
     static: api/static.md
-    update: api/update.md
+    to_dict: api/to_dict.md
+    to_string: api/to_string.md
 extra:
   search:
     language: en

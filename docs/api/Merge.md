@@ -1,6 +1,6 @@
 
-# treeo.apply
+# treeo.Merge
 
-::: treeo.api.apply
+::: treeo.mixins.Merge
     selection:
         inherited_members: true

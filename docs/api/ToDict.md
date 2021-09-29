@@ -1,6 +1,6 @@
 
-# treeo.apply
+# treeo.ToDict
 
-::: treeo.api.apply
+::: treeo.mixins.ToDict
     selection:
         inherited_members: true

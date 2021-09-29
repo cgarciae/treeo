@@ -1,6 +1,6 @@
 
-# treeo.apply
+# treeo.Copy
 
-::: treeo.api.apply
+::: treeo.mixins.Copy
     selection:
         inherited_members: true

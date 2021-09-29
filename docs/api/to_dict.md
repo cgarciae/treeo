@@ -1,6 +1,6 @@
 
-# treeo.apply
+# treeo.to_dict
 
-::: treeo.api.apply
+::: treeo.api.to_dict
     selection:
         inherited_members: true
