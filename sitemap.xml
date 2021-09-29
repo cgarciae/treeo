@@ -206,6 +206,16 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://cgarciae.github.io/treeo/user-guide/api/apply/</loc>
+         <lastmod>2021-09-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://cgarciae.github.io/treeo/user-guide/api/copy/</loc>
+         <lastmod>2021-09-29</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://cgarciae.github.io/treeo/user-guide/api/filter/</loc>
          <lastmod>2021-09-29</lastmod>
          <changefreq>daily</changefreq>
