@@ -32,8 +32,8 @@ do_something(Person(height=1.5, name='Fred')) # cached! 🤩
 ```
 `opaque` will "hide" the value content of the field from JAX, changes will only be detected if the type of an opaque field changes or, in case its an array-like type, if its shape or dtype changes.
 
-## opaque_is_equal
-If you want to define you on policy on how opaque fields are handled, you can use the `opaque_is_equal: Callable[[to.Opaque, Any], bool]` argument and pass a function that takes in a `to.Opaque(value: Any)` object and the new value of the field and return a boolean indicating whether the new value is considered equal to the opaque value.
+## opaque predicates
+If you want to define you on policy on how opaque fields are handled, you can use pass a `Callable[[to.Opaque, Any], bool]`  function that takes in a `to.Opaque(value: Any)` object and the new value of the field and return a boolean indicating whether the new value is considered equal to the opaque value.
 
 ```python hl_lines="19"
 def same_length(opaque: to.Opaque, other: Any):
@@ -53,7 +53,6 @@ class Person(to.Tree):
     height: float = to.field(node=True)
     names: List[str] = to.field(
         node=False, 
-        opaque=True, 
-        opaque_is_equal=same_length,
+        opaque=same_length, 
     )
 ```

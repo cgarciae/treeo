@@ -26,8 +26,7 @@ class KindMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
-        opaque: bool = False,
-        opaque_is_equal: tp.Optional[tp.Callable[[utils.Opaque, tp.Any], bool]] = None,
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
     ) -> tp.Any:
         return utils.field(
             default=default,
@@ -39,7 +38,6 @@ class KindMixin:
             hash=hash,
             compare=compare,
             opaque=opaque,
-            opaque_is_equal=opaque_is_equal,
         )
 
     @classmethod
@@ -52,8 +50,7 @@ class KindMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
-        opaque: bool = False,
-        opaque_is_equal: tp.Optional[tp.Callable[[utils.Opaque, tp.Any], bool]] = None,
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
     ) -> tp.Any:
         return utils.node(
             default=default,
@@ -64,7 +61,6 @@ class KindMixin:
             hash=hash,
             compare=compare,
             opaque=opaque,
-            opaque_is_equal=opaque_is_equal,
         )
 
     @classmethod
@@ -76,8 +72,7 @@ class KindMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
-        opaque: bool = False,
-        opaque_is_equal: tp.Optional[tp.Callable[[utils.Opaque, tp.Any], bool]] = None,
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
     ) -> tp.Any:
         return cls.field(
             default=default,
@@ -88,7 +83,6 @@ class KindMixin:
             hash=hash,
             compare=compare,
             opaque=opaque,
-            opaque_is_equal=opaque_is_equal,
         )
 
 
@@ -114,14 +108,17 @@ class _TrivialPytree:
 class FieldMetadata:
     node: bool
     kind: type
-    opaque: bool
-    opaque_is_equal: tp.Optional[tp.Callable[[utils.Opaque, tp.Any], bool]]
+    opaque: tp.Union[bool, tp.Callable[[utils.Opaque, tp.Any], bool]]
 
-    def __init__(self, node, kind, opaque, opaque_is_equal):
+    def __init__(
+        self,
+        node: bool,
+        kind: type,
+        opaque: tp.Union[bool, tp.Callable[[utils.Opaque, tp.Any], bool]],
+    ):
         self.__dict__["node"] = node
         self.__dict__["kind"] = kind
         self.__dict__["opaque"] = opaque
-        self.__dict__["opaque_is_equal"] = opaque_is_equal
 
     def update(self, **kwargs) -> "FieldMetadata":
         fields = vars(self).copy()

@@ -15,13 +15,11 @@ assert mike.field_metadata == {
         node=True, 
         kind=NoneType, 
         opaque=False,
-        opaque_is_equal=None,
     ), 
     'name': FieldMetadata(
         node=False, 
         kind=None, 
         opaque=True,
-        opaque_is_equal=None,
     )
 }
 ```

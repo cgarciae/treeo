@@ -102,12 +102,7 @@ class Tree(metaclass=TreeMeta):
         field: str,
         node: tp.Optional[bool] = None,
         kind: tp.Optional[type] = None,
-        opaque: tp.Optional[bool] = None,
-        opaque_is_equal: tp.Union[
-            tp.Callable[[utils.Opaque, tp.Any], bool],
-            None,
-            types.Missing,
-        ] = types.MISSING,
+        opaque: tp.Union[bool, utils.OpaquePredicate, None] = None,
     ) -> T:
         module = copy(self)
 
@@ -122,9 +117,6 @@ class Tree(metaclass=TreeMeta):
 
         if opaque is not None:
             updates.update(opaque=opaque)
-
-        if opaque_is_equal is not types.MISSING:
-            updates.update(opaque_is_equal=opaque_is_equal)
 
         if updates:
             field_metadata = field_metadata.update(**updates)
@@ -148,7 +140,6 @@ class Tree(metaclass=TreeMeta):
                     node=isinstance(value, Tree),
                     kind=type(value),
                     opaque=False,
-                    opaque_is_equal=None,
                 )
 
     def __init_subclass__(cls):
@@ -180,7 +171,6 @@ class Tree(metaclass=TreeMeta):
                         node=value.metadata["node"],
                         kind=value.metadata["kind"],
                         opaque=value.metadata["opaque"],
-                        opaque_is_equal=value.metadata["opaque_is_equal"],
                     )
 
         for field, value in annotations.items():
@@ -191,7 +181,6 @@ class Tree(metaclass=TreeMeta):
                     node=is_node,
                     kind=type(None),
                     opaque=False,
-                    opaque_is_equal=None,
                 )
 
     def tree_flatten(self):
@@ -214,10 +203,12 @@ class Tree(metaclass=TreeMeta):
 
                 if field_annotation.node:
                     node_fields[field] = value
-                elif not field_annotation.node and field_annotation.opaque:
+                elif not field_annotation.node and field_annotation.opaque != False:
                     static_fields[field] = utils.Opaque(
                         value,
-                        opaque_is_equal=field_annotation.opaque_is_equal,
+                        predicate=field_annotation.opaque
+                        if not isinstance(field_annotation.opaque, bool)
+                        else None,
                     )
                 else:
                     static_fields[field] = value

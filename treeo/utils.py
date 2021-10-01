@@ -13,7 +13,7 @@ key = jax.random.PRNGKey
 _pymap = map
 _pyfilter = filter
 
-OpaqueIsEqual = tp.Optional[tp.Callable[["Opaque", tp.Any], bool]]
+OpaquePredicate = tp.Optional[tp.Callable[["Opaque", tp.Any], bool]]
 
 
 @tpe.runtime_checkable
@@ -23,16 +23,16 @@ class ArrayLike(tpe.Protocol):
 
 
 class Opaque(tp.Generic[A]):
-    def __init__(self, value: A, opaque_is_equal: tp.Optional[OpaqueIsEqual]):
+    def __init__(self, value: A, predicate: tp.Optional[OpaquePredicate]):
         self.value = value
-        self.opaque_is_equal = opaque_is_equal
+        self.predicate = predicate
 
     def __repr__(self):
         return f"Hidden({self.value})"
 
     def __eq__(self, other):
-        if self.opaque_is_equal is not None:
-            return self.opaque_is_equal(self, other)
+        if self.predicate is not None:
+            return self.predicate(self, other)
         else:
             # if both are Opaque and their values are of the same type
             if isinstance(other, Opaque) and type(self.value) == type(other.value):
@@ -60,8 +60,7 @@ def field(
     repr: bool = True,
     hash: tp.Optional[bool] = None,
     compare: bool = True,
-    opaque: bool = False,
-    opaque_is_equal: tp.Optional[tp.Callable[[Opaque, tp.Any], bool]] = None,
+    opaque: tp.Union[bool, OpaquePredicate] = False,
 ) -> tp.Any:
 
     return dataclasses.field(
@@ -70,7 +69,6 @@ def field(
             "node": node,
             "kind": kind,
             "opaque": opaque,
-            "opaque_is_equal": opaque_is_equal,
         },
         default_factory=default_factory,
         init=init,
@@ -89,8 +87,7 @@ def node(
     repr: bool = True,
     hash: tp.Optional[bool] = None,
     compare: bool = True,
-    opaque: bool = False,
-    opaque_is_equal: tp.Optional[tp.Callable[[Opaque, tp.Any], bool]] = None,
+    opaque: tp.Union[bool, OpaquePredicate] = False,
 ) -> tp.Any:
     return field(
         default=default,
@@ -102,7 +99,6 @@ def node(
         hash=hash,
         compare=compare,
         opaque=opaque,
-        opaque_is_equal=opaque_is_equal,
     )
 
 
@@ -115,8 +111,7 @@ def static(
     repr: bool = True,
     hash: tp.Optional[bool] = None,
     compare: bool = True,
-    opaque: bool = False,
-    opaque_is_equal: tp.Optional[tp.Callable[[Opaque, tp.Any], bool]] = None,
+    opaque: tp.Union[bool, OpaquePredicate] = False,
 ) -> tp.Any:
     return field(
         default,
@@ -128,7 +123,6 @@ def static(
         hash=hash,
         compare=compare,
         opaque=opaque,
-        opaque_is_equal=opaque_is_equal,
     )
 
 
