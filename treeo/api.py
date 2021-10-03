@@ -1,3 +1,4 @@
+import functools
 import logging
 import re
 import typing as tp
@@ -9,7 +10,7 @@ import jax.numpy as jnp
 import numpy as np
 
 import treeo.tree as tree_m
-from treeo import types
+from treeo import types, utils
 from treeo.tree import FieldInfo, FlattenMode, Tree
 
 try:
@@ -429,6 +430,11 @@ def _to_string(
         return str(obj)
 
 
+# ---------------------------------------------------------------
+# Context Managers
+# ---------------------------------------------------------------
+
+
 @contextmanager
 def add_field_info():
     """
@@ -480,9 +486,24 @@ def flatten_mode(mode: tp.Optional[tp.Union[FlattenMode, str]]):
 # alias for internal use
 _flatten_context = flatten_mode
 
-# --------------------------------------------------
+
+# ---------------------------------------------------------------
+# decorators
+# ---------------------------------------------------------------
+
+
+def compact(f):
+    @functools.wraps(f)
+    def wrapper(tree, *args, **kwargs):
+        with tree_m._COMPACT_CONTEXT.compact(tree):
+            return f(tree, *args, **kwargs)
+
+    return wrapper
+
+
+# ---------------------------------------------------------------
 # utils
-# --------------------------------------------------
+# ---------------------------------------------------------------
 
 
 def _looser_tree_map(

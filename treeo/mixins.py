@@ -1,6 +1,9 @@
+import dataclasses
 import typing as tp
 
 from treeo import api
+from treeo import tree as tree_m
+from treeo import types, utils
 
 A = tp.TypeVar("A")
 
@@ -208,9 +211,278 @@ class Apply:
         return api.apply(f, self, *rest, inplace=inplace)
 
 
-class Extensions(Copy, ToString, ToDict, Repr, Filter, Merge, Map, Apply):
+class Hooks:
+    _field_metadata: tp.Dict[str, types.FieldMetadata]
+    _subtrees: tp.Optional[tp.Tuple[str, ...]]
+
+    @property
+    def compact_first_run(self) -> bool:
+        """
+        Returns:
+            `True` if the first run of `compact` has not been completed.
+        """
+        if tree_m._COMPACT_CONTEXT.current_tree is not self:
+            raise RuntimeError(
+                f"Object '{type(self).__name__}' is not the current tree, found '{type(tree_m._COMPACT_CONTEXT.current_tree).__name__}', did you forget the @compact decorator?"
+            )
+
+        return self._subtrees is None
+
+    def get_field(
+        self,
+        field_name: str,
+        initializer: tp.Callable[[], A],
+    ) -> A:
+        value: A
+        if field_name not in self._field_metadata:
+            raise ValueError(
+                f"Metadata for field '{field_name}' does not exist. Try using `add_field`, `add_node` or `add_static` instead."
+            )
+
+        if tree_m._COMPACT_CONTEXT.current_tree is not self:
+            raise RuntimeError(
+                f"Object '{type(self).__name__}' is not the current tree, found '{type(tree_m._COMPACT_CONTEXT.current_tree).__name__}', did you forget the @compact decorator?"
+            )
+
+        if hasattr(self, field_name):
+            value = getattr(self, field_name)
+        else:
+            if tree_m._COMPACT_CONTEXT.is_compact and not self.compact_first_run:
+                raise RuntimeError(
+                    f"Trying to initialize field '{field_name}' after the first run of `compact`."
+                )
+
+            value = initializer()
+            setattr(self, field_name, value)
+
+        return value
+
+    def add_field(
+        self,
+        field_name: str,
+        initializer: tp.Callable[[], A],
+        *,
+        node: bool,
+        kind: type = type(None),
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
+    ) -> A:
+        value: A
+
+        if (
+            field_name in self._field_metadata
+            and node != self._field_metadata[field_name].node
+            and kind != self._field_metadata[field_name].kind
+            and opaque is not self._field_metadata[field_name].opaque
+        ):
+            raise ValueError(
+                f"Metadata for field '{field_name}' does not match existing information."
+                f"\n    Got {{node: {node}, kind: {kind}, opaque: {opaque}}}"
+                f"\n    Expected {{node: {self._field_metadata[field_name].node}, kind: {self._field_metadata[field_name].kind}, opaque: {self._field_metadata[field_name].opaque}}}"
+                f"\nMake sure information matches or try using `get_field` instead."
+            )
+
+        if tree_m._COMPACT_CONTEXT.current_tree is not self:
+            raise RuntimeError(
+                f"Object '{type(self).__name__}' is not the current tree, found '{type(tree_m._COMPACT_CONTEXT.current_tree).__name__}', did you forget the @compact decorator?"
+            )
+
+        if hasattr(self, field_name):
+            value = getattr(self, field_name)
+
+        else:
+            if tree_m._COMPACT_CONTEXT.is_compact and not self.compact_first_run:
+                raise RuntimeError(
+                    f"Trying to initialize field '{field_name}' after the first run of `compact`."
+                )
+
+            value = initializer()
+            setattr(self, field_name, value)
+
+        if field_name not in self._field_metadata:
+            self._field_metadata[field_name] = types.FieldMetadata(
+                node=node,
+                kind=kind,
+                opaque=opaque,
+            )
+
+        return value
+
+    def add_node(
+        self,
+        field_name: str,
+        initializer: tp.Callable[[], A],
+        *,
+        kind: type = type(None),
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
+    ) -> A:
+        return self.add_field(
+            field_name,
+            initializer=initializer,
+            node=True,
+            kind=kind,
+            opaque=opaque,
+        )
+
+    def add_static(
+        self,
+        field_name: str,
+        initializer: tp.Callable[[], A],
+        *,
+        kind: type = type(None),
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
+    ) -> A:
+        return self.add_field(
+            field_name,
+            initializer=initializer,
+            node=False,
+            kind=kind,
+            opaque=opaque,
+        )
+
+
+class Extensions(Copy, ToString, ToDict, Repr, Filter, Merge, Map, Apply, Hooks):
     """
-    Mixin that adds all available mixins from `treeo.mixins`.
+    Mixin that adds all available mixins from `treeo.mixins` except `KindMixin`.
     """
 
     pass
+
+
+class KindMixin:
+    @classmethod
+    def field(
+        cls,
+        default=dataclasses.MISSING,
+        *,
+        node: bool,
+        default_factory=dataclasses.MISSING,
+        init: bool = True,
+        repr: bool = True,
+        hash: tp.Optional[bool] = None,
+        compare: bool = True,
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
+    ) -> tp.Any:
+        return utils.field(
+            default=default,
+            node=node,
+            kind=cls,
+            default_factory=default_factory,
+            init=init,
+            repr=repr,
+            hash=hash,
+            compare=compare,
+            opaque=opaque,
+        )
+
+    @classmethod
+    def node(
+        cls,
+        default=dataclasses.MISSING,
+        *,
+        default_factory=dataclasses.MISSING,
+        init: bool = True,
+        repr: bool = True,
+        hash: tp.Optional[bool] = None,
+        compare: bool = True,
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
+    ) -> tp.Any:
+        return utils.node(
+            default=default,
+            kind=cls,
+            default_factory=default_factory,
+            init=init,
+            repr=repr,
+            hash=hash,
+            compare=compare,
+            opaque=opaque,
+        )
+
+    @classmethod
+    def static(
+        cls,
+        default=dataclasses.MISSING,
+        default_factory=dataclasses.MISSING,
+        init: bool = True,
+        repr: bool = True,
+        hash: tp.Optional[bool] = None,
+        compare: bool = True,
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
+    ) -> tp.Any:
+        return cls.field(
+            default=default,
+            node=False,
+            default_factory=default_factory,
+            init=init,
+            repr=repr,
+            hash=hash,
+            compare=compare,
+            opaque=opaque,
+        )
+
+    # ---------------------------------------------------------------------------
+    # Hooks
+    # ---------------------------------------------------------------------------
+
+    @classmethod
+    def add_field(
+        cls,
+        field_name: str,
+        initializer: tp.Callable[[], A],
+        *,
+        node: bool,
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
+    ) -> A:
+
+        if tree_m._COMPACT_CONTEXT.current_tree is None:
+            raise ValueError("Cannot add fields outside of a Tree")
+
+        tree = tree_m._COMPACT_CONTEXT.current_tree
+
+        if isinstance(tree, Hooks):
+            return tree.add_field(
+                field_name,
+                initializer=initializer,
+                node=node,
+                kind=cls,
+                opaque=opaque,
+            )
+        else:
+            tree = tp.cast(Hooks, tree)
+            return Hooks.add_field(
+                tree,
+                field_name,
+                initializer=initializer,
+                node=node,
+                kind=cls,
+                opaque=opaque,
+            )
+
+    @classmethod
+    def add_node(
+        cls,
+        field_name: str,
+        initializer: tp.Callable[[], A],
+        *,
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
+    ) -> A:
+        return cls.add_field(
+            field_name,
+            initializer=initializer,
+            node=True,
+            opaque=opaque,
+        )
+
+    @classmethod
+    def add_static(
+        cls,
+        field_name: str,
+        initializer: tp.Callable[[], A],
+        *,
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
+    ) -> A:
+        return cls.add_field(
+            field_name,
+            initializer=initializer,
+            node=False,
+            opaque=opaque,
+        )

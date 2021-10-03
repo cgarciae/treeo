@@ -1,5 +1,6 @@
 import dataclasses
 import enum
+import functools
 import inspect
 import threading
 import typing as tp
@@ -47,6 +48,70 @@ class _Context(threading.local):
             yield
 
 
+@dataclass
+class _CompactContext(threading.local):
+    current_tree: tp.Optional["Tree"] = None
+    existing_subtrees: tp.Optional[tp.List["Tree"]] = None
+    tree_idx: int = 0
+    new_subtrees: tp.Optional[tp.List["Tree"]] = None
+
+    @property
+    def is_compact(self):
+        return self.existing_subtrees is not None or self.new_subtrees is not None
+
+    def __enter__(self):
+        global _COMPACT_CONTEXT
+        self._old_context = _COMPACT_CONTEXT
+        _COMPACT_CONTEXT = self
+
+    def __exit__(self, *args):
+        global _COMPACT_CONTEXT
+        _COMPACT_CONTEXT = self._old_context
+
+    @contextmanager
+    def update(self, **kwargs):
+        fields = vars(self).copy()
+        fields.pop("_old_context", None)
+        fields.update(kwargs)
+
+        with _CompactContext(**fields):
+            yield
+
+    @contextmanager
+    def compact(self, tree: "Tree"):
+        new_subtrees: tp.Optional[tp.List["Tree"]]
+        existing_subtrees: tp.Optional[tp.List["Tree"]]
+
+        if self.current_tree is tree:
+            raise ValueError(f"Detected recursion in `compact` for: {tree}")
+
+        if tree._subtrees is None:
+            existing_subtrees = None
+            new_subtrees = []
+        else:
+            existing_subtrees = list(getattr(tree, field) for field in tree._subtrees)
+            new_subtrees = None
+
+        with _CompactContext(
+            current_tree=tree,
+            existing_subtrees=existing_subtrees,
+            new_subtrees=new_subtrees,
+        ):
+            yield
+
+        if tree._subtrees is None:
+            assert new_subtrees is not None
+            field_names = list(
+                utils._unique_names(
+                    utils._get_name(new_tree) for new_tree in new_subtrees
+                )
+            )
+            tree._subtrees = tuple(field_names)
+            for field, subtree in zip(field_names, new_subtrees):
+                setattr(tree, field, subtree)
+
+
+_COMPACT_CONTEXT = _CompactContext()
 _CONTEXT = _Context()
 
 
@@ -69,21 +134,39 @@ class FieldInfo:
 
 class TreeMeta(ABCMeta):
     def __call__(cls, *args, **kwargs) -> "Tree":
-        obj: Tree = cls.__new__(cls)
+        obj: Tree
 
-        obj._field_metadata = obj._field_metadata.copy()
+        if _COMPACT_CONTEXT.existing_subtrees is not None:
+            if len(_COMPACT_CONTEXT.existing_subtrees) <= _COMPACT_CONTEXT.tree_idx:
+                raise ValueError(
+                    f"Out of bounds: trying to new initialize new Tree '{cls.__name__}' after the first compact run"
+                )
 
-        if not dataclasses.is_dataclass(cls):
-            for field, default_factory in obj._factory_fields.items():
-                setattr(obj, field, default_factory())
+            obj = _COMPACT_CONTEXT.existing_subtrees[_COMPACT_CONTEXT.tree_idx]
+            _COMPACT_CONTEXT.tree_idx += 1
 
-            for field, default_value in obj._default_field_values.items():
-                setattr(obj, field, default_value)
+            return obj
+        else:
+            obj = cls.__new__(cls)
 
-        obj.__init__(*args, **kwargs)
+            obj._field_metadata = obj._field_metadata.copy()
 
-        # auto-annotations
-        obj._update_local_metadata()
+            if not dataclasses.is_dataclass(cls):
+                for field, default_factory in obj._factory_fields.items():
+                    setattr(obj, field, default_factory())
+
+                for field, default_value in obj._default_field_values.items():
+                    setattr(obj, field, default_value)
+
+            # reset context before __init__ and add obj as current tree
+            with _CompactContext(current_tree=obj):
+                obj.__init__(*args, **kwargs)
+
+            # auto-annotations
+            obj._update_local_metadata()
+
+        if _COMPACT_CONTEXT.new_subtrees is not None:
+            _COMPACT_CONTEXT.new_subtrees.append(obj)
 
         return obj
 
@@ -92,6 +175,7 @@ class Tree(metaclass=TreeMeta):
     _field_metadata: tp.Dict[str, types.FieldMetadata]
     _factory_fields: tp.Dict[str, tp.Callable[[], tp.Any]]
     _default_field_values: tp.Dict[str, tp.Any]
+    _subtrees: tp.Optional[tp.Tuple[str, ...]]
 
     @property
     def field_metadata(self) -> tp.Mapping[str, types.FieldMetadata]:
@@ -152,9 +236,12 @@ class Tree(metaclass=TreeMeta):
 
         annotations = utils._get_all_annotations(cls)
         class_vars = utils._get_all_vars(cls)
+
+        # init class variables
         cls._field_metadata = {}
         cls._factory_fields = {}
         cls._default_field_values = {}
+        cls._subtrees = None
 
         for field, value in class_vars.items():
             if isinstance(value, dataclasses.Field):

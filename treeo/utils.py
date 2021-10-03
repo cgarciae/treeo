@@ -1,4 +1,5 @@
 import dataclasses
+import re
 import typing as tp
 
 import jax
@@ -13,7 +14,7 @@ key = jax.random.PRNGKey
 _pymap = map
 _pyfilter = filter
 
-OpaquePredicate = tp.Optional[tp.Callable[["Opaque", tp.Any], bool]]
+OpaquePredicate = tp.Callable[["Opaque", tp.Any], bool]
 
 
 @tpe.runtime_checkable
@@ -51,11 +52,11 @@ class Opaque(tp.Generic[A]):
 
 
 def field(
-    default=dataclasses.MISSING,
+    default: tp.Any = dataclasses.MISSING,
     *,
     node: bool,
     kind: type = type(None),
-    default_factory=dataclasses.MISSING,
+    default_factory: tp.Optional[tp.Callable[[], tp.Any]] = None,
     init: bool = True,
     repr: bool = True,
     hash: tp.Optional[bool] = None,
@@ -70,7 +71,9 @@ def field(
             "kind": kind,
             "opaque": opaque,
         },
-        default_factory=default_factory,
+        default_factory=default_factory
+        if default_factory is not None
+        else dataclasses.MISSING,
         init=init,
         repr=repr,
         hash=hash,
@@ -82,7 +85,7 @@ def node(
     default=dataclasses.MISSING,
     *,
     kind: type = type(None),
-    default_factory=dataclasses.MISSING,
+    default_factory: tp.Optional[tp.Callable[[], tp.Any]] = None,
     init: bool = True,
     repr: bool = True,
     hash: tp.Optional[bool] = None,
@@ -106,7 +109,7 @@ def static(
     default=dataclasses.MISSING,
     *,
     kind: type = type(None),
-    default_factory=dataclasses.MISSING,
+    default_factory: tp.Optional[tp.Callable[[], tp.Any]] = None,
     init: bool = True,
     repr: bool = True,
     hash: tp.Optional[bool] = None,
@@ -154,3 +157,53 @@ def _all_types_unfiltered(t: type) -> tp.Iterable[type]:
 
         for arg in t.__args__:
             yield from _all_types_unfiltered(arg)
+
+
+def _unique_name(
+    names: tp.Set[str],
+    name: str,
+):
+
+    if name in names:
+        i = 2
+        while f"{name}{i}" in names:
+            i += 1
+
+        name = f"{name}{i}"
+
+    names.add(name)
+    return name
+
+
+def _unique_names(
+    names: tp.Iterable[str],
+) -> tp.Iterable[str]:
+    new_names: tp.Set[str] = set()
+
+    for name in names:
+        yield _unique_name(new_names, name)
+
+
+def _lower_snake_case(s: str) -> str:
+    s = re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
+    parts = s.split("_")
+    output_parts = []
+
+    for i in range(len(parts)):
+        if i == 0 or len(parts[i - 1]) > 1:
+            output_parts.append(parts[i])
+        else:
+            output_parts[-1] += parts[i]
+
+    return "_".join(output_parts)
+
+
+def _get_name(obj) -> str:
+    if hasattr(obj, "name") and obj.name:
+        return obj.name
+    elif hasattr(obj, "__name__") and obj.__name__:
+        return obj.__name__
+    elif hasattr(obj, "__class__") and obj.__class__.__name__:
+        return _lower_snake_case(obj.__class__.__name__)
+    else:
+        raise ValueError(f"Could not get name for: {obj}")

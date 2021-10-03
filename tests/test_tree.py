@@ -822,3 +822,203 @@ class TestTreeo:
         rep = to.to_string(b, color=True)
 
         print(rep)
+
+    def test_field_method(self):
+        class Linear(to.Tree, to.Hooks):
+            def __init__(self, din, dout, name="linear"):
+                self.din = din
+                self.dout = dout
+                self.w = self.add_field(
+                    "w",
+                    lambda: np.random.uniform(size=(din, dout)),
+                    node=True,
+                    kind=Parameter,
+                )
+                self.b = self.add_field(
+                    "b",
+                    lambda: np.random.uniform(size=(dout,)),
+                    node=True,
+                    kind=Parameter,
+                )
+                self.n = self.add_field("n", lambda: 1, node=True, kind=State)
+                self.name = name
+
+        class MLP(to.Tree, to.Hooks):
+            def __init__(self, din, dmid, dout, name="mlp"):
+                self.din = din
+                self.dmid = dmid
+                self.dout = dout
+                self.name = name
+
+                self.linear1 = self.add_field(
+                    "linear1", lambda: Linear(din, dmid, name="linear1"), node=True
+                )
+                self.linear2 = self.add_field(
+                    "linear2", lambda: Linear(dmid, dout, name="linear2"), node=True
+                )
+
+        mlp = MLP(2, 4, 3)
+
+        flat = jax.tree_leaves(mlp)
+
+        assert len(flat) == 6
+
+        # params
+        mlp_params = to.filter(mlp, Parameter)
+
+        assert not isinstance(mlp_params.linear1.w, to.Nothing)
+        assert not isinstance(mlp_params.linear1.b, to.Nothing)
+        assert isinstance(mlp_params.linear1.n, to.Nothing)
+
+        assert not isinstance(mlp_params.linear2.w, to.Nothing)
+        assert not isinstance(mlp_params.linear2.b, to.Nothing)
+        assert isinstance(mlp_params.linear2.n, to.Nothing)
+
+        # states
+        mlp_states = to.filter(mlp, State)
+
+        assert isinstance(mlp_states.linear1.w, to.Nothing)
+        assert isinstance(mlp_states.linear1.b, to.Nothing)
+        assert not isinstance(mlp_states.linear1.n, to.Nothing)
+
+        assert isinstance(mlp_states.linear2.w, to.Nothing)
+        assert isinstance(mlp_states.linear2.b, to.Nothing)
+        assert not isinstance(mlp_states.linear2.n, to.Nothing)
+
+    def test_compact(self):
+        class Linear(to.Tree, to.Hooks):
+            def __init__(self, din, dout, name="linear"):
+                self.din = din
+                self.dout = dout
+                self.name = name
+
+            @to.compact
+            def __call__(self):
+                self.w = self.add_field(
+                    "w",
+                    lambda: np.random.uniform(size=(self.din, self.dout)),
+                    node=True,
+                    kind=Parameter,
+                )
+                self.b = self.add_field(
+                    "b",
+                    lambda: np.random.uniform(size=(self.dout,)),
+                    node=True,
+                    kind=Parameter,
+                )
+                self.n = self.add_field("n", lambda: 1, node=True, kind=State)
+
+        class MLP(to.Tree):
+            linear1: Linear
+            linear2: Linear
+
+            def __init__(self, din, dmid, dout, name="mlp"):
+                self.din = din
+                self.dmid = dmid
+                self.dout = dout
+                self.name = name
+
+            @to.compact
+            def __call__(self):
+                Linear(self.din, self.dmid, name="linear1")()
+                Linear(self.dmid, self.dout, name="linear2")()
+
+        mlp = MLP(2, 4, 3)
+        mlp()
+        mlp()
+
+        assert mlp.linear1.name == "linear1"
+        assert mlp.linear2.name == "linear2"
+        assert mlp.name == "mlp"
+
+        flat = jax.tree_leaves(mlp)
+
+        assert len(flat) == 6
+
+        # params
+        mlp_params = to.filter(mlp, Parameter)
+
+        assert not isinstance(mlp_params.linear1.w, to.Nothing)
+        assert not isinstance(mlp_params.linear1.b, to.Nothing)
+        assert isinstance(mlp_params.linear1.n, to.Nothing)
+
+        assert not isinstance(mlp_params.linear2.w, to.Nothing)
+        assert not isinstance(mlp_params.linear2.b, to.Nothing)
+        assert isinstance(mlp_params.linear2.n, to.Nothing)
+
+        # states
+        mlp_states = to.filter(mlp, State)
+
+        assert isinstance(mlp_states.linear1.w, to.Nothing)
+        assert isinstance(mlp_states.linear1.b, to.Nothing)
+        assert not isinstance(mlp_states.linear1.n, to.Nothing)
+
+        assert isinstance(mlp_states.linear2.w, to.Nothing)
+        assert isinstance(mlp_states.linear2.b, to.Nothing)
+        assert not isinstance(mlp_states.linear2.n, to.Nothing)
+
+    def test_compact_sugar(self):
+        class Linear(to.Tree, to.Hooks):
+            def __init__(self, din, dout, name="linear"):
+                self.din = din
+                self.dout = dout
+                self.name = name
+
+            @to.compact
+            def __call__(self):
+                self.w = Parameter.add_node(
+                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
+                )
+                self.b = Parameter.add_node(
+                    "b", lambda: np.random.uniform(size=(self.dout,))
+                )
+                self.n = State.add_node("n", lambda: 1)
+
+        class MLP(to.Tree):
+            linear1: Linear
+            linear2: Linear
+
+            def __init__(self, din, dmid, dout, name="mlp"):
+                self.din = din
+                self.dmid = dmid
+                self.dout = dout
+                self.name = name
+
+            @to.compact
+            def __call__(self):
+                Linear(self.din, self.dmid, name="linear1")()
+                Linear(self.dmid, self.dout, name="linear2")()
+
+        mlp = MLP(2, 4, 3)
+        mlp()
+        mlp()
+
+        assert mlp.linear1.name == "linear1"
+        assert mlp.linear2.name == "linear2"
+        assert mlp.name == "mlp"
+
+        flat = jax.tree_leaves(mlp)
+
+        assert len(flat) == 6
+
+        # params
+        mlp_params = to.filter(mlp, Parameter)
+
+        assert not isinstance(mlp_params.linear1.w, to.Nothing)
+        assert not isinstance(mlp_params.linear1.b, to.Nothing)
+        assert isinstance(mlp_params.linear1.n, to.Nothing)
+
+        assert not isinstance(mlp_params.linear2.w, to.Nothing)
+        assert not isinstance(mlp_params.linear2.b, to.Nothing)
+        assert isinstance(mlp_params.linear2.n, to.Nothing)
+
+        # states
+        mlp_states = to.filter(mlp, State)
+
+        assert isinstance(mlp_states.linear1.w, to.Nothing)
+        assert isinstance(mlp_states.linear1.b, to.Nothing)
+        assert not isinstance(mlp_states.linear1.n, to.Nothing)
+
+        assert isinstance(mlp_states.linear2.w, to.Nothing)
+        assert isinstance(mlp_states.linear2.b, to.Nothing)
+        assert not isinstance(mlp_states.linear2.n, to.Nothing)
