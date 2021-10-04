@@ -165,11 +165,20 @@ def _unique_name(
 ):
 
     if name in names:
-        i = 2
-        while f"{name}_{i}" in names:
+
+        match = re.match(r"(.*?)(\d*)$", name)
+        assert match is not None
+
+        name = match[1]
+        num_part = match[2]
+
+        i = int(num_part) if num_part else 2
+        str_template = f"{{name}}{{i:0{len(num_part)}}}"
+
+        while str_template.format(name=name, i=i) in names:
             i += 1
 
-        name = f"{name}_{i}"
+        name = str_template.format(name=name, i=i)
 
     names.add(name)
     return name

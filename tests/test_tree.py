@@ -1001,7 +1001,7 @@ class TestTreeo:
 
         class MLP(to.Tree):
             linear: Linear
-            linear_2: Linear
+            linear2: Linear
 
             def __init__(self, din, dmid, dout, name="mlp"):
                 self.din = din
@@ -1022,18 +1022,18 @@ class TestTreeo:
         assert mlp.linear.b.shape == (4,)
         assert mlp.linear.n == 1
 
-        assert mlp.linear_2.w.shape == (4, 3)
-        assert mlp.linear_2.b.shape == (3,)
-        assert mlp.linear_2.n == 1
+        assert mlp.linear2.w.shape == (4, 3)
+        assert mlp.linear2.b.shape == (3,)
+        assert mlp.linear2.n == 1
 
         assert hasattr(mlp, "linear")
-        assert hasattr(mlp, "linear_2")
+        assert hasattr(mlp, "linear2")
 
         assert mlp.linear.din == 2
         assert mlp.linear.dout == 4
 
-        assert mlp.linear_2.din == 4
-        assert mlp.linear_2.dout == 3
+        assert mlp.linear2.din == 4
+        assert mlp.linear2.dout == 3
 
     def test_compact_error_no_annotations(self):
         class Linear(to.Tree, to.Hooks):
