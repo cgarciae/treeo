@@ -54,6 +54,7 @@ class _CompactContext(threading.local):
     existing_subtrees: tp.Optional[tp.List["Tree"]] = None
     tree_idx: int = 0
     new_subtrees: tp.Optional[tp.List["Tree"]] = None
+    compact_calls: tp.Optional[tp.Set[tp.Callable[..., tp.Any]]] = None
 
     @property
     def is_compact(self):
@@ -78,12 +79,9 @@ class _CompactContext(threading.local):
             yield
 
     @contextmanager
-    def compact(self, tree: "Tree"):
+    def compact(self, f: tp.Callable[..., tp.Any], tree: "Tree"):
         new_subtrees: tp.Optional[tp.List["Tree"]]
         existing_subtrees: tp.Optional[tp.List["Tree"]]
-
-        if self.current_tree is tree:
-            raise ValueError(f"Detected recursion in `compact` for: {tree}")
 
         if tree._subtrees is None:
             existing_subtrees = None
@@ -92,12 +90,22 @@ class _CompactContext(threading.local):
             existing_subtrees = list(getattr(tree, field) for field in tree._subtrees)
             new_subtrees = None
 
-        with _CompactContext(
-            current_tree=tree,
-            existing_subtrees=existing_subtrees,
-            new_subtrees=new_subtrees,
-        ):
+        if self.current_tree is tree:
+            assert self.compact_calls is not None
+
+            if f in self.compact_calls:
+                raise RuntimeError(f"Detected recursion in `compact` for: {tree}")
+
+            self.compact_calls.add(f)
             yield
+        else:
+            with _CompactContext(
+                current_tree=tree,
+                existing_subtrees=existing_subtrees,
+                new_subtrees=new_subtrees,
+                compact_calls={f},
+            ):
+                yield
 
         if tree._subtrees is None:
             assert new_subtrees is not None

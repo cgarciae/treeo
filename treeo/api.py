@@ -495,7 +495,7 @@ _flatten_context = flatten_mode
 def compact(f):
     @functools.wraps(f)
     def wrapper(tree, *args, **kwargs):
-        with tree_m._COMPACT_CONTEXT.compact(tree):
+        with tree_m._COMPACT_CONTEXT.compact(f, tree):
             return f(tree, *args, **kwargs)
 
     return wrapper
