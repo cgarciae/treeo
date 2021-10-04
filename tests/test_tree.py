@@ -45,8 +45,8 @@ class MLP(to.Tree):
         self.dout = dout
         self.name = name
 
-        self.linear1 = Linear(din, dmid, name="linear1")
-        self.linear2 = Linear(dmid, dout, name="linear2")
+        self.linear1 = Linear(din, dmid)
+        self.linear2 = Linear(dmid, dout)
 
 
 class TestTreeo:
@@ -1022,3 +1022,47 @@ class TestTreeo:
         assert isinstance(mlp_states.linear2.w, to.Nothing)
         assert isinstance(mlp_states.linear2.b, to.Nothing)
         assert not isinstance(mlp_states.linear2.n, to.Nothing)
+
+    def test_compact_naming(self):
+        class Linear(to.Tree, to.Hooks):
+            def __init__(self, din, dout):
+                self.din = din
+                self.dout = dout
+
+            @to.compact
+            def __call__(self):
+                self.w = Parameter.add_node(
+                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
+                )
+                self.b = Parameter.add_node(
+                    "b", lambda: np.random.uniform(size=(self.dout,))
+                )
+                self.n = State.add_node("n", lambda: 1)
+
+        class MLP(to.Tree):
+            linear: Linear
+            linear_2: Linear
+
+            def __init__(self, din, dmid, dout, name="mlp"):
+                self.din = din
+                self.dmid = dmid
+                self.dout = dout
+                self.name = name
+
+            @to.compact
+            def __call__(self):
+                Linear(self.din, self.dmid)()
+                Linear(self.dmid, self.dout)()
+
+        mlp = MLP(2, 4, 3)
+        mlp()
+        mlp()
+
+        assert hasattr(mlp, "linear")
+        assert hasattr(mlp, "linear_2")
+
+        assert mlp.linear.din == 2
+        assert mlp.linear.dout == 4
+
+        assert mlp.linear_2.din == 4
+        assert mlp.linear_2.dout == 3

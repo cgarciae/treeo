@@ -166,10 +166,10 @@ def _unique_name(
 
     if name in names:
         i = 2
-        while f"{name}{i}" in names:
+        while f"{name}_{i}" in names:
             i += 1
 
-        name = f"{name}{i}"
+        name = f"{name}_{i}"
 
     names.add(name)
     return name
@@ -177,11 +177,14 @@ def _unique_name(
 
 def _unique_names(
     names: tp.Iterable[str],
+    *,
+    existing_names: tp.Optional[tp.Set[str]] = None,
 ) -> tp.Iterable[str]:
-    new_names: tp.Set[str] = set()
+    if existing_names is None:
+        existing_names = set()
 
     for name in names:
-        yield _unique_name(new_names, name)
+        yield _unique_name(existing_names, name)
 
 
 def _lower_snake_case(s: str) -> str:

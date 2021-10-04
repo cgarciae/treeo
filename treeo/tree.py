@@ -103,11 +103,27 @@ class _CompactContext(threading.local):
             assert new_subtrees is not None
             field_names = list(
                 utils._unique_names(
-                    utils._get_name(new_tree) for new_tree in new_subtrees
+                    (utils._get_name(new_tree) for new_tree in new_subtrees),
+                    existing_names=set(vars(tree).keys()),
                 )
             )
             tree._subtrees = tuple(field_names)
             for field, subtree in zip(field_names, new_subtrees):
+                if (
+                    field in tree._field_metadata
+                    and not tree._field_metadata[field].node
+                ):
+                    raise ValueError(
+                        f"Trying to subtree '{type(subtree).__name__}' to field '{field}' of '{type(tree).__name__}' but it has previously been declared with `node=False`"
+                    )
+
+                if field not in tree._field_metadata:
+                    tree._field_metadata[field] = types.FieldMetadata(
+                        kind=type(None),
+                        node=True,
+                        opaque=False,
+                    )
+
                 setattr(tree, field, subtree)
 
 
