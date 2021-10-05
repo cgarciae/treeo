@@ -172,25 +172,30 @@ class TreeMeta(ABCMeta):
             return obj
         else:
             obj = cls.__new__(cls)
-
-            obj._field_metadata = obj._field_metadata.copy()
-
-            if not dataclasses.is_dataclass(cls):
-                for field, default_factory in obj._factory_fields.items():
-                    setattr(obj, field, default_factory())
-
-                for field, default_value in obj._default_field_values.items():
-                    setattr(obj, field, default_value)
-
-            # reset context before __init__ and add obj as current tree
-            with _CompactContext(current_tree=obj):
-                obj.__init__(*args, **kwargs)
-
-            # auto-annotations
-            obj._update_local_metadata()
+            obj = cls.construct(obj, *args, **kwargs)
 
         if _COMPACT_CONTEXT.new_subtrees is not None:
             _COMPACT_CONTEXT.new_subtrees.append(obj)
+
+        return obj
+
+    def construct(cls, obj: T, *args, **kwargs) -> T:
+
+        obj._field_metadata = obj._field_metadata.copy()
+
+        if not dataclasses.is_dataclass(cls):
+            for field, default_factory in obj._factory_fields.items():
+                setattr(obj, field, default_factory())
+
+            for field, default_value in obj._default_field_values.items():
+                setattr(obj, field, default_value)
+
+        # reset context before __init__ and add obj as current tree
+        with _CompactContext(current_tree=obj):
+            obj.__init__(*args, **kwargs)
+
+        # auto-annotations
+        obj._update_local_metadata()
 
         return obj
 
