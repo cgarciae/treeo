@@ -216,10 +216,10 @@ class Hooks:
     _subtrees: tp.Optional[tp.Tuple[str, ...]]
 
     @property
-    def compact_first_run(self) -> bool:
+    def first_run(self) -> bool:
         """
         Returns:
-            `True` if the first run of `compact` has not been completed.
+            `True` if its currently the first run of a `compact` method.
         """
         if tree_m._COMPACT_CONTEXT.current_tree is not self:
             raise RuntimeError(
@@ -245,7 +245,7 @@ class Hooks:
         if field_name in vars(self):
             value = getattr(self, field_name)
         else:
-            if tree_m._COMPACT_CONTEXT.is_compact and not self.compact_first_run:
+            if tree_m._COMPACT_CONTEXT.is_compact and not self.first_run:
                 raise RuntimeError(
                     f"Trying to initialize field '{field_name}' after the first run of `compact`."
                 )
