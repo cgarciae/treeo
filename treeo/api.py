@@ -430,6 +430,10 @@ def _to_string(
         return str(obj)
 
 
+def in_compact() -> bool:
+    return tree_m._COMPACT_CONTEXT.in_compact
+
+
 # ---------------------------------------------------------------
 # Context Managers
 # ---------------------------------------------------------------

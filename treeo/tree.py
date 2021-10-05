@@ -57,7 +57,7 @@ class _CompactContext(threading.local):
     compact_calls: tp.Optional[tp.Set[tp.Callable[..., tp.Any]]] = None
 
     @property
-    def is_compact(self):
+    def in_compact(self):
         return self.existing_subtrees is not None or self.new_subtrees is not None
 
     def __enter__(self):

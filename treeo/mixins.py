@@ -245,7 +245,7 @@ class Hooks:
         if field_name in vars(self):
             value = getattr(self, field_name)
         else:
-            if tree_m._COMPACT_CONTEXT.is_compact and not self.first_run:
+            if tree_m._COMPACT_CONTEXT.in_compact and not self.first_run:
                 raise RuntimeError(
                     f"Trying to initialize field '{field_name}' after the first run of `compact`."
                 )
