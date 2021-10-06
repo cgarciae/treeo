@@ -219,7 +219,7 @@ class Apply:
         return api.apply(f, self, *rest, inplace=inplace)
 
 
-class Hooks:
+class Compact:
     _field_metadata: tp.Dict[str, types.FieldMetadata]
     _subtrees: tp.Optional[tp.Tuple[str, ...]]
 
@@ -263,7 +263,7 @@ class Hooks:
         return value
 
 
-class Extensions(Copy, ToString, ToDict, Repr, Filter, Merge, Map, Apply, Hooks):
+class Extensions(Copy, ToString, ToDict, Repr, Filter, Merge, Map, Apply, Compact):
     """
     Mixin that adds all available mixins from `treeo.mixins` except `KindMixin`.
     """

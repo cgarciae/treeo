@@ -43,4 +43,6 @@ __all__ = [
     "Map",
     "Apply",
     "Extensions",
+    "Compact",
+    "compact",
 ]
