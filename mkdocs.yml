@@ -20,9 +20,11 @@ nav:
     Opaque static fields: user-guide/opaque-static-fields.md
     Non-hashable static fields: user-guide/non-hashable-static-fields.md
     Field Metadata: user-guide/field-metadata.md
+    Compact Trees: user-guide/compact.md
 - API Reference:
     Apply: api/Apply.md
     ArrayLike: api/ArrayLike.md
+    Compact: api/Compact.md
     Copy: api/Copy.md
     Extensions: api/Extensions.md
     FieldInfo: api/FieldInfo.md
@@ -44,6 +46,7 @@ nav:
     TreeMeta: api/TreeMeta.md
     add_field_info: api/add_field_info.md
     apply: api/apply.md
+    compact: api/compact.md
     field: api/field.md
     filter: api/filter.md
     map: api/map.md

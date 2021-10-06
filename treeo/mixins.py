@@ -236,12 +236,30 @@ class Compact:
 
         return self._subtrees is None
 
+    # NOTE: it feels like `get_field` could be safely used in non-`compact` methods, maybe
+    # the various checks done to verify that this method is used inside `compact` could be removed.
     def get_field(
         self,
         field_name: str,
         initializer: tp.Callable[[], A],
     ) -> A:
+        """
+        A method that gets a field with the given name if exists, otherwise it initializes it and returns it.
+
+        Currently the follow restrictions apply:
+
+        * The field must be declared in the class definition.
+        * The method can only be called inside a `compact` context.
+
+        Arguments:
+            field_name: The name of the field to get.
+            initializer: The function to initialize the field if it does not exist.
+
+        Returns:
+            The field value.
+        """
         value: A
+
         if field_name not in self._field_metadata:
             raise ValueError(f"Metadata for field '{field_name}' does not exist.")
 

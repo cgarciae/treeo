@@ -18,7 +18,7 @@ pip install treeo
 ```
 
 ## Basics
-With Treeo you can easily define your own custom Pytree classes by inheriting from Treeo's `Tree` class and using the `field` function to declare which fields are nodes (childs) and which are static (metadata):
+With Treeo you can easily define your own custom Pytree classes by inheriting from Treeo's `Tree` class and using the `field` function to declare which fields are nodes (children) and which are static (metadata):
 
 ```python
 import treeo as to

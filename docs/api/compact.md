@@ -1,6 +1,6 @@
 
-# treeo.KindMixin
+# treeo.compact
 
-::: treeo.mixins.KindMixin
+::: treeo.api.compact
     selection:
         inherited_members: true

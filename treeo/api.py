@@ -432,6 +432,10 @@ def _to_string(
 
 
 def in_compact() -> bool:
+    """
+    Returns:
+        `True` if current inside a function decorated with `@compact`.
+    """
     return tree_m._COMPACT_CONTEXT.in_compact
 
 
@@ -498,6 +502,10 @@ _flatten_context = flatten_mode
 
 
 def compact(f):
+    """
+    A decorator that enable the definition of Tree subnodes at runtime.
+    """
+
     @functools.wraps(f)
     def wrapper(tree, *args, **kwargs):
         with tree_m._COMPACT_CONTEXT.compact(f, tree):
