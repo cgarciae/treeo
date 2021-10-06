@@ -824,7 +824,7 @@ class TestTreeo:
         print(rep)
 
     def test_compact(self):
-        class Linear(to.Tree, to.Hooks):
+        class Linear(to.Tree, to.Compact):
             w: np.ndarray = Parameter.node()
             b: np.ndarray = Parameter.node()
             n: int = State.node()
@@ -902,7 +902,7 @@ class TestTreeo:
         assert not isinstance(mlp_states.linear2.n, to.Nothing)
 
     def test_compact_sugar(self):
-        class Linear(to.Tree, to.Hooks):
+        class Linear(to.Tree, to.Compact):
             w: np.ndarray = Parameter.node()
             b: np.ndarray = Parameter.node()
             n: int = State.node()
@@ -980,7 +980,7 @@ class TestTreeo:
         assert not isinstance(mlp_states.linear2.n, to.Nothing)
 
     def test_compact_naming(self):
-        class Linear(to.Tree, to.Hooks):
+        class Linear(to.Tree, to.Compact):
             w: np.ndarray = Parameter.node()
             b: np.ndarray = Parameter.node()
             n: int = State.node()
@@ -1036,7 +1036,7 @@ class TestTreeo:
         assert mlp.linear2.dout == 3
 
     def test_compact_error_no_annotations(self):
-        class Linear(to.Tree, to.Hooks):
+        class Linear(to.Tree, to.Compact):
             def __init__(self, din, dout, name="linear"):
                 self.din = din
                 self.dout = dout
@@ -1054,7 +1054,7 @@ class TestTreeo:
             tree()
 
     def test_compact_override_ok(self):
-        class Linear(to.Tree, to.Hooks):
+        class Linear(to.Tree, to.Compact):
             w: np.ndarray = Parameter.node()
 
             def __init__(self, din, dout, name="linear"):
@@ -1086,7 +1086,7 @@ class TestTreeo:
         assert tree.b.shape == (4,)
 
     def test_compact_recursion_error(self):
-        class Linear(to.Tree, to.Hooks):
+        class Linear(to.Tree, to.Compact):
             w: np.ndarray = Parameter.node()
 
             def __init__(self, din, dout, name="linear"):
@@ -1127,7 +1127,7 @@ class TestTreeo:
                 A()
 
         b = B()
-        
+
         assert b_init_ran
 
         b()

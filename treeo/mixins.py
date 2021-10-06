@@ -223,6 +223,7 @@ class Compact:
     _field_metadata: tp.Dict[str, types.FieldMetadata]
     _subtrees: tp.Optional[tp.Tuple[str, ...]]
 
+    @property
     def first_run(self) -> bool:
         """
         Returns:
@@ -252,7 +253,7 @@ class Compact:
         if field_name in vars(self):
             value = getattr(self, field_name)
         else:
-            if tree_m._COMPACT_CONTEXT.in_compact and not self.first_run():
+            if tree_m._COMPACT_CONTEXT.in_compact and not self.first_run:
                 raise RuntimeError(
                     f"Trying to initialize field '{field_name}' after the first run of `compact`."
                 )
