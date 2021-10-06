@@ -161,6 +161,7 @@ def map(
     *filters: Filter,
     inplace: bool = False,
     flatten_mode: tp.Union[FlattenMode, str, None] = None,
+    is_leaf: tp.Callable[[tp.Any], bool] = None,
 ) -> A:
     """
     Applies a function to all leaves in a pytree using `jax.tree_map`, if `filters` are given then
@@ -193,7 +194,7 @@ def map(
         else:
             new_obj = obj
 
-        new_obj: A = jax.tree_map(f, new_obj)
+        new_obj: A = jax.tree_map(f, new_obj, is_leaf=is_leaf)
 
         if has_filters:
             new_obj = merge(obj, new_obj)
@@ -501,6 +502,8 @@ def compact(f):
     def wrapper(tree, *args, **kwargs):
         with tree_m._COMPACT_CONTEXT.compact(f, tree):
             return f(tree, *args, **kwargs)
+
+    wrapper._treeo_compact = True
 
     return wrapper
 

@@ -1105,3 +1105,33 @@ class TestTreeo:
 
         with pytest.raises(RuntimeError):
             tree()
+
+    def test_not_compact_in_init(self):
+        a_init_ran = False
+        b_init_ran = False
+
+        class A(to.Tree):
+            def __init__(self) -> None:
+                nonlocal a_init_ran
+                a_init_ran = True
+                assert not to.in_compact()
+
+        class B(to.Tree):
+            def __init__(self) -> None:
+                nonlocal b_init_ran
+                b_init_ran = True
+                assert not to.in_compact()
+
+            @to.compact
+            def __call__(self):
+                A()
+
+        b = B()
+        
+        assert b_init_ran
+
+        b()
+
+        assert a_init_ran
+        assert "a" in vars(b)
+        assert isinstance(b.a, A)

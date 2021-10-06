@@ -13,11 +13,11 @@ class Copy:
     Mixin that adds a `.copy()` method to the class.
     """
 
-    def copy(self):
+    def copy(self: A) -> A:
         """
         `copy` is a wrapper over `treeo.copy` that passes `self` as the first argument.
         """
-        return api.copy(self)
+        return tree_m.copy(self)
 
 
 class ToString:
@@ -175,6 +175,7 @@ class Map:
         *filters: Filter,
         inplace: bool = False,
         flatten_mode: tp.Union[api.FlattenMode, str, None] = None,
+        is_leaf: tp.Callable[[tp.Any], bool] = None,
     ) -> A:
         """
         `map` is a wrapper over `treeo.map` that passes `self` as the second argument.
@@ -188,7 +189,14 @@ class Map:
         Returns:
             A new pytree with the changes applied. If `inplace` is `True`, the input `obj` is returned.
         """
-        return api.map(f, self, *filters, inplace=inplace, flatten_mode=flatten_mode)
+        return api.map(
+            f,
+            self,
+            *filters,
+            inplace=inplace,
+            flatten_mode=flatten_mode,
+            is_leaf=is_leaf,
+        )
 
 
 class Apply:
@@ -215,7 +223,6 @@ class Hooks:
     _field_metadata: tp.Dict[str, types.FieldMetadata]
     _subtrees: tp.Optional[tp.Tuple[str, ...]]
 
-    @property
     def first_run(self) -> bool:
         """
         Returns:
@@ -245,7 +252,7 @@ class Hooks:
         if field_name in vars(self):
             value = getattr(self, field_name)
         else:
-            if tree_m._COMPACT_CONTEXT.in_compact and not self.first_run:
+            if tree_m._COMPACT_CONTEXT.in_compact and not self.first_run():
                 raise RuntimeError(
                     f"Trying to initialize field '{field_name}' after the first run of `compact`."
                 )
