@@ -474,6 +474,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/compact/" class="md-nav__link">
+        Compact Trees
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -532,6 +546,20 @@
     <li class="md-nav__item">
       <a href="../ArrayLike/" class="md-nav__link">
         ArrayLike
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Compact/" class="md-nav__link">
+        Compact
       </a>
     </li>
   
@@ -838,6 +866,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../compact/" class="md-nav__link">
+        compact
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../field/" class="md-nav__link">
         field
       </a>
@@ -1054,13 +1096,12 @@
     <span class="n">default</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">kind</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span>
-    <span class="n">default_factory</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
+    <span class="n">default_factory</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">init</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="nb">repr</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="nb">hash</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">compare</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">opaque</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">opaque_is_equal</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">Opaque</span><span class="p">,</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">opaque</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">OpaquePredicate</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">field</span><span class="p">(</span>
         <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
@@ -1072,7 +1113,6 @@
         <span class="nb">hash</span><span class="o">=</span><span class="nb">hash</span><span class="p">,</span>
         <span class="n">compare</span><span class="o">=</span><span class="n">compare</span><span class="p">,</span>
         <span class="n">opaque</span><span class="o">=</span><span class="n">opaque</span><span class="p">,</span>
-        <span class="n">opaque_is_equal</span><span class="o">=</span><span class="n">opaque_is_equal</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div>
         </details>

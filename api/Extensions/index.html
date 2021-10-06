@@ -474,6 +474,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/compact/" class="md-nav__link">
+        Compact Trees
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -544,6 +558,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../Compact/" class="md-nav__link">
+        Compact
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../Copy/" class="md-nav__link">
         Copy
       </a>
@@ -598,6 +626,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#treeo.mixins.Extensions.first_run" class="md-nav__link">
+    first_run
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#treeo.mixins.Extensions.__repr__" class="md-nav__link">
     __repr__()
   </a>
@@ -621,6 +656,13 @@
         <li class="md-nav__item">
   <a href="#treeo.mixins.Extensions.filter" class="md-nav__link">
     filter()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#treeo.mixins.Extensions.get_field" class="md-nav__link">
+    get_field()
   </a>
   
 </li>
@@ -934,6 +976,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../compact/" class="md-nav__link">
+        compact
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../field/" class="md-nav__link">
         field
       </a>
@@ -1079,6 +1135,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#treeo.mixins.Extensions.first_run" class="md-nav__link">
+    first_run
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#treeo.mixins.Extensions.__repr__" class="md-nav__link">
     __repr__()
   </a>
@@ -1102,6 +1165,13 @@
         <li class="md-nav__item">
   <a href="#treeo.mixins.Extensions.filter" class="md-nav__link">
     filter()
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#treeo.mixins.Extensions.get_field" class="md-nav__link">
+    get_field()
   </a>
   
 </li>
@@ -1159,7 +1229,7 @@
 <a id="treeo.mixins.Extensions"></a>
     <div class="doc doc-contents first">
 
-      <p>Mixin that adds all available mixins from <code>treeo.mixins</code>.</p>
+      <p>Mixin that adds all available mixins from <code>treeo.mixins</code> except <code>KindMixin</code>.</p>
 
 
 
@@ -1168,6 +1238,44 @@
 
 
 
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h2 id="treeo.mixins.Extensions.first_run" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">first_run</span><span class="p">:</span> <span class="nb">bool</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-inherited"><code>inherited</code></small>
+      <small class="doc doc-property doc-property-property"><code>property</code></small>
+      <small class="doc doc-property doc-property-readonly"><code>readonly</code></small>
+  </span>
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>bool</code></td>
+      <td><p><code>True</code> if its currently the first run of a <code>compact</code> method.</p></td>
+    </tr>
+  </tbody>
+</table>    </div>
+
+  </div>
 
 
 
@@ -1317,11 +1425,11 @@
 
         <details class="quote">
           <summary>Source code in <code>treeo/mixins.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">A</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `copy` is a wrapper over `treeo.copy` that passes `self` as the first argument.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">api</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -1427,8 +1535,122 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
 
 
 
+<h2 id="treeo.mixins.Extensions.get_field" class="doc doc-heading">
+<code class="highlight language-python"><span class="n">get_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">initializer</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-inherited"><code>inherited</code></small>
+  </span>
+
+</h2>
+
+    <div class="doc doc-contents ">
+
+      <p>A method that gets a field with the given name if exists, otherwise it initializes it and returns it.</p>
+<p>Currently the follow restrictions apply:</p>
+<ul>
+<li>The field must be declared in the class definition.</li>
+<li>The method can only be called inside a <code>compact</code> context.</li>
+</ul>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>field_name</code></td>
+        <td><code>str</code></td>
+        <td><p>The name of the field to get.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>initializer</code></td>
+        <td><code>Callable[[], ~A]</code></td>
+        <td><p>The function to initialize the field if it does not exist.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Type</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>~A</code></td>
+      <td><p>The field value.</p></td>
+    </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>treeo/mixins.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">get_field</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">initializer</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">A</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A method that gets a field with the given name if exists, otherwise it initializes it and returns it.</span>
+
+<span class="sd">    Currently the follow restrictions apply:</span>
+
+<span class="sd">    * The field must be declared in the class definition.</span>
+<span class="sd">    * The method can only be called inside a `compact` context.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        field_name: The name of the field to get.</span>
+<span class="sd">        initializer: The function to initialize the field if it does not exist.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The field value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">A</span>
+
+    <span class="k">if</span> <span class="n">field_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_metadata</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Metadata for field &#39;</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">&#39; does not exist.&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">_COMPACT_CONTEXT</span><span class="o">.</span><span class="n">current_tree</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Object &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; is not the current tree, found &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">tree_m</span><span class="o">.</span><span class="n">_COMPACT_CONTEXT</span><span class="o">.</span><span class="n">current_tree</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;, did you forget the @compact decorator?&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">_COMPACT_CONTEXT</span><span class="o">.</span><span class="n">in_compact</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_run</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Trying to initialize field &#39;</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">&#39; after the first run of `compact`.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="n">initializer</span><span class="p">()</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">value</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
 <h2 id="treeo.mixins.Extensions.map" class="doc doc-heading">
-<code class="highlight language-python"><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">filters</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flatten_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">filters</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flatten_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-inherited"><code>inherited</code></small>
@@ -1500,6 +1722,7 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
     <span class="o">*</span><span class="n">filters</span><span class="p">:</span> <span class="n">Filter</span><span class="p">,</span>
     <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">flatten_mode</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">api</span><span class="o">.</span><span class="n">FlattenMode</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">is_leaf</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `map` is a wrapper over `treeo.map` that passes `self` as the second argument.</span>
@@ -1513,7 +1736,14 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
 <span class="sd">    Returns:</span>
 <span class="sd">        A new pytree with the changes applied. If `inplace` is `True`, the input `obj` is returned.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">api</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">filters</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">,</span> <span class="n">flatten_mode</span><span class="o">=</span><span class="n">flatten_mode</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">api</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+        <span class="n">f</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">filters</span><span class="p">,</span>
+        <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">,</span>
+        <span class="n">flatten_mode</span><span class="o">=</span><span class="n">flatten_mode</span><span class="p">,</span>
+        <span class="n">is_leaf</span><span class="o">=</span><span class="n">is_leaf</span><span class="p">,</span>
+    <span class="p">)</span>
 </code></pre></div>
         </details>
     </div>

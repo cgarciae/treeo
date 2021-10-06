@@ -474,6 +474,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/compact/" class="md-nav__link">
+        Compact Trees
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -532,6 +546,20 @@
     <li class="md-nav__item">
       <a href="../ArrayLike/" class="md-nav__link">
         ArrayLike
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Compact/" class="md-nav__link">
+        Compact
       </a>
     </li>
   
@@ -941,6 +969,20 @@
     <li class="md-nav__item">
       <a href="../apply/" class="md-nav__link">
         apply
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compact/" class="md-nav__link">
+        compact
       </a>
     </li>
   
@@ -1417,6 +1459,7 @@ even via super()).</p>
 
 
 
+
   <div class="doc doc-object doc-method">
 
 
@@ -1495,9 +1538,12 @@ overridden to extend subclasses.</p>
 
     <span class="n">annotations</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">_get_all_annotations</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
     <span class="n">class_vars</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">_get_all_vars</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
+    <span class="c1"># init class variables</span>
     <span class="bp">cls</span><span class="o">.</span><span class="n">_field_metadata</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">cls</span><span class="o">.</span><span class="n">_factory_fields</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">cls</span><span class="o">.</span><span class="n">_default_field_values</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">cls</span><span class="o">.</span><span class="n">_subtrees</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">class_vars</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">):</span>
@@ -1514,7 +1560,6 @@ overridden to extend subclasses.</p>
                     <span class="n">node</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">],</span>
                     <span class="n">kind</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;kind&quot;</span><span class="p">],</span>
                     <span class="n">opaque</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;opaque&quot;</span><span class="p">],</span>
-                    <span class="n">opaque_is_equal</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">metadata</span><span class="p">[</span><span class="s2">&quot;opaque_is_equal&quot;</span><span class="p">],</span>
                 <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">annotations</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -1525,7 +1570,6 @@ overridden to extend subclasses.</p>
                 <span class="n">node</span><span class="o">=</span><span class="n">is_node</span><span class="p">,</span>
                 <span class="n">kind</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span>
                 <span class="n">opaque</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">opaque_is_equal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="p">)</span>
 </code></pre></div>
         </details>

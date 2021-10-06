@@ -474,6 +474,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/compact/" class="md-nav__link">
+        Compact Trees
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -532,6 +546,20 @@
     <li class="md-nav__item">
       <a href="../ArrayLike/" class="md-nav__link">
         ArrayLike
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Compact/" class="md-nav__link">
+        Compact
       </a>
     </li>
   
@@ -885,6 +913,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../compact/" class="md-nav__link">
+        compact
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../field/" class="md-nav__link">
         field
       </a>
@@ -1081,7 +1123,7 @@
 
 
 <h2 id="treeo.mixins.Map.map" class="doc doc-heading">
-<code class="highlight language-python"><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">filters</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flatten_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">filters</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flatten_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 
 </h2>
@@ -1150,6 +1192,7 @@
     <span class="o">*</span><span class="n">filters</span><span class="p">:</span> <span class="n">Filter</span><span class="p">,</span>
     <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">flatten_mode</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">api</span><span class="o">.</span><span class="n">FlattenMode</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">is_leaf</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    `map` is a wrapper over `treeo.map` that passes `self` as the second argument.</span>
@@ -1163,7 +1206,14 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        A new pytree with the changes applied. If `inplace` is `True`, the input `obj` is returned.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">api</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">filters</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">,</span> <span class="n">flatten_mode</span><span class="o">=</span><span class="n">flatten_mode</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">api</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
+        <span class="n">f</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">filters</span><span class="p">,</span>
+        <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">,</span>
+        <span class="n">flatten_mode</span><span class="o">=</span><span class="n">flatten_mode</span><span class="p">,</span>
+        <span class="n">is_leaf</span><span class="o">=</span><span class="n">is_leaf</span><span class="p">,</span>
+    <span class="p">)</span>
 </code></pre></div>
         </details>
     </div>

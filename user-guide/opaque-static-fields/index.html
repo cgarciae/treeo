@@ -65,7 +65,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#opaque_is_equal" class="md-skip">
+        <a href="#opaque-predicates" class="md-skip">
           Skip to content
         </a>
       
@@ -469,8 +469,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#opaque_is_equal" class="md-nav__link">
-    opaque_is_equal
+  <a href="#opaque-predicates" class="md-nav__link">
+    opaque predicates
   </a>
   
 </li>
@@ -506,6 +506,20 @@
     <li class="md-nav__item">
       <a href="../field-metadata/" class="md-nav__link">
         Field Metadata
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../compact/" class="md-nav__link">
+        Compact Trees
       </a>
     </li>
   
@@ -568,6 +582,20 @@
     <li class="md-nav__item">
       <a href="../../api/ArrayLike/" class="md-nav__link">
         ArrayLike
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/Compact/" class="md-nav__link">
+        Compact
       </a>
     </li>
   
@@ -874,6 +902,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/compact/" class="md-nav__link">
+        compact
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/field/" class="md-nav__link">
         field
       </a>
@@ -1010,8 +1052,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#opaque_is_equal" class="md-nav__link">
-    opaque_is_equal
+  <a href="#opaque-predicates" class="md-nav__link">
+    opaque predicates
   </a>
   
 </li>
@@ -1063,8 +1105,8 @@ To avoid this, you can mark a field as <code>opaque</code>:
 <span class="n">do_something</span><span class="p">(</span><span class="n">Person</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="mf">1.5</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Fred&#39;</span><span class="p">))</span> <span class="c1"># cached! 🤩</span>
 </code></pre></div>
 <code>opaque</code> will "hide" the value content of the field from JAX, changes will only be detected if the type of an opaque field changes or, in case its an array-like type, if its shape or dtype changes.</p>
-<h2 id="opaque_is_equal">opaque_is_equal</h2>
-<p>If you want to define you on policy on how opaque fields are handled, you can use the <code>opaque_is_equal: Callable[[to.Opaque, Any], bool]</code> argument and pass a function that takes in a <code>to.Opaque(value: Any)</code> object and the new value of the field and return a boolean indicating whether the new value is considered equal to the opaque value.</p>
+<h2 id="opaque-predicates">opaque predicates</h2>
+<p>If you want to define you on policy on how opaque fields are handled, you can use pass a <code>Callable[[to.Opaque, Any], bool]</code>  function that takes in a <code>to.Opaque(value: Any)</code> object and the new value of the field and return a boolean indicating whether the new value is considered equal to the opaque value.</p>
 <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">same_length</span><span class="p">(</span><span class="n">opaque</span><span class="p">:</span> <span class="n">to</span><span class="o">.</span><span class="n">Opaque</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
     <span class="k">if</span> <span class="p">(</span>
         <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">to</span><span class="o">.</span><span class="n">Opaque</span><span class="p">)</span> 
@@ -1082,10 +1124,9 @@ To avoid this, you can mark a field as <code>opaque</code>:
     <span class="n">height</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
         <span class="n">node</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
-        <span class="n">opaque</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
-<span class="hll">        <span class="n">opaque_is_equal</span><span class="o">=</span><span class="n">same_length</span><span class="p">,</span>
-</span>    <span class="p">)</span>
-</code></pre></div>
+        <span class="n">opaque</span><span class="o">=</span><span class="n">same_length</span><span class="p">,</span> 
+<span class="hll">    <span class="p">)</span>
+</span></code></pre></div>
                 
               
               
