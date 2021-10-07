@@ -45,8 +45,8 @@ class MLP(to.Tree):
         self.dout = dout
         self.name = name
 
-        self.linear1 = Linear(din, dmid, name="linear1")
-        self.linear2 = Linear(dmid, dout, name="linear2")
+        self.linear1 = Linear(din, dmid)
+        self.linear2 = Linear(dmid, dout)
 
 
 class TestTreeo:
@@ -822,3 +822,316 @@ class TestTreeo:
         rep = to.to_string(b, color=True)
 
         print(rep)
+
+    def test_compact(self):
+        class Linear(to.Tree, to.Compact):
+            w: np.ndarray = Parameter.node()
+            b: np.ndarray = Parameter.node()
+            n: int = State.node()
+
+            def __init__(self, din, dout, name="linear"):
+                self.din = din
+                self.dout = dout
+                self.name = name
+
+            @to.compact
+            def __call__(self):
+                self.w = self.get_field(
+                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
+                )
+                self.b = self.get_field(
+                    "b", lambda: np.random.uniform(size=(self.dout,))
+                )
+                self.n = self.get_field("n", lambda: 1)
+
+        class MLP(to.Tree):
+            linear1: Linear
+            linear2: Linear
+
+            def __init__(self, din, dmid, dout, name="mlp"):
+                self.din = din
+                self.dmid = dmid
+                self.dout = dout
+                self.name = name
+
+            @to.compact
+            def __call__(self):
+                Linear(self.din, self.dmid, name="linear1")()
+                Linear(self.dmid, self.dout, name="linear2")()
+
+        mlp = MLP(2, 4, 3)
+        mlp()
+        mlp()
+
+        assert mlp.linear1.w.shape == (2, 4)
+        assert mlp.linear1.b.shape == (4,)
+        assert mlp.linear1.n == 1
+
+        assert mlp.linear2.w.shape == (4, 3)
+        assert mlp.linear2.b.shape == (3,)
+        assert mlp.linear2.n == 1
+
+        assert mlp.linear1.name == "linear1"
+        assert mlp.linear2.name == "linear2"
+        assert mlp.name == "mlp"
+
+        flat = jax.tree_leaves(mlp)
+
+        assert len(flat) == 6
+
+        # params
+        mlp_params = to.filter(mlp, Parameter)
+
+        assert not isinstance(mlp_params.linear1.w, to.Nothing)
+        assert not isinstance(mlp_params.linear1.b, to.Nothing)
+        assert isinstance(mlp_params.linear1.n, to.Nothing)
+
+        assert not isinstance(mlp_params.linear2.w, to.Nothing)
+        assert not isinstance(mlp_params.linear2.b, to.Nothing)
+        assert isinstance(mlp_params.linear2.n, to.Nothing)
+
+        # states
+        mlp_states = to.filter(mlp, State)
+
+        assert isinstance(mlp_states.linear1.w, to.Nothing)
+        assert isinstance(mlp_states.linear1.b, to.Nothing)
+        assert not isinstance(mlp_states.linear1.n, to.Nothing)
+
+        assert isinstance(mlp_states.linear2.w, to.Nothing)
+        assert isinstance(mlp_states.linear2.b, to.Nothing)
+        assert not isinstance(mlp_states.linear2.n, to.Nothing)
+
+    def test_compact_sugar(self):
+        class Linear(to.Tree, to.Compact):
+            w: np.ndarray = Parameter.node()
+            b: np.ndarray = Parameter.node()
+            n: int = State.node()
+
+            def __init__(self, din, dout, name="linear"):
+                self.din = din
+                self.dout = dout
+                self.name = name
+
+            @to.compact
+            def __call__(self):
+                self.w = self.get_field(
+                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
+                )
+                self.b = self.get_field(
+                    "b", lambda: np.random.uniform(size=(self.dout,))
+                )
+                self.n = self.get_field("n", lambda: 1)
+
+        class MLP(to.Tree):
+            linear1: Linear
+            linear2: Linear
+
+            def __init__(self, din, dmid, dout, name="mlp"):
+                self.din = din
+                self.dmid = dmid
+                self.dout = dout
+                self.name = name
+
+            @to.compact
+            def __call__(self):
+                Linear(self.din, self.dmid, name="linear1")()
+                Linear(self.dmid, self.dout, name="linear2")()
+
+        mlp = MLP(2, 4, 3)
+        mlp()
+        mlp()
+
+        assert mlp.linear1.w.shape == (2, 4)
+        assert mlp.linear1.b.shape == (4,)
+        assert mlp.linear1.n == 1
+
+        assert mlp.linear2.w.shape == (4, 3)
+        assert mlp.linear2.b.shape == (3,)
+        assert mlp.linear2.n == 1
+
+        assert mlp.linear1.name == "linear1"
+        assert mlp.linear2.name == "linear2"
+        assert mlp.name == "mlp"
+
+        flat = jax.tree_leaves(mlp)
+
+        assert len(flat) == 6
+
+        # params
+        mlp_params = to.filter(mlp, Parameter)
+
+        assert not isinstance(mlp_params.linear1.w, to.Nothing)
+        assert not isinstance(mlp_params.linear1.b, to.Nothing)
+        assert isinstance(mlp_params.linear1.n, to.Nothing)
+
+        assert not isinstance(mlp_params.linear2.w, to.Nothing)
+        assert not isinstance(mlp_params.linear2.b, to.Nothing)
+        assert isinstance(mlp_params.linear2.n, to.Nothing)
+
+        # states
+        mlp_states = to.filter(mlp, State)
+
+        assert isinstance(mlp_states.linear1.w, to.Nothing)
+        assert isinstance(mlp_states.linear1.b, to.Nothing)
+        assert not isinstance(mlp_states.linear1.n, to.Nothing)
+
+        assert isinstance(mlp_states.linear2.w, to.Nothing)
+        assert isinstance(mlp_states.linear2.b, to.Nothing)
+        assert not isinstance(mlp_states.linear2.n, to.Nothing)
+
+    def test_compact_naming(self):
+        class Linear(to.Tree, to.Compact):
+            w: np.ndarray = Parameter.node()
+            b: np.ndarray = Parameter.node()
+            n: int = State.node()
+
+            def __init__(self, din, dout):
+                self.din = din
+                self.dout = dout
+
+            @to.compact
+            def __call__(self):
+                self.w = self.get_field(
+                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
+                )
+                self.b = self.get_field(
+                    "b", lambda: np.random.uniform(size=(self.dout,))
+                )
+                self.n = self.get_field("n", lambda: 1)
+
+        class MLP(to.Tree):
+            linear: Linear
+            linear2: Linear
+
+            def __init__(self, din, dmid, dout, name="mlp"):
+                self.din = din
+                self.dmid = dmid
+                self.dout = dout
+                self.name = name
+
+            @to.compact
+            def __call__(self):
+                Linear(self.din, self.dmid)()
+                Linear(self.dmid, self.dout)()
+
+        mlp = MLP(2, 4, 3)
+        mlp()
+        mlp()
+
+        assert mlp.linear.w.shape == (2, 4)
+        assert mlp.linear.b.shape == (4,)
+        assert mlp.linear.n == 1
+
+        assert mlp.linear2.w.shape == (4, 3)
+        assert mlp.linear2.b.shape == (3,)
+        assert mlp.linear2.n == 1
+
+        assert hasattr(mlp, "linear")
+        assert hasattr(mlp, "linear2")
+
+        assert mlp.linear.din == 2
+        assert mlp.linear.dout == 4
+
+        assert mlp.linear2.din == 4
+        assert mlp.linear2.dout == 3
+
+    def test_compact_error_no_annotations(self):
+        class Linear(to.Tree, to.Compact):
+            def __init__(self, din, dout, name="linear"):
+                self.din = din
+                self.dout = dout
+                self.name = name
+
+            @to.compact
+            def __call__(self):
+                self.w = self.get_field(
+                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
+                )
+
+        tree = Linear(2, 4)
+
+        with pytest.raises(ValueError):
+            tree()
+
+    def test_compact_override_ok(self):
+        class Linear(to.Tree, to.Compact):
+            w: np.ndarray = Parameter.node()
+
+            def __init__(self, din, dout, name="linear"):
+                self.din = din
+                self.dout = dout
+                self.name = name
+
+            @to.compact
+            def __call__(self):
+                self.w = self.get_field(
+                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
+                )
+
+        class NewLinear(Linear):
+            b: np.ndarray = Parameter.node()
+
+            @to.compact
+            def __call__(self):
+                self.b = self.get_field(
+                    "b", lambda: np.random.uniform(size=(self.dout,))
+                )
+                super().__call__()
+
+        tree = NewLinear(2, 4)
+
+        tree()
+
+        assert tree.w.shape == (2, 4)
+        assert tree.b.shape == (4,)
+
+    def test_compact_recursion_error(self):
+        class Linear(to.Tree, to.Compact):
+            w: np.ndarray = Parameter.node()
+
+            def __init__(self, din, dout, name="linear"):
+                self.din = din
+                self.dout = dout
+                self.name = name
+
+            @to.compact
+            def __call__(self):
+                self.w = self.get_field(
+                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
+                )
+                self()
+
+        tree = Linear(2, 4)
+
+        with pytest.raises(RuntimeError):
+            tree()
+
+    def test_not_compact_in_init(self):
+        a_init_ran = False
+        b_init_ran = False
+
+        class A(to.Tree):
+            def __init__(self) -> None:
+                nonlocal a_init_ran
+                a_init_ran = True
+                assert not to.in_compact()
+
+        class B(to.Tree):
+            def __init__(self) -> None:
+                nonlocal b_init_ran
+                b_init_ran = True
+                assert not to.in_compact()
+
+            @to.compact
+            def __call__(self):
+                A()
+
+        b = B()
+
+        assert b_init_ran
+
+        b()
+
+        assert a_init_ran
+        assert "a" in vars(b)
+        assert isinstance(b.a, A)

@@ -1,6 +1,9 @@
+import dataclasses
 import typing as tp
 
 from treeo import api
+from treeo import tree as tree_m
+from treeo import types, utils
 
 A = tp.TypeVar("A")
 
@@ -10,11 +13,11 @@ class Copy:
     Mixin that adds a `.copy()` method to the class.
     """
 
-    def copy(self):
+    def copy(self: A) -> A:
         """
         `copy` is a wrapper over `treeo.copy` that passes `self` as the first argument.
         """
-        return api.copy(self)
+        return tree_m.copy(self)
 
 
 class ToString:
@@ -172,6 +175,7 @@ class Map:
         *filters: Filter,
         inplace: bool = False,
         flatten_mode: tp.Union[api.FlattenMode, str, None] = None,
+        is_leaf: tp.Callable[[tp.Any], bool] = None,
     ) -> A:
         """
         `map` is a wrapper over `treeo.map` that passes `self` as the second argument.
@@ -185,7 +189,14 @@ class Map:
         Returns:
             A new pytree with the changes applied. If `inplace` is `True`, the input `obj` is returned.
         """
-        return api.map(f, self, *filters, inplace=inplace, flatten_mode=flatten_mode)
+        return api.map(
+            f,
+            self,
+            *filters,
+            inplace=inplace,
+            flatten_mode=flatten_mode,
+            is_leaf=is_leaf,
+        )
 
 
 class Apply:
@@ -208,9 +219,144 @@ class Apply:
         return api.apply(f, self, *rest, inplace=inplace)
 
 
-class Extensions(Copy, ToString, ToDict, Repr, Filter, Merge, Map, Apply):
+class Compact:
+    _field_metadata: tp.Dict[str, types.FieldMetadata]
+    _subtrees: tp.Optional[tp.Tuple[str, ...]]
+
+    @property
+    def first_run(self) -> bool:
+        """
+        Returns:
+            `True` if its currently the first run of a `compact` method.
+        """
+        if tree_m._COMPACT_CONTEXT.current_tree is not self:
+            raise RuntimeError(
+                f"Object '{type(self).__name__}' is not the current tree, found '{type(tree_m._COMPACT_CONTEXT.current_tree).__name__}', did you forget the @compact decorator?"
+            )
+
+        return self._subtrees is None
+
+    # NOTE: it feels like `get_field` could be safely used in non-`compact` methods, maybe
+    # the various checks done to verify that this method is used inside `compact` could be removed.
+    def get_field(
+        self,
+        field_name: str,
+        initializer: tp.Callable[[], A],
+    ) -> A:
+        """
+        A method that gets a field with the given name if exists, otherwise it initializes it and returns it.
+
+        Currently the follow restrictions apply:
+
+        * The field must be declared in the class definition.
+        * The method can only be called inside a `compact` context.
+
+        Arguments:
+            field_name: The name of the field to get.
+            initializer: The function to initialize the field if it does not exist.
+
+        Returns:
+            The field value.
+        """
+        value: A
+
+        if field_name not in self._field_metadata:
+            raise ValueError(f"Metadata for field '{field_name}' does not exist.")
+
+        if tree_m._COMPACT_CONTEXT.current_tree is not self:
+            raise RuntimeError(
+                f"Object '{type(self).__name__}' is not the current tree, found '{type(tree_m._COMPACT_CONTEXT.current_tree).__name__}', did you forget the @compact decorator?"
+            )
+
+        if field_name in vars(self):
+            value = getattr(self, field_name)
+        else:
+            if tree_m._COMPACT_CONTEXT.in_compact and not self.first_run:
+                raise RuntimeError(
+                    f"Trying to initialize field '{field_name}' after the first run of `compact`."
+                )
+
+            value = initializer()
+            setattr(self, field_name, value)
+
+        return value
+
+
+class Extensions(Copy, ToString, ToDict, Repr, Filter, Merge, Map, Apply, Compact):
     """
-    Mixin that adds all available mixins from `treeo.mixins`.
+    Mixin that adds all available mixins from `treeo.mixins` except `KindMixin`.
     """
 
     pass
+
+
+class KindMixin:
+    @classmethod
+    def field(
+        cls,
+        default=dataclasses.MISSING,
+        *,
+        node: bool,
+        default_factory=dataclasses.MISSING,
+        init: bool = True,
+        repr: bool = True,
+        hash: tp.Optional[bool] = None,
+        compare: bool = True,
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
+    ) -> tp.Any:
+        return utils.field(
+            default=default,
+            node=node,
+            kind=cls,
+            default_factory=default_factory,
+            init=init,
+            repr=repr,
+            hash=hash,
+            compare=compare,
+            opaque=opaque,
+        )
+
+    @classmethod
+    def node(
+        cls,
+        default=dataclasses.MISSING,
+        *,
+        default_factory=dataclasses.MISSING,
+        init: bool = True,
+        repr: bool = True,
+        hash: tp.Optional[bool] = None,
+        compare: bool = True,
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
+    ) -> tp.Any:
+        return utils.node(
+            default=default,
+            kind=cls,
+            default_factory=default_factory,
+            init=init,
+            repr=repr,
+            hash=hash,
+            compare=compare,
+            opaque=opaque,
+        )
+
+    @classmethod
+    def static(
+        cls,
+        default=dataclasses.MISSING,
+        default_factory=dataclasses.MISSING,
+        init: bool = True,
+        repr: bool = True,
+        hash: tp.Optional[bool] = None,
+        compare: bool = True,
+        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
+    ) -> tp.Any:
+        return cls.field(
+            default=default,
+            node=False,
+            default_factory=default_factory,
+            init=init,
+            repr=repr,
+            hash=hash,
+            compare=compare,
+            opaque=opaque,
+        )

@@ -1,3 +1,4 @@
+import functools
 import logging
 import re
 import typing as tp
@@ -9,7 +10,7 @@ import jax.numpy as jnp
 import numpy as np
 
 import treeo.tree as tree_m
-from treeo import types
+from treeo import types, utils
 from treeo.tree import FieldInfo, FlattenMode, Tree
 
 try:
@@ -160,6 +161,7 @@ def map(
     *filters: Filter,
     inplace: bool = False,
     flatten_mode: tp.Union[FlattenMode, str, None] = None,
+    is_leaf: tp.Callable[[tp.Any], bool] = None,
 ) -> A:
     """
     Applies a function to all leaves in a pytree using `jax.tree_map`, if `filters` are given then
@@ -192,7 +194,7 @@ def map(
         else:
             new_obj = obj
 
-        new_obj: A = jax.tree_map(f, new_obj)
+        new_obj: A = jax.tree_map(f, new_obj, is_leaf=is_leaf)
 
         if has_filters:
             new_obj = merge(obj, new_obj)
@@ -429,6 +431,19 @@ def _to_string(
         return str(obj)
 
 
+def in_compact() -> bool:
+    """
+    Returns:
+        `True` if current inside a function decorated with `@compact`.
+    """
+    return tree_m._COMPACT_CONTEXT.in_compact
+
+
+# ---------------------------------------------------------------
+# Context Managers
+# ---------------------------------------------------------------
+
+
 @contextmanager
 def add_field_info():
     """
@@ -480,9 +495,30 @@ def flatten_mode(mode: tp.Optional[tp.Union[FlattenMode, str]]):
 # alias for internal use
 _flatten_context = flatten_mode
 
-# --------------------------------------------------
+
+# ---------------------------------------------------------------
+# decorators
+# ---------------------------------------------------------------
+
+
+def compact(f):
+    """
+    A decorator that enable the definition of Tree subnodes at runtime.
+    """
+
+    @functools.wraps(f)
+    def wrapper(tree, *args, **kwargs):
+        with tree_m._COMPACT_CONTEXT.compact(f, tree):
+            return f(tree, *args, **kwargs)
+
+    wrapper._treeo_compact = True
+
+    return wrapper
+
+
+# ---------------------------------------------------------------
 # utils
-# --------------------------------------------------
+# ---------------------------------------------------------------
 
 
 def _looser_tree_map(

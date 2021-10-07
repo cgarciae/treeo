@@ -14,84 +14,6 @@ A = tp.TypeVar("A")
 B = tp.TypeVar("B")
 
 
-class KindMixin:
-    @classmethod
-    def field(
-        cls,
-        default=dataclasses.MISSING,
-        *,
-        node: bool,
-        default_factory=dataclasses.MISSING,
-        init: bool = True,
-        repr: bool = True,
-        hash: tp.Optional[bool] = None,
-        compare: bool = True,
-        opaque: bool = False,
-        opaque_is_equal: tp.Optional[tp.Callable[[utils.Opaque, tp.Any], bool]] = None,
-    ) -> tp.Any:
-        return utils.field(
-            default=default,
-            node=node,
-            kind=cls,
-            default_factory=default_factory,
-            init=init,
-            repr=repr,
-            hash=hash,
-            compare=compare,
-            opaque=opaque,
-            opaque_is_equal=opaque_is_equal,
-        )
-
-    @classmethod
-    def node(
-        cls,
-        default=dataclasses.MISSING,
-        *,
-        default_factory=dataclasses.MISSING,
-        init: bool = True,
-        repr: bool = True,
-        hash: tp.Optional[bool] = None,
-        compare: bool = True,
-        opaque: bool = False,
-        opaque_is_equal: tp.Optional[tp.Callable[[utils.Opaque, tp.Any], bool]] = None,
-    ) -> tp.Any:
-        return utils.node(
-            default=default,
-            kind=cls,
-            default_factory=default_factory,
-            init=init,
-            repr=repr,
-            hash=hash,
-            compare=compare,
-            opaque=opaque,
-            opaque_is_equal=opaque_is_equal,
-        )
-
-    @classmethod
-    def static(
-        cls,
-        default=dataclasses.MISSING,
-        default_factory=dataclasses.MISSING,
-        init: bool = True,
-        repr: bool = True,
-        hash: tp.Optional[bool] = None,
-        compare: bool = True,
-        opaque: bool = False,
-        opaque_is_equal: tp.Optional[tp.Callable[[utils.Opaque, tp.Any], bool]] = None,
-    ) -> tp.Any:
-        return cls.field(
-            default=default,
-            node=False,
-            default_factory=default_factory,
-            init=init,
-            repr=repr,
-            hash=hash,
-            compare=compare,
-            opaque=opaque,
-            opaque_is_equal=opaque_is_equal,
-        )
-
-
 class _TrivialPytree:
     def tree_flatten(self):
         tree = vars(self)
@@ -114,14 +36,17 @@ class _TrivialPytree:
 class FieldMetadata:
     node: bool
     kind: type
-    opaque: bool
-    opaque_is_equal: tp.Optional[tp.Callable[[utils.Opaque, tp.Any], bool]]
+    opaque: tp.Union[bool, tp.Callable[[utils.Opaque, tp.Any], bool]]
 
-    def __init__(self, node, kind, opaque, opaque_is_equal):
+    def __init__(
+        self,
+        node: bool,
+        kind: type,
+        opaque: tp.Union[bool, tp.Callable[[utils.Opaque, tp.Any], bool]],
+    ):
         self.__dict__["node"] = node
         self.__dict__["kind"] = kind
         self.__dict__["opaque"] = opaque
-        self.__dict__["opaque_is_equal"] = opaque_is_equal
 
     def update(self, **kwargs) -> "FieldMetadata":
         fields = vars(self).copy()

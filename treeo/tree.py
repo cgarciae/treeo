@@ -1,5 +1,6 @@
 import dataclasses
 import enum
+import functools
 import inspect
 import threading
 import typing as tp
@@ -47,6 +48,94 @@ class _Context(threading.local):
             yield
 
 
+@dataclass
+class _CompactContext(threading.local):
+    current_tree: tp.Optional["Tree"] = None
+    existing_subtrees: tp.Optional[tp.List["Tree"]] = None
+    tree_idx: int = 0
+    new_subtrees: tp.Optional[tp.List["Tree"]] = None
+    compact_calls: tp.Optional[tp.Set[tp.Callable[..., tp.Any]]] = None
+
+    @property
+    def in_compact(self):
+        return self.existing_subtrees is not None or self.new_subtrees is not None
+
+    def __enter__(self):
+        global _COMPACT_CONTEXT
+        self._old_context = _COMPACT_CONTEXT
+        _COMPACT_CONTEXT = self
+
+    def __exit__(self, *args):
+        global _COMPACT_CONTEXT
+        _COMPACT_CONTEXT = self._old_context
+
+    @contextmanager
+    def update(self, **kwargs):
+        fields = vars(self).copy()
+        fields.pop("_old_context", None)
+        fields.update(kwargs)
+
+        with _CompactContext(**fields):
+            yield
+
+    @contextmanager
+    def compact(self, f: tp.Callable[..., tp.Any], tree: "Tree"):
+        new_subtrees: tp.Optional[tp.List["Tree"]]
+        existing_subtrees: tp.Optional[tp.List["Tree"]]
+
+        if tree._subtrees is None:
+            existing_subtrees = None
+            new_subtrees = []
+        else:
+            existing_subtrees = list(getattr(tree, field) for field in tree._subtrees)
+            new_subtrees = None
+
+        if self.current_tree is tree:
+            assert self.compact_calls is not None
+
+            if f in self.compact_calls:
+                raise RuntimeError(f"Detected recursion in `compact` for: {tree}")
+
+            self.compact_calls.add(f)
+            yield
+        else:
+            with _CompactContext(
+                current_tree=tree,
+                existing_subtrees=existing_subtrees,
+                new_subtrees=new_subtrees,
+                compact_calls={f},
+            ):
+                yield
+
+        if tree._subtrees is None:
+            assert new_subtrees is not None
+            field_names = list(
+                utils._unique_names(
+                    (utils._get_name(new_tree) for new_tree in new_subtrees),
+                    existing_names=set(vars(tree).keys()),
+                )
+            )
+            tree._subtrees = tuple(field_names)
+            for field, subtree in zip(field_names, new_subtrees):
+                if (
+                    field in tree._field_metadata
+                    and not tree._field_metadata[field].node
+                ):
+                    raise ValueError(
+                        f"Trying to subtree '{type(subtree).__name__}' to field '{field}' of '{type(tree).__name__}' but it has previously been declared with `node=False`"
+                    )
+
+                if field not in tree._field_metadata:
+                    tree._field_metadata[field] = types.FieldMetadata(
+                        kind=type(None),
+                        node=True,
+                        opaque=False,
+                    )
+
+                setattr(tree, field, subtree)
+
+
+_COMPACT_CONTEXT = _CompactContext()
 _CONTEXT = _Context()
 
 
@@ -69,7 +158,28 @@ class FieldInfo:
 
 class TreeMeta(ABCMeta):
     def __call__(cls, *args, **kwargs) -> "Tree":
-        obj: Tree = cls.__new__(cls)
+        obj: Tree
+
+        if _COMPACT_CONTEXT.existing_subtrees is not None:
+            if len(_COMPACT_CONTEXT.existing_subtrees) <= _COMPACT_CONTEXT.tree_idx:
+                raise ValueError(
+                    f"Out of bounds: trying to new initialize new Tree '{cls.__name__}' after the first compact run"
+                )
+
+            obj = _COMPACT_CONTEXT.existing_subtrees[_COMPACT_CONTEXT.tree_idx]
+            _COMPACT_CONTEXT.tree_idx += 1
+
+            return obj
+        else:
+            obj = cls.__new__(cls)
+            obj = cls.construct(obj, *args, **kwargs)
+
+        if _COMPACT_CONTEXT.new_subtrees is not None:
+            _COMPACT_CONTEXT.new_subtrees.append(obj)
+
+        return obj
+
+    def construct(cls, obj: T, *args, **kwargs) -> T:
 
         obj._field_metadata = obj._field_metadata.copy()
 
@@ -80,7 +190,9 @@ class TreeMeta(ABCMeta):
             for field, default_value in obj._default_field_values.items():
                 setattr(obj, field, default_value)
 
-        obj.__init__(*args, **kwargs)
+        # reset context before __init__ and add obj as current tree
+        with _CompactContext(current_tree=obj):
+            obj.__init__(*args, **kwargs)
 
         # auto-annotations
         obj._update_local_metadata()
@@ -92,6 +204,7 @@ class Tree(metaclass=TreeMeta):
     _field_metadata: tp.Dict[str, types.FieldMetadata]
     _factory_fields: tp.Dict[str, tp.Callable[[], tp.Any]]
     _default_field_values: tp.Dict[str, tp.Any]
+    _subtrees: tp.Optional[tp.Tuple[str, ...]]
 
     @property
     def field_metadata(self) -> tp.Mapping[str, types.FieldMetadata]:
@@ -102,12 +215,7 @@ class Tree(metaclass=TreeMeta):
         field: str,
         node: tp.Optional[bool] = None,
         kind: tp.Optional[type] = None,
-        opaque: tp.Optional[bool] = None,
-        opaque_is_equal: tp.Union[
-            tp.Callable[[utils.Opaque, tp.Any], bool],
-            None,
-            types.Missing,
-        ] = types.MISSING,
+        opaque: tp.Union[bool, utils.OpaquePredicate, None] = None,
     ) -> T:
         module = copy(self)
 
@@ -122,9 +230,6 @@ class Tree(metaclass=TreeMeta):
 
         if opaque is not None:
             updates.update(opaque=opaque)
-
-        if opaque_is_equal is not types.MISSING:
-            updates.update(opaque_is_equal=opaque_is_equal)
 
         if updates:
             field_metadata = field_metadata.update(**updates)
@@ -148,7 +253,6 @@ class Tree(metaclass=TreeMeta):
                     node=isinstance(value, Tree),
                     kind=type(value),
                     opaque=False,
-                    opaque_is_equal=None,
                 )
 
     def __init_subclass__(cls):
@@ -161,9 +265,12 @@ class Tree(metaclass=TreeMeta):
 
         annotations = utils._get_all_annotations(cls)
         class_vars = utils._get_all_vars(cls)
+
+        # init class variables
         cls._field_metadata = {}
         cls._factory_fields = {}
         cls._default_field_values = {}
+        cls._subtrees = None
 
         for field, value in class_vars.items():
             if isinstance(value, dataclasses.Field):
@@ -180,7 +287,6 @@ class Tree(metaclass=TreeMeta):
                         node=value.metadata["node"],
                         kind=value.metadata["kind"],
                         opaque=value.metadata["opaque"],
-                        opaque_is_equal=value.metadata["opaque_is_equal"],
                     )
 
         for field, value in annotations.items():
@@ -191,7 +297,6 @@ class Tree(metaclass=TreeMeta):
                     node=is_node,
                     kind=type(None),
                     opaque=False,
-                    opaque_is_equal=None,
                 )
 
     def tree_flatten(self):
@@ -214,10 +319,12 @@ class Tree(metaclass=TreeMeta):
 
                 if field_annotation.node:
                     node_fields[field] = value
-                elif not field_annotation.node and field_annotation.opaque:
+                elif not field_annotation.node and field_annotation.opaque != False:
                     static_fields[field] = utils.Opaque(
                         value,
-                        opaque_is_equal=field_annotation.opaque_is_equal,
+                        predicate=field_annotation.opaque
+                        if not isinstance(field_annotation.opaque, bool)
+                        else None,
                     )
                 else:
                     static_fields[field] = value
