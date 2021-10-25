@@ -1,7 +1,6 @@
+# isort:skip_file
 __version__ = "0.0.4"
 
-# optimizers first
-# rest
 
 from treeo.api import *
 from treeo.mixins import *

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "treeo"
-version = "0.0.4"
+version = "0.0.5"
 description = ""
 authors = ["Cristian Garcia <cgarcia.e88@gmail.com>"]
 license = "MIT"
@@ -12,7 +12,7 @@ homepage = "https://cgarciae.github.io/treeo"
 python = "^3.7"
 jax = "^0.2.18"
 jaxlib = "^0.1.70"
-typing-extensions = "^3.10.0"
+typing-extensions = ">=3.7.0"
 
 [tool.poetry.dev-dependencies]
 matplotlib = { version = "^3.4.3", python = ">=3.7" }
