@@ -509,3 +509,16 @@ class TestTreeoDataclass:
 
         assert infos[0].kind == type(None)
         assert infos[1].kind == Parameter
+
+    def test_static(self):
+        # @dataclass
+        class A(to.Tree):
+            _initialized: bool = to.static(False)
+
+        @dataclass
+        class B(A):
+            pass
+
+        tree = B()
+
+        assert tree._initialized is False

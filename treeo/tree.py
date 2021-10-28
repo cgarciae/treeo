@@ -183,12 +183,12 @@ class TreeMeta(ABCMeta):
 
         obj._field_metadata = obj._field_metadata.copy()
 
-        if not dataclasses.is_dataclass(cls):
-            for field, default_factory in obj._factory_fields.items():
-                setattr(obj, field, default_factory())
+        # set default fields
+        for field, default_factory in obj._factory_fields.items():
+            setattr(obj, field, default_factory())
 
-            for field, default_value in obj._default_field_values.items():
-                setattr(obj, field, default_value)
+        for field, default_value in obj._default_field_values.items():
+            setattr(obj, field, default_value)
 
         # reset context before __init__ and add obj as current tree
         with _CompactContext(current_tree=obj):
