@@ -263,11 +263,6 @@ class Compact:
         if field_name not in self._field_metadata:
             raise ValueError(f"Metadata for field '{field_name}' does not exist.")
 
-        if tree_m._COMPACT_CONTEXT.current_tree is not self:
-            raise RuntimeError(
-                f"Object '{type(self).__name__}' is not the current tree, found '{type(tree_m._COMPACT_CONTEXT.current_tree).__name__}', did you forget the @compact decorator?"
-            )
-
         if field_name in vars(self):
             value = getattr(self, field_name)
         else:
