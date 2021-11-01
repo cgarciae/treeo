@@ -162,6 +162,7 @@ def map(
     inplace: bool = False,
     flatten_mode: tp.Union[FlattenMode, str, None] = None,
     is_leaf: tp.Callable[[tp.Any], bool] = None,
+    field_info: tp.Optional[bool] = False,
 ) -> A:
     """
     Applies a function to all leaves in a pytree using `jax.tree_map`, if `filters` are given then
@@ -175,6 +176,8 @@ def map(
         *filters: The filters used to select the leaves to which the function will be applied.
         inplace: If `True`, the input `obj` is mutated and returned.
         flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used.
+        add_field_info: Represent the leaves of the tree by a `FieldInfo` type. This enables values of the field such as
+        kind and value to be used within the `map` function.
 
     Returns:
         A new pytree with the changes applied. If `inplace` is `True`, the input `obj` is returned.
@@ -194,7 +197,12 @@ def map(
         else:
             new_obj = obj
 
-        new_obj: A = jax.tree_map(f, new_obj, is_leaf=is_leaf)
+        # Conditionally build map function with, or without, the leaf nodes' field info.
+        if field_info:
+            with add_field_info():
+                new_obj: A = jax.tree_map(f, new_obj, is_leaf=is_leaf)
+        else:
+            new_obj: A = jax.tree_map(f, new_obj, is_leaf=is_leaf)
 
         if has_filters:
             new_obj = merge(obj, new_obj)
