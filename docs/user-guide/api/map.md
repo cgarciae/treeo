@@ -24,8 +24,8 @@ def parameter_fn(field):
     return f + 1
 
 to.map(parameter_fn, tree, Parameter, field_info = True)  # MyTree(a=2, b=2)
+```
 
 `map` is equivalent to `filter -> tree_map -> merge` in sequence.
 
 If `inplace` is `True`, the input `obj` is mutated and returned. You can only update inplace if the input `obj` has a `__dict__` attribute, else a `TypeError` is raised.
-```
