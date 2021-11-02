@@ -9,8 +9,9 @@ import numpy as np
 import pytest
 
 import treeo as to
-from treeo.api import T, add_field_info
+from treeo.api import T, add_field_info, map
 from treeo.tree import Tree
+from treeo.utils import field
 
 
 class Parameter(to.KindMixin):
@@ -404,7 +405,6 @@ class TestTreeo:
             x.a = 2
 
         module2 = to.apply(map_fn, module)
-
         assert module.a == 1
         assert module2.a == 2
 
@@ -1135,3 +1135,29 @@ class TestTreeo:
         assert a_init_ran
         assert "a" in vars(b)
         assert isinstance(b.a, A)
+
+    def test_with_field_info(self):
+        class Parameter:
+            @staticmethod
+            def fn(x):
+                return np.asarray(x ** 2)
+
+        @dataclass
+        class A(to.Tree):
+            x: np.ndarray = to.field(node=True, kind=Parameter)
+            y: np.ndarray = to.field(node=True)
+
+        m = A(np.array(2.0), np.array(2.0))
+
+        def field_map_fn(f):
+            return f.kind.fn(f.value)
+
+        m1 = to.map(field_map_fn, m, Parameter, field_info=True)
+
+        assert m.x == 2.0
+        assert m.y == 2.0
+        assert m1.x == 4.0
+        assert m1.y == 2.0
+        assert type(m) == type(m1)
+        assert type(m1.x) == type(m.x)
+        assert type(m1.y) == type(m.y)
