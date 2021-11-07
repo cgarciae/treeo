@@ -7,6 +7,7 @@ import jax.numpy as jnp
 import jax.tree_util
 import numpy as np
 import typing_extensions as tpe
+import treeo as to
 
 from treeo import utils
 

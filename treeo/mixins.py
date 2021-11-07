@@ -172,7 +172,7 @@ class Map:
     def map(
         self: A,
         f: tp.Callable,
-        *filters: Filter,
+        *filters: api.Filter,
         inplace: bool = False,
         flatten_mode: tp.Union[api.FlattenMode, str, None] = None,
         is_leaf: tp.Callable[[tp.Any], bool] = None,
