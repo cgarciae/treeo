@@ -752,6 +752,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../FlattenMode/" class="md-nav__link">
+        FlattenMode
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../Hashable/" class="md-nav__link">
         Hashable
       </a>
@@ -878,6 +892,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../OpaquePredicate/" class="md-nav__link">
+        OpaquePredicate
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../Repr/" class="md-nav__link">
         Repr
       </a>
@@ -990,6 +1018,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../copy/" class="md-nav__link">
+        copy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../field/" class="md-nav__link">
         field
       </a>
@@ -1006,6 +1048,34 @@
     <li class="md-nav__item">
       <a href="../filter/" class="md-nav__link">
         filter
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flatten_mode/" class="md-nav__link">
+        flatten_mode
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../in_compact/" class="md-nav__link">
+        in_compact
       </a>
     </li>
   
@@ -1620,11 +1690,6 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
     <span class="k">if</span> <span class="n">field_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field_metadata</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Metadata for field &#39;</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">&#39; does not exist.&quot;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">_COMPACT_CONTEXT</span><span class="o">.</span><span class="n">current_tree</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Object &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; is not the current tree, found &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">tree_m</span><span class="o">.</span><span class="n">_COMPACT_CONTEXT</span><span class="o">.</span><span class="n">current_tree</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39;, did you forget the @compact decorator?&quot;</span>
-        <span class="p">)</span>
-
     <span class="k">if</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -1681,7 +1746,7 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
       </tr>
       <tr>
         <td><code>*filters</code></td>
-        <td><code>Filter</code></td>
+        <td><code>Union[Type[Any], Callable[[FieldInfo], bool]]</code></td>
         <td><p>The filters used to select the leaves to which the function will be applied.</p></td>
         <td><code>()</code></td>
       </tr>
@@ -1719,7 +1784,7 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">map</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span>
-    <span class="o">*</span><span class="n">filters</span><span class="p">:</span> <span class="n">Filter</span><span class="p">,</span>
+    <span class="o">*</span><span class="n">filters</span><span class="p">:</span> <span class="n">api</span><span class="o">.</span><span class="n">Filter</span><span class="p">,</span>
     <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">flatten_mode</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">api</span><span class="o">.</span><span class="n">FlattenMode</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">is_leaf</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

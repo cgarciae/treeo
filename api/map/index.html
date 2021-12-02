@@ -642,6 +642,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../FlattenMode/" class="md-nav__link">
+        FlattenMode
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../Hashable/" class="md-nav__link">
         Hashable
       </a>
@@ -768,6 +782,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../OpaquePredicate/" class="md-nav__link">
+        OpaquePredicate
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../Repr/" class="md-nav__link">
         Repr
       </a>
@@ -880,6 +908,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../copy/" class="md-nav__link">
+        copy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../field/" class="md-nav__link">
         field
       </a>
@@ -896,6 +938,34 @@
     <li class="md-nav__item">
       <a href="../filter/" class="md-nav__link">
         filter
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../flatten_mode/" class="md-nav__link">
+        flatten_mode
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../in_compact/" class="md-nav__link">
+        in_compact
       </a>
     </li>
   
@@ -1134,6 +1204,12 @@ the function will be applied only to the subset of leaves that match the filters
         <td><p>Sets a new <code>FlattenMode</code> context for the operation, if <code>None</code> the current context is used.</p></td>
         <td><code>None</code></td>
       </tr>
+      <tr>
+        <td><code>add_field_info</code></td>
+        <td><code></code></td>
+        <td><p>Represent the leaves of the tree by a <code>FieldInfo</code> type. This enables values of the field such as</p></td>
+        <td><em>required</em></td>
+      </tr>
   </tbody>
 </table>
 <p><strong>Returns:</strong></p>
@@ -1160,6 +1236,7 @@ the function will be applied only to the subset of leaves that match the filters
     <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">flatten_mode</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">FlattenMode</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">is_leaf</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">field_info</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies a function to all leaves in a pytree using `jax.tree_map`, if `filters` are given then</span>
@@ -1173,6 +1250,8 @@ the function will be applied only to the subset of leaves that match the filters
 <span class="sd">        *filters: The filters used to select the leaves to which the function will be applied.</span>
 <span class="sd">        inplace: If `True`, the input `obj` is mutated and returned.</span>
 <span class="sd">        flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used.</span>
+<span class="sd">        add_field_info: Represent the leaves of the tree by a `FieldInfo` type. This enables values of the field such as</span>
+<span class="sd">        kind and value to be used within the `map` function.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A new pytree with the changes applied. If `inplace` is `True`, the input `obj` is returned.</span>
@@ -1192,7 +1271,12 @@ the function will be applied only to the subset of leaves that match the filters
         <span class="k">else</span><span class="p">:</span>
             <span class="n">new_obj</span> <span class="o">=</span> <span class="n">obj</span>
 
-        <span class="n">new_obj</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">new_obj</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">is_leaf</span><span class="p">)</span>
+        <span class="c1"># Conditionally build map function with, or without, the leaf nodes&#39; field info.</span>
+        <span class="k">if</span> <span class="n">field_info</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">add_field_info</span><span class="p">():</span>
+                <span class="n">new_obj</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">new_obj</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">is_leaf</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_obj</span><span class="p">:</span> <span class="n">A</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">new_obj</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">is_leaf</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">has_filters</span><span class="p">:</span>
             <span class="n">new_obj</span> <span class="o">=</span> <span class="n">merge</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">new_obj</span><span class="p">)</span>
@@ -1226,7 +1310,7 @@ the function will be applied only to the subset of leaves that match the filters
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../filter/" class="md-footer__link md-footer__link--prev" aria-label="Previous: filter" rel="prev">
+        <a href="../in_compact/" class="md-footer__link md-footer__link--prev" aria-label="Previous: in_compact" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1235,7 +1319,7 @@ the function will be applied only to the subset of leaves that match the filters
               <span class="md-footer__direction">
                 Previous
               </span>
-              filter
+              in_compact
             </div>
           </div>
         </a>
