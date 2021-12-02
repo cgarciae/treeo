@@ -1,7 +1,6 @@
 import inspect
 import shutil
 import typing as tp
-from dataclasses import dataclass
 from pathlib import Path
 from types import ModuleType
 
@@ -18,8 +17,6 @@ INCLUDED_MODULES = {"treeo"}
 class MemberInfo:
     member: tp.Any
     path: tp.Tuple[str]
-    # module_path: str
-    # members: tp.List[str]
 
     def __init__(self, member, path):
         self.member = member
