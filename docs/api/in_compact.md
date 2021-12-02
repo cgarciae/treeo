@@ -1,6 +1,6 @@
 
-# treeo.MISSING
+# treeo.in_compact
 
-::: treeo.MISSING
+::: treeo.in_compact
     selection:
         inherited_members: true

@@ -1,6 +1,6 @@
 
 # treeo.Nothing
 
-::: treeo.types.Nothing
+::: treeo.Nothing
     selection:
         inherited_members: true

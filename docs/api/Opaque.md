@@ -1,6 +1,6 @@
 
 # treeo.Opaque
 
-::: treeo.utils.Opaque
+::: treeo.Opaque
     selection:
         inherited_members: true

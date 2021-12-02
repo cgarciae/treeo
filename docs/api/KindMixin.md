@@ -1,6 +1,6 @@
 
 # treeo.KindMixin
 
-::: treeo.mixins.KindMixin
+::: treeo.KindMixin
     selection:
         inherited_members: true

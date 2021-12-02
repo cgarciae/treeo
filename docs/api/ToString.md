@@ -1,6 +1,6 @@
 
 # treeo.ToString
 
-::: treeo.mixins.ToString
+::: treeo.ToString
     selection:
         inherited_members: true

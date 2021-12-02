@@ -1,6 +1,6 @@
 
 # treeo.ToDict
 
-::: treeo.mixins.ToDict
+::: treeo.ToDict
     selection:
         inherited_members: true

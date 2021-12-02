@@ -12,52 +12,46 @@ import yaml
 import treeo as MODULE
 
 MODULE_NAME = "treeo"
+INCLUDED_MODULES = {"treeo"}
 
 
-@dataclass
-class Structure:
-    obj: tp.Any
-    name_path: str
-    module_path: str
-    members: tp.List[str]
+class MemberInfo:
+    member: tp.Any
+    path: tp.Tuple[str]
+    # module_path: str
+    # members: tp.List[str]
+
+    def __init__(self, member, path):
+        self.member = member
+        self.path = path
 
 
-def getinfo():
-    module = MODULE
-    name_path = MODULE_NAME
+def getinfo(module: ModuleType, path: tp.Tuple[str, ...]) -> tp.Dict[str, tp.Any]:
 
-    all_members = (
-        module.__all__
-        if hasattr(module, "__all__")
-        else [
-            name
-            for name, obj in inspect.getmembers(module)
-            if (isinstance(obj, ModuleType) and obj.__name__.startswith(MODULE_NAME))
-            or (
-                hasattr(obj, "__module__")
-                and obj.__class__.__module__ != "typing"
-                and MODULE_NAME in obj.__module__
-                and (inspect.isclass(obj) or inspect.isfunction(obj))
-            )
-        ]
+    if not hasattr(module, "__all__"):
+        return {}
+
+    member_names: tp.List[str]
+    member_names = module.__all__
+    member_names = sorted(member_names)
+
+    names_paths_values = (
+        (name, path + (name,), getattr(module, name)) for name in member_names
     )
-    all_members = sorted(all_members)
-
-    outputs = {
-        name: Structure(
-            obj=module,
-            name_path=f"{name_path}.{name}",
-            module_path=f"{module.__module__}.{name}",
-            members=module.__all__ if hasattr(module, "__all__") else [],
+    all_members = {
+        name: MemberInfo(
+            member=getinfo(value, path) if inspect.ismodule(value) else value,
+            path=path,
         )
-        for module, name in ((getattr(module, name), name) for name in all_members)
-        if hasattr(module, "__module__")
+        for name, path, value in names_paths_values
+        if value
     }
 
-    return {k: v for k, v in outputs.items() if v}
+    return {name: info for name, info in all_members.items() if info.member}
 
 
-docs_info = getinfo()
+docs_info = getinfo(MODULE, ())
+
 
 # populate mkdocs
 with open("mkdocs.yml", "r") as f:
@@ -70,7 +64,7 @@ with open("mkdocs.yml", "r") as f:
 
 
 api_reference = jax.tree_map(
-    lambda s: s.name_path.replace(MODULE_NAME, "api").replace(".", "/") + ".md",
+    lambda info: "api/" + "/".join(info.path) + ".md",
     docs_info,
 )
 
@@ -97,14 +91,14 @@ template = """
 api_path = Path("docs/api")
 shutil.rmtree(api_path, ignore_errors=True)
 
-for structure in jax.tree_leaves(docs_info):
-    filepath: Path = api_path / (
-        structure.name_path.replace(f"{MODULE_NAME}.", "").replace(".", "/") + ".md"
-    )
+for info in jax.tree_leaves(docs_info):
+    info: MemberInfo
+
+    filepath: Path = api_path / ("/".join(info.path) + ".md")
     markdown = jinja2.Template(template).render(
-        name_path=structure.name_path,
-        module_path=structure.module_path,
-        members=structure.members,
+        name_path=f"{MODULE_NAME}." + ".".join(info.path),
+        module_path=f"{MODULE_NAME}." + ".".join(info.path),
+        members=[],
     )
 
     filepath.parent.mkdir(parents=True, exist_ok=True)

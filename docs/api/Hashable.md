@@ -1,6 +1,6 @@
 
 # treeo.Hashable
 
-::: treeo.types.Hashable
+::: treeo.Hashable
     selection:
         inherited_members: true
