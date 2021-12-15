@@ -1,6 +1,6 @@
 
 # treeo.filter
 
-::: treeo.api.filter
+::: treeo.filter
     selection:
         inherited_members: true

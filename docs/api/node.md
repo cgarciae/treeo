@@ -1,6 +1,6 @@
 
 # treeo.node
 
-::: treeo.utils.node
+::: treeo.node
     selection:
         inherited_members: true

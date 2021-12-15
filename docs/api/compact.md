@@ -1,6 +1,6 @@
 
 # treeo.compact
 
-::: treeo.api.compact
+::: treeo.compact
     selection:
         inherited_members: true

@@ -1,6 +1,6 @@
 
-# treeo.MISSING
+# treeo.FlattenMode
 
-::: treeo.MISSING
+::: treeo.FlattenMode
     selection:
         inherited_members: true

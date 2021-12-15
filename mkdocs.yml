@@ -30,6 +30,7 @@ nav:
     FieldInfo: api/FieldInfo.md
     FieldMetadata: api/FieldMetadata.md
     Filter: api/Filter.md
+    FlattenMode: api/FlattenMode.md
     Hashable: api/Hashable.md
     KindMixin: api/KindMixin.md
     MISSING: api/MISSING.md
@@ -39,6 +40,7 @@ nav:
     NOTHING: api/NOTHING.md
     Nothing: api/Nothing.md
     Opaque: api/Opaque.md
+    OpaquePredicate: api/OpaquePredicate.md
     Repr: api/Repr.md
     ToDict: api/ToDict.md
     ToString: api/ToString.md
@@ -47,8 +49,11 @@ nav:
     add_field_info: api/add_field_info.md
     apply: api/apply.md
     compact: api/compact.md
+    copy: api/copy.md
     field: api/field.md
     filter: api/filter.md
+    flatten_mode: api/flatten_mode.md
+    in_compact: api/in_compact.md
     map: api/map.md
     merge: api/merge.md
     node: api/node.md
@@ -84,6 +89,8 @@ markdown_extensions:
 plugins:
 - search
 - mkdocs-jupyter
-- mkdocstrings
+- mkdocstrings:
+    watch:
+    - treeo
 extra_javascript:
 - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML

@@ -1,6 +1,6 @@
 
 # treeo.ArrayLike
 
-::: treeo.utils.ArrayLike
+::: treeo.ArrayLike
     selection:
         inherited_members: true

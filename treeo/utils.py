@@ -10,7 +10,6 @@ import typing_extensions as tpe
 A = tp.TypeVar("A")
 B = tp.TypeVar("B")
 
-key = jax.random.PRNGKey
 _pymap = map
 _pyfilter = filter
 

@@ -1,6 +1,6 @@
 
 # treeo.field
 
-::: treeo.utils.field
+::: treeo.field
     selection:
         inherited_members: true

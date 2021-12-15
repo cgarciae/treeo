@@ -1,6 +1,6 @@
 
 # treeo.Extensions
 
-::: treeo.mixins.Extensions
+::: treeo.Extensions
     selection:
         inherited_members: true

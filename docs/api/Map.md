@@ -1,6 +1,6 @@
 
 # treeo.Map
 
-::: treeo.mixins.Map
+::: treeo.Map
     selection:
         inherited_members: true

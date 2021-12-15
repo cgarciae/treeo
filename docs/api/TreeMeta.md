@@ -1,6 +1,6 @@
 
 # treeo.TreeMeta
 
-::: treeo.tree.TreeMeta
+::: treeo.TreeMeta
     selection:
         inherited_members: true

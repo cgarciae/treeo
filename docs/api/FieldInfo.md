@@ -1,6 +1,6 @@
 
 # treeo.FieldInfo
 
-::: treeo.tree.FieldInfo
+::: treeo.FieldInfo
     selection:
         inherited_members: true
