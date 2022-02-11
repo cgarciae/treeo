@@ -8,9 +8,9 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - name: Build Changelog
+      - name: Release Changelog Builder
+        uses: mikepenz/release-changelog-builder-action@v2.9.0
         id: github_release
-        uses: mikepenz/release-changelog-builder-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
