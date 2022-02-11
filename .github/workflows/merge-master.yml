@@ -12,7 +12,8 @@ jobs:
       - name: Release Changelog Builder
         uses: mikepenz/release-changelog-builder-action@v2.9.0
         id: github_release
-        fromTag: 0.0.1
+        with:
+          fromTag: "0.0.1"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
