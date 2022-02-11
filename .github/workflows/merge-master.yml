@@ -4,9 +4,9 @@ on:
     branches:
       - master
   pull_request:
-  
+
 jobs:
-  release:
+  update-changelog:
     runs-on: ubuntu-latest
     steps:
       - name: Release Changelog Builder
