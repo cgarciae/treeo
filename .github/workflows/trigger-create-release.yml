@@ -19,9 +19,10 @@ jobs:
         with:
           python-version: 3.8
 
+      - name: Install Dependencies
+        run: |
+          pip install toml==0.10.2 typer==0.4.0
+
       - name: Test Environment
         run: |
-          python -c "
-          import os
-          print('${{github.event.release.name}}')
-          "
+          python scripts/update_version.py ${{github.event.release.name}}
