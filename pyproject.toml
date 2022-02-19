@@ -13,8 +13,8 @@ python = "^3.7"
 typing-extensions = ">=3.7.0"
 
 [tool.poetry.dev-dependencies]
-jax = "^0.2.24"
-jaxlib = "^0.1.73"
+jax = ">=0.2.24"
+jaxlib = ">=0.1.73"
 matplotlib = { version = "^3.4.3", python = ">=3.7" }
 pytest = "^5.2"
 black = {version = "^21.7b0", allow-prereleases = true, python = ">=3.6.2" }
