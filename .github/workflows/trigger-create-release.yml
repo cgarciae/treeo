@@ -2,7 +2,7 @@ name: Trigger Create Release
 
 on:
   release:
-    types: [prerelease]
+    types: [prereleased]
 
   pull_request:
 
