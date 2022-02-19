@@ -5,7 +5,8 @@ on:
 
 jobs:
   update-version:
-    if: startsWith(github.ref, 'version-') && endsWith(github.ref, '-create-release')
+    version-0.0.10-create-release
+    if: startsWith(github.ref_name, 'version-') && endsWith(github.ref_name, '-create-release')
     name: Update Version
     runs-on: ubuntu-latest
     steps:
@@ -23,7 +24,7 @@ jobs:
 
       - name: Test Environment
         run: |
-          VERSION='${{ github.ref }}'
+          VERSION='${{ github.ref_name }}'
           VERSION=${VERSION//-create-release/}
 
           # setup git
@@ -44,5 +45,5 @@ jobs:
           git push origin master --tags
 
           # delete branch
-          git push -d origin ${{ github.ref }}
+          git push -d origin ${{ github.ref_name }}
         
