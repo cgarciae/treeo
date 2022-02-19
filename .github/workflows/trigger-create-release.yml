@@ -23,7 +23,7 @@ jobs:
 
       - name: Test Environment
         run: |
-          VERSION='${{github.ref}}'
+          VERSION='${{ github.ref }}'
           VERSION=${VERSION//-create-release/}
 
           # setup git
@@ -42,4 +42,7 @@ jobs:
 
           # push to master
           git push origin master --tags
+
+          # delete branch
+          git push -d origin ${{ github.ref }}
         
