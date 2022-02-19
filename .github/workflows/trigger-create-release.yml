@@ -24,6 +24,7 @@ jobs:
       - name: Test Environment
         run: |
           VERSION='${{ github.ref_name }}'
+          VERSION=${VERSION//version-/}
           VERSION=${VERSION//-create-release/}
 
           # setup git
@@ -44,6 +45,7 @@ jobs:
           git tag $VERSION
 
           # push to master
+          git push
           git push --tags
 
           # delete branch
