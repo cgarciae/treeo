@@ -5,7 +5,6 @@ on:
 
 jobs:
   update-version:
-    version-0.0.10-create-release
     if: startsWith(github.ref_name, 'version-') && endsWith(github.ref_name, '-create-release')
     name: Update Version
     runs-on: ubuntu-latest
