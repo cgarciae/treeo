@@ -8,7 +8,7 @@ on:
 
 jobs:
   release:
-    # if: endsWith(github.event.release.name, '[create-release]')
+    # if: endsWith(github.event.release.name, '-create-release')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
@@ -21,4 +21,7 @@ jobs:
 
       - name: Test Environment
         run: |
-          python -c "import os; print(os.environ['github.event.release.name'])"
+          python -c "
+          import os
+          print('${{github.event.release.name}}')
+          "
