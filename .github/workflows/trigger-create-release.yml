@@ -33,6 +33,7 @@ jobs:
 
       - name: Commit files
         run: |
+          cat pyproject.toml
           REPO_VERSION='${{github.event.release.name}}'
           REPO_VERSION=${REPO_VERSION//-create-release/}
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
