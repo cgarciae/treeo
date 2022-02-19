@@ -1,5 +1,5 @@
 # Checks that we can build and validate the Unittest
-name: GitHub CI
+name: Run Tests
 on:
   push:
     # Sequence of patterns matched against refs/heads

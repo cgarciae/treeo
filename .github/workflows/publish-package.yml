@@ -1,9 +1,10 @@
-name: Update GitHub Pages
+name: Publish Package
 on:
   release:
     types: [published]
 jobs:
   publish-docs:
+    name: Publish Docs
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
@@ -37,6 +38,7 @@ jobs:
           folder: site
         
   publish-package:
+    name: Publish Package
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
