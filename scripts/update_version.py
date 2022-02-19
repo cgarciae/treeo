@@ -1,6 +1,8 @@
-from pathlib import Path
-import typer
 import re
+from pathlib import Path
+
+import typer
+
 
 # NOTE: this script could be written bash using sed, but I'm not sure if it's worth it
 def main(release_name: str):
