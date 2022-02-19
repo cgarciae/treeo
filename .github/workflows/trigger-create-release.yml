@@ -8,7 +8,7 @@ on:
 
 jobs:
   release:
-    if: endsWith(github.event.release.name, '[create-release]')
+    # if: endsWith(github.event.release.name, '[create-release]')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout 🛎️
