@@ -1,10 +1,10 @@
 # Checks that we can build and validate the Unittest
 name: Run Tests
 on:
-  # push:
-  #   branches:
-  #     - master
-  # pull_request:
+  push:
+    branches:
+      - master
+  pull_request:
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
@@ -13,7 +13,9 @@ jobs:
     - uses: actions/setup-python@v2
     - uses: pre-commit/action@v2.0.3
   test:
-    if: ${{ !contains(github.event.pull_request.title, 'WIP') }}
+    if: false
+    name: Run Tests
+    # if: ${{ !contains(github.event.pull_request.title, 'WIP') }}
     runs-on: ubuntu-latest
     strategy:
       matrix:
