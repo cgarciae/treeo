@@ -41,7 +41,7 @@ jobs:
           git tag $VERSION
 
           # push to master
-          git push origin master --tags
+          git push --tags
 
           # delete branch
           git push -d origin ${{ github.ref_name }}
