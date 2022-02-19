@@ -5,7 +5,7 @@ on:
 
 jobs:
   update-version:
-    if: startsWith(github.ref, 'version-') and endsWith(github.ref, '-create-release')
+    if: startsWith(github.ref, 'version-') && endsWith(github.ref, '-create-release')
     name: Update Version
     runs-on: ubuntu-latest
     steps:
