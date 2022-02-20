@@ -56,8 +56,6 @@ jobs:
           git push
           git push --tags
 
-          # delete branch
-          git push -d origin ${{ github.ref_name }}
         
       - name: Build Changelog
         id: github_release
