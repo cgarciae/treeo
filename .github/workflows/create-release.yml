@@ -53,6 +53,7 @@ jobs:
           git commit -am "Update version to $RELEASE_VERSION"
 
           # create tag
+          git fetch --tags
           git tag $RELEASE_VERSION
 
           # push to master
@@ -73,7 +74,7 @@ jobs:
         with:
           tag_name: ${{ steps.setup.outputs.RELEASE_VERSION }}
           release_name: ${{ steps.setup.outputs.RELEASE_VERSION }}
-          body: ${{steps.github_release.outputs.changelog}}
+          body: ${{ steps.github_release.outputs.changelog }}
           draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
