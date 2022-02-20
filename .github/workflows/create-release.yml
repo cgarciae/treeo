@@ -1,28 +1,78 @@
 name: Create Release
 
 on:
-  push:
-    tags:
-      - '*'
+  create
 
 jobs:
-  release:
-    if: false
+  create-release:
+    if: startsWith(github.ref_name, 'version-') && endsWith(github.ref_name, '-create-release')
     name: Create Release
-    # if: startsWith(github.ref, 'refs/tags/') and not endsWith(github.ref, '-create-release')
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2
+        # with:
+        #   token: ${{ secrets.ACCESS_TOKEN }}
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+
+      - name: Setup
+        id: setup
+        run: |
+          # install python dependencies
+          pip install typer==0.4.0
+
+          # variables
+          RELEASE_VERSION='${{ github.ref_name }}'
+          RELEASE_VERSION=${RELEASE_VERSION//version-/}
+          RELEASE_VERSION=${RELEASE_VERSION//-create-release/}
+          echo "::set-output name=RELEASE_VERSION::${RELEASE_VERSION}"
+
+
+      - name: Test Environment
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        run: |
+          RELEASE_VERSION='${{ steps.setup.outputs.RELEASE_VERSION }}'
+
+          # setup git
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git remote -v
+
+          # switch to master
+          git pull origin master
+          git checkout master
+
+          # update version
+          python scripts/update_version.py $RELEASE_VERSION
+          git commit -am "Update version to $RELEASE_VERSION"
+
+          # create tag
+          git tag $RELEASE_VERSION
+
+          # push to master
+          git push
+          git push --tags
+
+          # delete branch
+          git push -d origin ${{ github.ref_name }}
+        
       - name: Build Changelog
         id: github_release
-        uses: mikepenz/release-changelog-builder-action@v2.9.0
+        uses: mikepenz/release-changelog-builder-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
+          tag_name: ${{ steps.setup.outputs.RELEASE_VERSION }}
+          release_name: ${{ steps.setup.outputs.RELEASE_VERSION }}
           body: ${{steps.github_release.outputs.changelog}}
           draft: true
         env:
