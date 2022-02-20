@@ -13,9 +13,8 @@ jobs:
     - uses: actions/setup-python@v2
     - uses: pre-commit/action@v2.0.3
   test:
-    if: false
     name: Run Tests
-    # if: ${{ !contains(github.event.pull_request.title, 'WIP') }}
+    if: ${{ !contains(github.event.pull_request.title, 'WIP') }}
     runs-on: ubuntu-latest
     strategy:
       matrix:

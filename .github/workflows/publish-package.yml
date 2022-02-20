@@ -4,7 +4,6 @@ on:
     types: [published]
 jobs:
   publish-docs:
-    if: false
     name: Publish Docs
     runs-on: ubuntu-latest
     steps:
@@ -39,7 +38,6 @@ jobs:
           folder: site
         
   publish-package:
-    if: false 
     name: Publish Package
     runs-on: ubuntu-latest
     steps:
