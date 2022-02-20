@@ -1,11 +1,10 @@
 name: Create Release
 
 on:
-  create
+  push:
 
 jobs:
   create-release:
-    if: startsWith(github.ref_name, 'version-') && endsWith(github.ref_name, '-create-release')
     name: Create Release
     runs-on: ubuntu-latest
     steps:
@@ -26,10 +25,7 @@ jobs:
           pip install typer==0.4.0
 
           # variables
-          RELEASE_VERSION='${{ github.ref_name }}'
-          RELEASE_VERSION=${RELEASE_VERSION//version-/}
-          RELEASE_VERSION=${RELEASE_VERSION//-create-release/}
-          echo "::set-output name=RELEASE_VERSION::${RELEASE_VERSION}"
+          echo "::set-output name=RELEASE_VERSION::0.0.10"
 
 
       - name: Test Environment
@@ -70,6 +66,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           toTag: ${{ steps.setup.outputs.RELEASE_VERSION }}
+          fromTag: 0.0.9
 
       - name: Create Release
         uses: actions/create-release@v1
