@@ -11,8 +11,6 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v2
-        # with:
-        #   token: ${{ secrets.ACCESS_TOKEN }}
 
       - name: Set up Python 3.8
         uses: actions/setup-python@v2
@@ -33,16 +31,12 @@ jobs:
 
 
       - name: Test Environment
-        # env:
-        #   GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         run: |
           RELEASE_VERSION='${{ steps.setup.outputs.RELEASE_VERSION }}'
 
           # setup git
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-
-          git remote -v
 
           # switch to master
           git pull origin master
