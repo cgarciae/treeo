@@ -76,6 +76,8 @@ jobs:
           pip install -U certifi
           poetry config virtualenvs.create false
           poetry install --no-dev
+          pip install jax jaxlib
         
       - name: Test Import Treex
-        run: python -c "import treeo"
+        run: |
+          python -c "import treeo"
