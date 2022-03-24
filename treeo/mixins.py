@@ -1,5 +1,8 @@
 import dataclasses
+import inspect
+import threading
 import typing as tp
+from contextlib import contextmanager
 
 from treeo import api
 from treeo import tree as tree_m
@@ -272,7 +275,9 @@ class Compact:
                 )
 
             value = initializer()
-            setattr(self, field_name, value)
+
+            with tree_m._make_mutable_single(self):
+                setattr(self, field_name, value)
 
         return value
 
@@ -355,3 +360,79 @@ class KindMixin:
             compare=compare,
             opaque=opaque,
         )
+
+
+# -------------------------------------------------------------------------------
+# Immutable Mixin
+# -------------------------------------------------------------------------------
+
+
+class Immutable:
+    """
+    Mixin that adds the `.__setattr__()` method to the class.
+    """
+
+    _mutable: bool
+
+    # def __setattr__(self, key: str, value: tp.Any) -> None:
+    #     if not self._mutable:
+    #         raise RuntimeError(
+    #             f"Trying to mutate field '{key}' in immutable '{type(self).__name__}' object."
+    #         )
+
+    #     super().__setattr__(key, value)
+
+    def mutable_call(
+        self: A,
+        *args,
+        method: tp.Union[str, tp.Callable] = "__call__",
+        **kwargs,
+    ) -> tp.Tuple[tp.Any, A]:
+        """
+        Calls a method on the object while making it mutable.
+
+        Arguments:
+            *args: The positional arguments to pass to the method.
+            method: The method to call, can be a string with the method name,
+                a bounded method, or a function that takes the object as first argument.
+            **kwargs: The keyword arguments to pass to the method.
+
+        Returns:
+            A (output, tree) tuple containing the output of the method and the
+            updated tree.
+        """
+
+        unbounded_method: tp.Callable = (
+            getattr(self.__class__, method)
+            if isinstance(method, str)
+            else method.__func__
+            if inspect.ismethod(method)
+            else method
+        )
+
+        return api.mutable(unbounded_method)(self, *args, **kwargs)
+
+    def replace(self: A, **kwargs) -> A:
+        """
+        Returns a new instance with the given fields replaced.
+        """
+        tree = tree_m.copy(self)
+
+        with tree_m._make_mutable_single(tree):
+            for key, value in kwargs.items():
+                setattr(tree, key, value)
+
+        return tree
+
+
+# set __setattr__ outside of class so linters still detect it unknown attribute assignments
+def _immutable_setattr(self: Immutable, key: str, value: tp.Any) -> None:
+    if not self._mutable:
+        raise RuntimeError(
+            f"Trying to mutate field '{key}' in immutable '{type(self).__name__}' object."
+        )
+
+    object.__setattr__(self, key, value)
+
+
+Immutable.__setattr__ = _immutable_setattr
