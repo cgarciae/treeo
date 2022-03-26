@@ -108,31 +108,32 @@ class _CompactContext(threading.local):
                 yield
 
         if tree._subtrees is None:
-            assert new_subtrees is not None
-            field_names = list(
-                utils._unique_names(
-                    (utils._get_name(new_tree) for new_tree in new_subtrees),
-                    existing_names=set(vars(tree).keys()),
+            with _make_mutable_single(tree):
+                assert new_subtrees is not None
+                field_names = list(
+                    utils._unique_names(
+                        (utils._get_name(new_tree) for new_tree in new_subtrees),
+                        existing_names=set(vars(tree).keys()),
+                    )
                 )
-            )
-            tree._subtrees = tuple(field_names)
-            for field, subtree in zip(field_names, new_subtrees):
-                if (
-                    field in tree._field_metadata
-                    and not tree._field_metadata[field].node
-                ):
-                    raise ValueError(
-                        f"Trying to subtree '{type(subtree).__name__}' to field '{field}' of '{type(tree).__name__}' but it has previously been declared with `node=False`"
-                    )
+                tree._subtrees = tuple(field_names)
+                for field, subtree in zip(field_names, new_subtrees):
+                    if (
+                        field in tree._field_metadata
+                        and not tree._field_metadata[field].node
+                    ):
+                        raise ValueError(
+                            f"Trying to subtree '{type(subtree).__name__}' to field '{field}' of '{type(tree).__name__}' but it has previously been declared with `node=False`"
+                        )
 
-                if field not in tree._field_metadata:
-                    tree._field_metadata[field] = types.FieldMetadata(
-                        kind=type(None),
-                        node=True,
-                        opaque=False,
-                    )
+                    if field not in tree._field_metadata:
+                        tree._field_metadata[field] = types.FieldMetadata(
+                            kind=type(None),
+                            node=True,
+                            opaque=False,
+                        )
 
-                setattr(tree, field, subtree)
+                    setattr(tree, field, subtree)
 
 
 _COMPACT_CONTEXT = _CompactContext()
@@ -180,24 +181,27 @@ class TreeMeta(ABCMeta):
         return obj
 
     def construct(cls, obj: T, *args, **kwargs) -> T:
+        with _make_mutable_single(obj):
+            obj._field_metadata = obj._field_metadata.copy()
 
-        obj._field_metadata = obj._field_metadata.copy()
+            # set default fields
+            for field, default_factory in obj._factory_fields.items():
+                setattr(obj, field, default_factory())
 
-        # set default fields
-        for field, default_factory in obj._factory_fields.items():
-            setattr(obj, field, default_factory())
+            for field, default_value in obj._default_field_values.items():
+                setattr(obj, field, default_value)
 
-        for field, default_value in obj._default_field_values.items():
-            setattr(obj, field, default_value)
+            # reset context before __init__ and add obj as current tree
+            with _CompactContext(current_tree=obj):
+                obj.__init__(*args, **kwargs)
 
-        # reset context before __init__ and add obj as current tree
-        with _CompactContext(current_tree=obj):
-            obj.__init__(*args, **kwargs)
+            # auto-annotations
+            obj._update_local_metadata()
 
-        # auto-annotations
-        obj._update_local_metadata()
+            if _COMPACT_CONTEXT.current_tree is not None:
+                obj._mutable = _COMPACT_CONTEXT.current_tree._mutable
 
-        return obj
+            return obj
 
 
 class Tree(metaclass=TreeMeta):
@@ -205,6 +209,7 @@ class Tree(metaclass=TreeMeta):
     _factory_fields: tp.Dict[str, tp.Callable[[], tp.Any]]
     _default_field_values: tp.Dict[str, tp.Any]
     _subtrees: tp.Optional[tp.Tuple[str, ...]]
+    _mutable: bool
 
     @property
     def field_metadata(self) -> tp.Mapping[str, types.FieldMetadata]:
@@ -271,6 +276,7 @@ class Tree(metaclass=TreeMeta):
         cls._factory_fields = {}
         cls._default_field_values = {}
         cls._subtrees = None
+        cls._mutable = False
 
         for field, value in class_vars.items():
             if isinstance(value, dataclasses.Field):
@@ -370,14 +376,15 @@ class Tree(metaclass=TreeMeta):
 
         module.__dict__.update(node_fields, **static_fields)
 
-        # extract value from Opaque
-        for field, value in static_fields.items():
-            if (
-                isinstance(value, utils.Opaque)
-                and field in module._field_metadata
-                and module._field_metadata[field].opaque
-            ):
-                setattr(module, field, value.value)
+        with _make_mutable_single(module):
+            # extract value from Opaque
+            for field, value in static_fields.items():
+                if (
+                    isinstance(value, utils.Opaque)
+                    and field in module._field_metadata
+                    and module._field_metadata[field].opaque
+                ):
+                    setattr(module, field, value.value)
 
         return module
 
@@ -397,3 +404,101 @@ def copy(obj: A) -> A:
     """
     with _CONTEXT.update(flatten_mode=FlattenMode.all_fields):
         return jax.tree_map(lambda x: x, obj)
+
+
+def apply(
+    f: tp.Callable[..., None],
+    obj: A,
+    *rest: A,
+    inplace: bool = False,
+    _top_inplace: tp.Optional[bool] = None,
+) -> A:
+    """
+    Applies a function to all `to.Tree`s in a Pytree. Works very similar to `jax.tree_map`,
+    but its values are `to.Tree`s instead of leaves, also `f` should apply the changes inplace to Tree object.
+
+    If `inplace` is `False`, a copy of the first object is returned with the changes applied.
+    The `rest` of the objects are always copied.
+
+    If a `Tree` is `Immutable` and `inplace=True` a `RuntimeError` could be raised if a field is mutated.
+
+    Arguments:
+        f: The function to apply.
+        obj: a pytree possibly containing Trees.
+        *rest: additional pytrees.
+        inplace: If `True`, the input `obj` is mutated.
+
+    Returns:
+        A new pytree with the updated Trees or the same input `obj` if `inplace` is `True`.
+    """
+    if _top_inplace is None:
+        _top_inplace = inplace
+
+    rest = copy(rest)
+    if not inplace:
+        obj = copy(obj)
+
+    objs = (obj,) + rest
+
+    def nested_fn(obj, *rest):
+        if isinstance(obj, Tree):
+            apply(f, obj, *rest, inplace=True, _top_inplace=_top_inplace)
+
+    jax.tree_map(
+        nested_fn,
+        *objs,
+        is_leaf=lambda x: isinstance(x, Tree) and not x in objs,
+    )
+
+    if isinstance(obj, Tree):
+        if _top_inplace:
+            f(obj, *rest)
+        else:
+            with _make_mutable_single(obj):
+                f(obj, *rest)
+
+    return obj
+
+
+@contextmanager
+def _make_mutable(obj: tp.Any):
+    """
+    Context manager that makes the tree mutable.
+    """
+
+    prev_mutable: tp.Dict[Tree, bool] = {}
+
+    def _make_mutable_fn(a: Tree):
+        prev_mutable[a] = a._mutable
+        # update __dict__ instead to avoid error during __setattr__
+        a.__dict__["_mutable"] = True
+
+    def _revert_mutable_fn(a: Tree):
+        # update __dict__ instead to avoid error during __setattr__
+        a.__dict__["_mutable"] = prev_mutable[a]
+
+    try:
+        apply(_make_mutable_fn, obj, inplace=True)
+        yield
+    finally:
+        apply(_revert_mutable_fn, obj, inplace=True)
+
+
+@contextmanager
+def _make_mutable_single(*objs: Tree):
+    """
+    Context manager that makes a single tree mutable.
+    """
+
+    _mutables = [obj._mutable for obj in objs]
+
+    for obj in objs:
+        # update __dict__ instead to avoid error during __setattr__
+        obj.__dict__["_mutable"] = True
+
+    try:
+        yield
+    finally:
+        # update __dict__ instead to avoid error during __setattr__
+        for obj, _mutable in zip(objs, _mutables):
+            obj.__dict__["_mutable"] = _mutable

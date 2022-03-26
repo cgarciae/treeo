@@ -153,3 +153,6 @@ data
 # rsync
 .git/
 tmp/
+
+# docs
+/docs/api

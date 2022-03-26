@@ -218,3 +218,9 @@ def _get_name(obj) -> str:
         return _lower_snake_case(obj.__class__.__name__)
     else:
         raise ValueError(f"Could not get name for: {obj}")
+
+
+def _safe_update_fields_from(obj, updates):
+    for field, value in updates.__dict__.items():
+        setattr(obj, field, value)
+    return obj

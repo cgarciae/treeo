@@ -29,6 +29,7 @@ Filter = tp.Union[
     tp.Type[tp.Any],
     tp.Callable[["FieldInfo"], bool],
 ]
+F = tp.TypeVar("F", bound="tp.Callable")
 
 PAD_START = r"__PAD_START__"
 PAD_END = r"__PAD_END__"
@@ -91,10 +92,9 @@ def filter(
         obj = jax.tree_map(apply_filters, obj)
 
     if inplace:
-        input_obj.__dict__.update(obj.__dict__)
-        return input_obj
-    else:
-        return obj
+        obj = utils._safe_update_fields_from(input_obj, obj)
+
+    return obj
 
 
 def merge(
@@ -149,10 +149,9 @@ def merge(
         )
 
     if inplace:
-        input_obj.__dict__.update(obj.__dict__)
-        return input_obj
-    else:
-        return obj
+        obj = utils._safe_update_fields_from(input_obj, obj)
+
+    return obj
 
 
 def map(
@@ -208,50 +207,9 @@ def map(
             new_obj = merge(obj, new_obj)
 
     if inplace:
-        input_obj.__dict__.update(new_obj.__dict__)
-        return input_obj
-    else:
-        return new_obj
+        new_obj = utils._safe_update_fields_from(input_obj, new_obj)
 
-
-def apply(f: tp.Callable[..., None], obj: A, *rest: A, inplace: bool = False) -> A:
-    """
-    Applies a function to all `to.Tree`s in a Pytree. Works very similar to `jax.tree_map`,
-    but its values are `to.Tree`s instead of leaves, also `f` should apply the changes inplace to Tree object.
-
-    If `inplace` is `False`, a copy of the first object is returned with the changes applied.
-    The `rest` of the objects are always copied.
-
-    Arguments:
-        f: The function to apply.
-        obj: a pytree possibly containing Trees.
-        *rest: additional pytrees.
-        inplace: If `True`, the input `obj` is mutated.
-
-    Returns:
-        A new pytree with the updated Trees or the same input `obj` if `inplace` is `True`.
-    """
-    rest = tree_m.copy(rest)
-
-    if not inplace:
-        obj = tree_m.copy(obj)
-
-    objs = (obj,) + rest
-
-    def nested_fn(obj, *rest):
-        if isinstance(obj, Tree):
-            apply(f, obj, *rest, inplace=True)
-
-    jax.tree_map(
-        nested_fn,
-        *objs,
-        is_leaf=lambda x: isinstance(x, Tree) and not x in objs,
-    )
-
-    if isinstance(obj, Tree):
-        f(obj, *rest)
-
-    return obj
+    return new_obj
 
 
 def to_dict(
@@ -268,17 +226,17 @@ def to_dict(
             flat, treedef = jax.tree_flatten(obj)
 
         obj = jax.tree_unflatten(treedef, flat)
-        obj = apply(_remove_field_info_from_metadata, obj)
+        obj = tree_m.apply(_remove_field_info_from_metadata, obj)
 
     return _to_dict(obj, private_fields, static_fields, type_info)
 
 
 def _remove_field_info_from_metadata(obj: Tree):
-
-    obj._field_metadata = jax.tree_map(
-        lambda x: x.value if isinstance(x, FieldInfo) else x,
-        obj._field_metadata,
-    )
+    with tree_m._make_mutable_single(obj):
+        obj._field_metadata = jax.tree_map(
+            lambda x: x.value if isinstance(x, FieldInfo) else x,
+            obj._field_metadata,
+        )
 
 
 def _to_dict(
@@ -520,6 +478,52 @@ def compact(f):
             return f(tree, *args, **kwargs)
 
     wrapper._treeo_compact = True
+
+    return wrapper
+
+
+def mutable(f: tp.Callable[..., A]) -> tp.Callable[..., tp.Tuple[A, tp.Any]]:
+    """
+    A decorator that transforms a stateful function `f` that receives an Tree
+    instance as a its first argument into a function that returns a tuple of the result and a Tree
+    with the new state.
+
+    This is useful for 2 reasons:
+    * It transforms `f` into a pure function.
+    * It allows `Immutable` Trees to perform inline field updates without getting `RuntimeError`s.
+
+    Note that since the original object is not modified, `Immutable` instance remain in the end immutable.
+
+    Example:
+
+    ```python
+    def accumulate_id(tree: MyTree, x: int) -> int:
+        tree.n += x
+        return x
+
+    tree0 = MyTree(n=4)
+    y, tree1 = mutable(accumulate_id)(tree0, 1)
+
+    assert tree0.n == 4
+    assert tree1.n == 5
+    assert y == 1
+    ```
+
+    Arguments:
+        f: The function to be transformed.
+
+    Returns:
+        A function that returns a tuple of the result and a Tree with the new state.
+    """
+
+    @functools.wraps(f)
+    def wrapper(tree, *args, **kwargs) -> tp.Tuple[A, tp.Any]:
+        tree = tree_m.copy(tree)
+
+        with tree_m._make_mutable(tree):
+            output = f(tree, *args, **kwargs)
+
+        return output, tree
 
     return wrapper
 

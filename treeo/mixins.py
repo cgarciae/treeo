@@ -1,5 +1,8 @@
 import dataclasses
+import inspect
+import threading
 import typing as tp
+from contextlib import contextmanager
 
 from treeo import api
 from treeo import tree as tree_m
@@ -272,7 +275,9 @@ class Compact:
                 )
 
             value = initializer()
-            setattr(self, field_name, value)
+
+            with tree_m._make_mutable_single(self):
+                setattr(self, field_name, value)
 
         return value
 
@@ -355,3 +360,122 @@ class KindMixin:
             compare=compare,
             opaque=opaque,
         )
+
+
+# -------------------------------------------------------------------------------
+# Immutable Mixin
+# -------------------------------------------------------------------------------
+
+
+class Immutable:
+    """
+    Mixin that makes a class immutable. It adds a `.replace()` and `.mutable()` methods to the class
+    which let you modify the state by creating a new objects.
+    """
+
+    _mutable: bool
+
+    def replace(self: A, **kwargs) -> A:
+        """
+        Returns a copy of the Tree with the given fields specified in `kwargs`
+        updated to the new values.
+
+        Example:
+
+        ```python
+        @dataclass
+        class MyTree(to.Tree, to.Immutable):
+            x: int = to.node()
+
+        tree = MyTree(x=1)
+
+        # increment x by 1
+        tree = tree.replace(x=tree.x + 1)
+        ```
+
+        Arguments:
+            **kwargs: The fields to update.
+
+        Returns:
+            A new Tree with the updated fields.
+        """
+        tree = tree_m.copy(self)
+
+        with tree_m._make_mutable_single(tree):
+            for key, value in kwargs.items():
+                setattr(tree, key, value)
+
+        return tree
+
+    def mutable(
+        self: A,
+        *args,
+        method: tp.Union[str, tp.Callable] = "__call__",
+        **kwargs,
+    ) -> tp.Tuple[tp.Any, A]:
+        """
+        Calls a method that contains stateful/mutable operations in
+        an immutable fashion. `mutable` will let you perform stateful operations
+        but all update will be performed other a new instance which is returned
+        as the second output.
+
+        Example:
+
+        ```python
+        @dataclass
+        class MyTree(to.Tree, to.Immutable):
+            total: int = to.node()
+
+            def accumulate(self, inc) -> None:
+                self.total += inc
+                return self.total
+
+        tree0 = MyTree(total=1)
+
+        # increment by 10
+        total, tree = tree.mutable(10, method="accumulate")
+
+        assert total == 11
+        ```
+
+        Arguments:
+            *args: The positional arguments to pass to the method.
+            method: The method to call, can be a string with the method name,
+                a bounded method, or a function that takes the object as first argument.
+            **kwargs: The keyword arguments to pass to the method.
+
+        Returns:
+            A (output, tree) tuple containing the output of the method and the
+            updated tree.
+        """
+
+        unbounded_method: tp.Callable = (
+            getattr(self.__class__, method)
+            if isinstance(method, str)
+            else method.__func__
+            if inspect.ismethod(method)
+            else method
+        )
+
+        return api.mutable(unbounded_method)(self, *args, **kwargs)
+
+
+# define __setattr__ outside of class so linters still detect it unknown attribute assignments
+def _immutable_setattr(self: Immutable, key: str, value: tp.Any) -> None:
+    if not self._mutable:
+        raise RuntimeError(
+            f"Trying to mutate field '{key}' in immutable '{type(self).__name__}' object."
+        )
+
+    object.__setattr__(self, key, value)
+
+
+Immutable.__setattr__ = _immutable_setattr
+
+
+class ImmutableTree(tree_m.Tree, Immutable):
+    """
+    A Tree class that also inherits from `Immutable`.
+    """
+
+    pass
