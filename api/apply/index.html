@@ -670,6 +670,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../Immutable/" class="md-nav__link">
+        Immutable
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ImmutableTree/" class="md-nav__link">
+        ImmutableTree
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../KindMixin/" class="md-nav__link">
         KindMixin
       </a>
@@ -913,8 +941,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#treeo.api.apply" class="md-nav__link">
-    treeo.api.apply
+  <a href="#treeo.tree.apply" class="md-nav__link">
+    treeo.tree.apply
   </a>
   
 </li>
@@ -1046,6 +1074,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../mutable/" class="md-nav__link">
+        mutable
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../node/" class="md-nav__link">
         node
       </a>
@@ -1128,8 +1170,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#treeo.api.apply" class="md-nav__link">
-    treeo.api.apply
+  <a href="#treeo.tree.apply" class="md-nav__link">
+    treeo.tree.apply
   </a>
   
 </li>
@@ -1156,13 +1198,14 @@
 
   <div class="doc doc-object doc-function">
 
-<a id="treeo.api.apply"></a>
+<a id="treeo.tree.apply"></a>
     <div class="doc doc-contents first">
 
       <p>Applies a function to all <code>to.Tree</code>s in a Pytree. Works very similar to <code>jax.tree_map</code>,
 but its values are <code>to.Tree</code>s instead of leaves, also <code>f</code> should apply the changes inplace to Tree object.</p>
 <p>If <code>inplace</code> is <code>False</code>, a copy of the first object is returned with the changes applied.
 The <code>rest</code> of the objects are always copied.</p>
+<p>If a <code>Tree</code> is <code>Immutable</code> and <code>inplace=True</code> a <code>RuntimeError</code> could be raised if a field is mutated.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1217,14 +1260,22 @@ The <code>rest</code> of the objects are always copied.</p>
   </tbody>
 </table>
         <details class="quote">
-          <summary>Source code in <code>treeo/api.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">obj</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span> <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="p">:</span>
+          <summary>Source code in <code>treeo/tree.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">apply</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span>
+    <span class="o">*</span><span class="n">rest</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span>
+    <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">_top_inplace</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Applies a function to all `to.Tree`s in a Pytree. Works very similar to `jax.tree_map`,</span>
 <span class="sd">    but its values are `to.Tree`s instead of leaves, also `f` should apply the changes inplace to Tree object.</span>
 
 <span class="sd">    If `inplace` is `False`, a copy of the first object is returned with the changes applied.</span>
 <span class="sd">    The `rest` of the objects are always copied.</span>
+
+<span class="sd">    If a `Tree` is `Immutable` and `inplace=True` a `RuntimeError` could be raised if a field is mutated.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        f: The function to apply.</span>
@@ -1235,16 +1286,18 @@ The <code>rest</code> of the objects are always copied.</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        A new pytree with the updated Trees or the same input `obj` if `inplace` is `True`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">rest</span> <span class="o">=</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_top_inplace</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_top_inplace</span> <span class="o">=</span> <span class="n">inplace</span>
 
+    <span class="n">rest</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">rest</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">inplace</span><span class="p">:</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
     <span class="n">objs</span> <span class="o">=</span> <span class="p">(</span><span class="n">obj</span><span class="p">,)</span> <span class="o">+</span> <span class="n">rest</span>
 
     <span class="k">def</span> <span class="nf">nested_fn</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Tree</span><span class="p">):</span>
-            <span class="n">apply</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">apply</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">_top_inplace</span><span class="o">=</span><span class="n">_top_inplace</span><span class="p">)</span>
 
     <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span>
         <span class="n">nested_fn</span><span class="p">,</span>
@@ -1253,7 +1306,11 @@ The <code>rest</code> of the objects are always copied.</p>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Tree</span><span class="p">):</span>
-        <span class="n">f</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_top_inplace</span><span class="p">:</span>
+            <span class="n">f</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">_make_mutable_single</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+                <span class="n">f</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">obj</span>
 </code></pre></div>

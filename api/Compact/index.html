@@ -724,6 +724,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../Immutable/" class="md-nav__link">
+        Immutable
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ImmutableTree/" class="md-nav__link">
+        ImmutableTree
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../KindMixin/" class="md-nav__link">
         KindMixin
       </a>
@@ -1060,6 +1088,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../mutable/" class="md-nav__link">
+        mutable
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../node/" class="md-nav__link">
         node
       </a>
@@ -1333,7 +1375,9 @@
             <span class="p">)</span>
 
         <span class="n">value</span> <span class="o">=</span> <span class="n">initializer</span><span class="p">()</span>
-        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">_make_mutable_single</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">value</span>
 </code></pre></div>

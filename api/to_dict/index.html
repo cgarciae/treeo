@@ -670,6 +670,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../Immutable/" class="md-nav__link">
+        Immutable
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ImmutableTree/" class="md-nav__link">
+        ImmutableTree
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../KindMixin/" class="md-nav__link">
         KindMixin
       </a>
@@ -1006,6 +1034,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../mutable/" class="md-nav__link">
+        mutable
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../node/" class="md-nav__link">
         node
       </a>
@@ -1176,7 +1218,7 @@
             <span class="n">flat</span><span class="p">,</span> <span class="n">treedef</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_flatten</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
         <span class="n">obj</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_unflatten</span><span class="p">(</span><span class="n">treedef</span><span class="p">,</span> <span class="n">flat</span><span class="p">)</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">apply</span><span class="p">(</span><span class="n">_remove_field_info_from_metadata</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_remove_field_info_from_metadata</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">_to_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">private_fields</span><span class="p">,</span> <span class="n">static_fields</span><span class="p">,</span> <span class="n">type_info</span><span class="p">)</span>
 </code></pre></div>

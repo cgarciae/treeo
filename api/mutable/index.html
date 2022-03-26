@@ -9,14 +9,14 @@
       
       
       
-        <link rel="canonical" href="https://cgarciae.github.io/treeo/api/in_compact/">
+        <link rel="canonical" href="https://cgarciae.github.io/treeo/api/mutable/">
       
       <link rel="icon" href="../../images/favicon.png">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.0">
     
     
       
-        <title>in_compact - Treeo</title>
+        <title>mutable - Treeo</title>
       
     
     
@@ -65,7 +65,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#treeoin_compact" class="md-skip">
+        <a href="#treeomutable" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              in_compact
+              mutable
             
           </span>
         </div>
@@ -990,51 +990,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          in_compact
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../in_compact/" class="md-nav__link">
         in_compact
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#treeo.api.in_compact" class="md-nav__link">
-    treeo.api.in_compact
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1072,11 +1032,51 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../mutable/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          mutable
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         mutable
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#treeo.api.mutable" class="md-nav__link">
+    treeo.api.mutable
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1170,8 +1170,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#treeo.api.in_compact" class="md-nav__link">
-    treeo.api.in_compact
+  <a href="#treeo.api.mutable" class="md-nav__link">
+    treeo.api.mutable
   </a>
   
 </li>
@@ -1188,20 +1188,60 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/cgarciae/treeo/edit/master/docs/api/in_compact.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/cgarciae/treeo/edit/master/docs/api/mutable.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="treeoin_compact">treeo.in_compact</h1>
+                <h1 id="treeomutable">treeo.mutable</h1>
 
 
   <div class="doc doc-object doc-function">
 
-<a id="treeo.api.in_compact"></a>
+<a id="treeo.api.mutable"></a>
     <div class="doc doc-contents first">
 
+      <p>A decorator that transforms a stateful function <code>f</code> that receives an Tree
+instance as a its first argument into a function that returns a tuple of the result and a Tree
+with the new state.</p>
+<p>This is useful for 2 reasons:
+* It transforms <code>f</code> into a pure function.
+* It allows <code>Immutable</code> Trees to perform inline field updates without getting <code>RuntimeError</code>s.</p>
+<p>Note that since the original object is not modified, <code>Immutable</code> instance remain in the end immutable.</p>
 
+<p><strong>Examples:</strong></p>
+    
+      <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">accumulate_id</span><span class="p">(</span><span class="n">tree</span><span class="p">:</span> <span class="n">MyTree</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="n">tree</span><span class="o">.</span><span class="n">n</span> <span class="o">+=</span> <span class="n">x</span>
+    <span class="k">return</span> <span class="n">x</span>
+
+<span class="n">tree0</span> <span class="o">=</span> <span class="n">MyTree</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">y</span><span class="p">,</span> <span class="n">tree1</span> <span class="o">=</span> <span class="n">mutable</span><span class="p">(</span><span class="n">accumulate_id</span><span class="p">)(</span><span class="n">tree0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="n">tree0</span><span class="o">.</span><span class="n">n</span> <span class="o">==</span> <span class="mi">4</span>
+<span class="k">assert</span> <span class="n">tree1</span><span class="o">.</span><span class="n">n</span> <span class="o">==</span> <span class="mi">5</span>
+<span class="k">assert</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">1</span>
+</code></pre></div>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>f</code></td>
+        <td><code>Callable[..., ~A]</code></td>
+        <td><p>The function to be transformed.</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
 <p><strong>Returns:</strong></p>
 <table>
   <thead>
@@ -1212,19 +1252,57 @@
   </thead>
   <tbody>
     <tr>
-      <td><code>bool</code></td>
-      <td><p><code>True</code> if current inside a function decorated with <code>@compact</code>.</p></td>
+      <td><code>Callable[..., Tuple[~A, Any]]</code></td>
+      <td><p>A function that returns a tuple of the result and a Tree with the new state.</p></td>
     </tr>
   </tbody>
 </table>
         <details class="quote">
           <summary>Source code in <code>treeo/api.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">in_compact</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">mutable</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">A</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">tp</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A decorator that transforms a stateful function `f` that receives an Tree</span>
+<span class="sd">    instance as a its first argument into a function that returns a tuple of the result and a Tree</span>
+<span class="sd">    with the new state.</span>
+
+<span class="sd">    This is useful for 2 reasons:</span>
+<span class="sd">    * It transforms `f` into a pure function.</span>
+<span class="sd">    * It allows `Immutable` Trees to perform inline field updates without getting `RuntimeError`s.</span>
+
+<span class="sd">    Note that since the original object is not modified, `Immutable` instance remain in the end immutable.</span>
+
+<span class="sd">    Example:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    def accumulate_id(tree: MyTree, x: int) -&gt; int:</span>
+<span class="sd">        tree.n += x</span>
+<span class="sd">        return x</span>
+
+<span class="sd">    tree0 = MyTree(n=4)</span>
+<span class="sd">    y, tree1 = mutable(accumulate_id)(tree0, 1)</span>
+
+<span class="sd">    assert tree0.n == 4</span>
+<span class="sd">    assert tree1.n == 5</span>
+<span class="sd">    assert y == 1</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        f: The function to be transformed.</span>
+
 <span class="sd">    Returns:</span>
-<span class="sd">        `True` if current inside a function decorated with `@compact`.</span>
+<span class="sd">        A function that returns a tuple of the result and a Tree with the new state.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">_COMPACT_CONTEXT</span><span class="o">.</span><span class="n">in_compact</span>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tp</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">_make_mutable</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="n">tree</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span>
 </code></pre></div>
         </details>
     </div>
@@ -1249,7 +1327,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../flatten_mode/" class="md-footer__link md-footer__link--prev" aria-label="Previous: flatten_mode" rel="prev">
+        <a href="../merge/" class="md-footer__link md-footer__link--prev" aria-label="Previous: merge" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1258,20 +1336,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              flatten_mode
+              merge
             </div>
           </div>
         </a>
       
       
         
-        <a href="../map/" class="md-footer__link md-footer__link--next" aria-label="Next: map" rel="next">
+        <a href="../node/" class="md-footer__link md-footer__link--next" aria-label="Next: node" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              map
+              node
             </div>
           </div>
           <div class="md-footer__button md-icon">

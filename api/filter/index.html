@@ -670,6 +670,34 @@
   
   
     <li class="md-nav__item">
+      <a href="../Immutable/" class="md-nav__link">
+        Immutable
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ImmutableTree/" class="md-nav__link">
+        ImmutableTree
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../KindMixin/" class="md-nav__link">
         KindMixin
       </a>
@@ -1046,6 +1074,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../mutable/" class="md-nav__link">
+        mutable
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../node/" class="md-nav__link">
         node
       </a>
@@ -1268,10 +1310,9 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
         <span class="n">obj</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="n">apply_filters</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">inplace</span><span class="p">:</span>
-        <span class="n">input_obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">input_obj</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">obj</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">utils</span><span class="o">.</span><span class="n">_safe_update_fields_from</span><span class="p">(</span><span class="n">input_obj</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">obj</span>
 </code></pre></div>
         </details>
     </div>
