@@ -27,6 +27,7 @@ from treeo.mixins import (
     Extensions,
     KindMixin,
     Immutable,
+    ImmutableTree,
 )
 from treeo.tree import FlattenMode, FieldInfo, TreeMeta, Tree, copy, apply
 from treeo.types import FieldMetadata, Nothing, NOTHING, Missing, MISSING, Hashable
@@ -45,6 +46,7 @@ __all__ = [
     "FlattenMode",
     "Hashable",
     "Immutable",
+    "ImmutableTree",
     "KindMixin",
     "MISSING",
     "Map",

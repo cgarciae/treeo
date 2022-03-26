@@ -425,7 +425,7 @@ class Immutable:
         return tree
 
 
-# set __setattr__ outside of class so linters still detect it unknown attribute assignments
+# define __setattr__ outside of class so linters still detect it unknown attribute assignments
 def _immutable_setattr(self: Immutable, key: str, value: tp.Any) -> None:
     if not self._mutable:
         raise RuntimeError(
@@ -436,3 +436,7 @@ def _immutable_setattr(self: Immutable, key: str, value: tp.Any) -> None:
 
 
 Immutable.__setattr__ = _immutable_setattr
+
+
+class ImmutableTree(tree_m.Tree, Immutable):
+    pass
