@@ -482,31 +482,38 @@ def compact(f):
     return wrapper
 
 
-TA = tp.TypeVar("TA", contravariant=True)
-TB = tp.TypeVar("TB", covariant=True)
-
-
-class _TreeCallable(tp.Protocol, tp.Generic[TA, TB]):
-    """
-    A protocol for tree callables.
-    """
-
-    def __call__(self, _a: TA, *_args, **_kwargs) -> TB:
-        ...
-
-
-class _MutableTreeCallable(tp.Protocol, tp.Generic[A, TB]):
-    """
-    A protocol for tree callables.
-    """
-
-    def __call__(self, _a: A, *_args, **_kwargs) -> tp.Tuple[TB, A]:
-        ...
-
-
 def mutable(f: tp.Callable[..., A]) -> tp.Callable[..., tp.Tuple[A, tp.Any]]:
     """
-    A decorator that makes a Tree mutable.
+    A decorator that transforms a stateful function `f` that receives an Tree
+    instance as a its first argument into a function that returns a tuple of the result and a Tree
+    with the new state.
+
+    This is useful for 2 reasons:
+    * It transforms `f` into a pure function.
+    * It allows `Immutable` Trees to perform inline field updates without getting `RuntimeError`s.
+
+    Note that since the original object is not modified, `Immutable` instance remain in the end immutable.
+
+    Example:
+
+    ```python
+    def accumulate_id(tree: MyTree, x: int) -> int:
+        tree.n += x
+        return x
+
+    tree0 = MyTree(n=4)
+    y, tree1 = mutable(accumulate_id)(tree0, 1)
+
+    assert tree0.n == 4
+    assert tree1.n == 5
+    assert y == 1
+    ```
+
+    Arguments:
+        f: The function to be transformed.
+
+    Returns:
+        A function that returns a tuple of the result and a Tree with the new state.
     """
 
     @functools.wraps(f)

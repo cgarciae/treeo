@@ -369,18 +369,24 @@ class KindMixin:
 
 class Immutable:
     """
-    Mixin that adds the `.__setattr__()` method to the class.
+    Mixin that makes a class immutable. It adds a `.replace()` and `.mutable()` methods to the class
+    which let you modify the state by creating a new one.
     """
 
     _mutable: bool
 
-    # def __setattr__(self, key: str, value: tp.Any) -> None:
-    #     if not self._mutable:
-    #         raise RuntimeError(
-    #             f"Trying to mutate field '{key}' in immutable '{type(self).__name__}' object."
-    #         )
+    def replace(self: A, **kwargs) -> A:
+        """
+        Returns a copy of the Tree with the given fields specified in `kwargs`
+        updated to the new values.
+        """
+        tree = tree_m.copy(self)
 
-    #     super().__setattr__(key, value)
+        with tree_m._make_mutable_single(tree):
+            for key, value in kwargs.items():
+                setattr(tree, key, value)
+
+        return tree
 
     def mutable(
         self: A,
@@ -389,7 +395,10 @@ class Immutable:
         **kwargs,
     ) -> tp.Tuple[tp.Any, A]:
         """
-        Calls a method on the object while making it mutable.
+        Calls a method that contains stateful/mutable operations in
+        an immutable fashion. `mutable` will let you perform stateful operations
+        but all update will be performed other a new instance which is returned
+        as the second output.
 
         Arguments:
             *args: The positional arguments to pass to the method.
@@ -412,18 +421,6 @@ class Immutable:
 
         return api.mutable(unbounded_method)(self, *args, **kwargs)
 
-    def replace(self: A, **kwargs) -> A:
-        """
-        Returns a new instance with the given fields replaced.
-        """
-        tree = tree_m.copy(self)
-
-        with tree_m._make_mutable_single(tree):
-            for key, value in kwargs.items():
-                setattr(tree, key, value)
-
-        return tree
-
 
 # define __setattr__ outside of class so linters still detect it unknown attribute assignments
 def _immutable_setattr(self: Immutable, key: str, value: tp.Any) -> None:
@@ -439,4 +436,8 @@ Immutable.__setattr__ = _immutable_setattr
 
 
 class ImmutableTree(tree_m.Tree, Immutable):
+    """
+    A Tree class that also inherits from `Immutable`.
+    """
+
     pass
