@@ -370,7 +370,7 @@ class KindMixin:
 class Immutable:
     """
     Mixin that makes a class immutable. It adds a `.replace()` and `.mutable()` methods to the class
-    which let you modify the state by creating a new one.
+    which let you modify the state by creating a new objects.
     """
 
     _mutable: bool
@@ -379,6 +379,25 @@ class Immutable:
         """
         Returns a copy of the Tree with the given fields specified in `kwargs`
         updated to the new values.
+
+        Example:
+
+        ```python
+        @dataclass
+        class MyTree(to.Tree, to.Immutable):
+            x: int = to.node()
+
+        tree = MyTree(x=1)
+
+        # increment x by 1
+        tree = tree.replace(x=tree.x + 1)
+        ```
+
+        Arguments:
+            **kwargs: The fields to update.
+
+        Returns:
+            A new Tree with the updated fields.
         """
         tree = tree_m.copy(self)
 
@@ -399,6 +418,25 @@ class Immutable:
         an immutable fashion. `mutable` will let you perform stateful operations
         but all update will be performed other a new instance which is returned
         as the second output.
+
+        Example:
+
+        ```python
+        @dataclass
+        class MyTree(to.Tree, to.Immutable):
+            total: int = to.node()
+
+            def accumulate(self, inc) -> None:
+                self.total += inc
+                return self.total
+
+        tree0 = MyTree(total=1)
+
+        # increment by 10
+        total, tree = tree.mutable(10, method="accumulate")
+
+        assert total == 11
+        ```
 
         Arguments:
             *args: The positional arguments to pass to the method.
