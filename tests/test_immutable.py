@@ -108,6 +108,39 @@ class TestImmutable:
         assert isinstance(linear2, Linear)
         assert linear is not linear2
 
+    def test_mutable_submodule(self):
+        class Parent(to.Tree, to.Immutable):
+            def __init__(self):
+                self.child = Child()
+
+            def __call__(self, x):
+                return self.child(x)
+
+        class Child(to.Tree, to.Immutable):
+            n: int = to.node()
+
+            def __init__(self):
+                self.n = 0
+
+            def __call__(self, x):
+                self.n += 1
+                return x
+
+        x = np.random.uniform(size=(5, 2))
+        module = Parent()
+
+        with pytest.raises(RuntimeError):
+            y = module(x)
+
+        assert module.child.n == 0
+
+        y, module2 = module.mutable(x)
+
+        assert y.shape == (5, 2)
+        assert isinstance(module2, Parent)
+        assert module is not module2
+        assert module2.child.n == 1
+
     def test_default(self):
         class A(to.Tree, to.Immutable):
             a: int = to.field(1, node=True)
