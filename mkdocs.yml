@@ -32,6 +32,8 @@ nav:
     Filter: api/Filter.md
     FlattenMode: api/FlattenMode.md
     Hashable: api/Hashable.md
+    Immutable: api/Immutable.md
+    ImmutableTree: api/ImmutableTree.md
     KindMixin: api/KindMixin.md
     MISSING: api/MISSING.md
     Map: api/Map.md
@@ -56,6 +58,7 @@ nav:
     in_compact: api/in_compact.md
     map: api/map.md
     merge: api/merge.md
+    mutable: api/mutable.md
     node: api/node.md
     static: api/static.md
     to_dict: api/to_dict.md
