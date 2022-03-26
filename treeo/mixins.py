@@ -382,7 +382,7 @@ class Immutable:
 
     #     super().__setattr__(key, value)
 
-    def mutable_call(
+    def mutable(
         self: A,
         *args,
         method: tp.Union[str, tp.Callable] = "__call__",

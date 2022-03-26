@@ -72,7 +72,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
 
-        y, linear2 = linear.mutable_call(x)
+        y, linear2 = linear.mutable(x)
 
         assert y.shape == (5, 3)
         assert isinstance(linear2, Linear)
@@ -82,7 +82,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
 
-        y, linear2 = linear.mutable_call(x, method=linear.__call__)
+        y, linear2 = linear.mutable(x, method=linear.__call__)
 
         assert y.shape == (5, 3)
         assert isinstance(linear2, Linear)
@@ -92,7 +92,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
 
-        y, linear2 = linear.mutable_call(x, method=Linear.__call__)
+        y, linear2 = linear.mutable(x, method=Linear.__call__)
 
         assert y.shape == (5, 3)
         assert isinstance(linear2, Linear)
@@ -102,7 +102,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
 
-        y, linear2 = linear.mutable_call(x, method="double")
+        y, linear2 = linear.mutable(x, method="double")
 
         assert y.shape == (5, 3)
         assert isinstance(linear2, Linear)
