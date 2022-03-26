@@ -68,6 +68,16 @@ class TestImmutable:
         with pytest.raises(RuntimeError):
             y = linear(x)
 
+    def test_mutable_functional(self):
+        x = np.random.uniform(size=(5, 2))
+        linear = Linear(2, 3)
+
+        y, linear2 = to.mutable(Linear.__call__)(linear, x)
+
+        assert y.shape == (5, 3)
+        assert isinstance(linear2, Linear)
+        assert linear is not linear2
+
     def test_mutable_no_arg(self):
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
