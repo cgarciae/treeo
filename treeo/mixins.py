@@ -294,10 +294,10 @@ class KindMixin:
     @classmethod
     def field(
         cls,
-        default=dataclasses.MISSING,
+        default: tp.Any = dataclasses.MISSING,
         *,
         node: bool,
-        default_factory=dataclasses.MISSING,
+        default_factory: tp.Any = dataclasses.MISSING,
         init: bool = True,
         repr: bool = True,
         hash: tp.Optional[bool] = None,
@@ -319,9 +319,9 @@ class KindMixin:
     @classmethod
     def node(
         cls,
-        default=dataclasses.MISSING,
+        default: tp.Any = dataclasses.MISSING,
         *,
-        default_factory=dataclasses.MISSING,
+        default_factory: tp.Any = dataclasses.MISSING,
         init: bool = True,
         repr: bool = True,
         hash: tp.Optional[bool] = None,
@@ -342,8 +342,8 @@ class KindMixin:
     @classmethod
     def static(
         cls,
-        default=dataclasses.MISSING,
-        default_factory=dataclasses.MISSING,
+        default: tp.Any = dataclasses.MISSING,
+        default_factory: tp.Any = dataclasses.MISSING,
         init: bool = True,
         repr: bool = True,
         hash: tp.Optional[bool] = None,
