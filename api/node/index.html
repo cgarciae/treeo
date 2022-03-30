@@ -1205,10 +1205,10 @@
         <details class="quote">
           <summary>Source code in <code>treeo/utils.py</code></summary>
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">node</span><span class="p">(</span>
-    <span class="n">default</span><span class="o">=</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">kind</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span>
-    <span class="n">default_factory</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default_factory</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
     <span class="n">init</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="nb">repr</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="nb">hash</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

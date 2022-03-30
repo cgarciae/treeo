@@ -1209,7 +1209,7 @@
     <span class="o">*</span><span class="p">,</span>
     <span class="n">node</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">kind</span><span class="p">:</span> <span class="nb">type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">),</span>
-    <span class="n">default_factory</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default_factory</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
     <span class="n">init</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="nb">repr</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="nb">hash</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1224,9 +1224,7 @@
             <span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span>
             <span class="s2">&quot;opaque&quot;</span><span class="p">:</span> <span class="n">opaque</span><span class="p">,</span>
         <span class="p">},</span>
-        <span class="n">default_factory</span><span class="o">=</span><span class="n">default_factory</span>
-        <span class="k">if</span> <span class="n">default_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">else</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="n">default_factory</span><span class="p">,</span>
         <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span>
         <span class="nb">repr</span><span class="o">=</span><span class="nb">repr</span><span class="p">,</span>
         <span class="nb">hash</span><span class="o">=</span><span class="nb">hash</span><span class="p">,</span>
