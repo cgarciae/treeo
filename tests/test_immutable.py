@@ -146,6 +146,46 @@ class TestImmutable:
 
         y, module2 = module.mutable(x)
 
+        assert not module._mutable
+        assert not module.child._mutable
+        assert not module2._mutable
+        assert not module2.child._mutable
+
+        assert y.shape == (5, 2)
+        assert isinstance(module2, Parent)
+        assert module is not module2
+        assert module2.child.n == 1
+
+    def test_mutable_compact_submodule(self):
+        class Parent(to.Tree, to.Immutable):
+            @to.compact
+            def __call__(self, x):
+                return Child()(x)
+
+        class Child(to.Tree, to.Immutable):
+            n: int = to.node()
+
+            def __init__(self):
+                self.n = 0
+
+            def __call__(self, x):
+                self.n += 1
+                return x
+
+        x = np.random.uniform(size=(5, 2))
+        module = Parent()
+
+        # with pytest.raises(RuntimeError):
+        #     y = module(x)
+
+        # assert not hasattr(module, "child")
+
+        y, module2 = module.mutable(x)
+
+        assert not module._mutable
+        assert not module2._mutable
+        assert not module2.child._mutable
+
         assert y.shape == (5, 2)
         assert isinstance(module2, Parent)
         assert module is not module2

@@ -136,8 +136,32 @@ class _CompactContext(threading.local):
                     setattr(tree, field, subtree)
 
 
+@dataclass
+class _MutableContext(threading.local):
+    prev_mutable: tp.Optional[tp.Dict["Tree", bool]] = None
+
+    def __enter__(self):
+        global _MUTABLE_CONTEXT
+        self._old_context = _MUTABLE_CONTEXT
+        _MUTABLE_CONTEXT = self
+
+    def __exit__(self, *args):
+        global _MUTABLE_CONTEXT
+        _MUTABLE_CONTEXT = self._old_context
+
+    @contextmanager
+    def update(self, **kwargs):
+        fields = vars(self).copy()
+        fields.pop("_old_context", None)
+        fields.update(kwargs)
+
+        with _MutableContext(**fields):
+            yield
+
+
 _COMPACT_CONTEXT = _CompactContext()
 _CONTEXT = _Context()
+_MUTABLE_CONTEXT = _MutableContext()
 
 
 class FieldInfo:
@@ -158,8 +182,8 @@ class FieldInfo:
 
 
 class TreeMeta(ABCMeta):
-    def __call__(cls, *args, **kwargs) -> "Tree":
-        obj: Tree
+    def __call__(cls: tp.Type[T], *args, **kwargs) -> T:
+        obj: T
 
         if _COMPACT_CONTEXT.existing_subtrees is not None:
             if len(_COMPACT_CONTEXT.existing_subtrees) <= _COMPACT_CONTEXT.tree_idx:
@@ -178,6 +202,12 @@ class TreeMeta(ABCMeta):
 
         if _COMPACT_CONTEXT.new_subtrees is not None:
             _COMPACT_CONTEXT.new_subtrees.append(obj)
+
+        if _COMPACT_CONTEXT.in_compact and _COMPACT_CONTEXT.current_tree is not None:
+            _set_mutable(obj, _COMPACT_CONTEXT.current_tree._mutable)
+
+            if _MUTABLE_CONTEXT.prev_mutable is not None:
+                _MUTABLE_CONTEXT.prev_mutable[obj] = False
 
         return obj
 
@@ -198,9 +228,6 @@ class TreeMeta(ABCMeta):
 
         # auto-annotations
         obj._update_local_metadata()
-
-        if _COMPACT_CONTEXT.current_tree is not None:
-            obj._mutable = _COMPACT_CONTEXT.current_tree._mutable
 
         return obj
 
@@ -467,22 +494,23 @@ def _make_mutable(obj: tp.Any):
     Context manager that makes the tree mutable.
     """
 
-    prev_mutable: tp.Dict[Tree, bool] = {}
-
     def _make_mutable_fn(a: Tree):
-        prev_mutable[a] = a._mutable
+        assert _MUTABLE_CONTEXT.prev_mutable is not None
+        _MUTABLE_CONTEXT.prev_mutable[a] = a._mutable
         # update __dict__ instead to avoid error during __setattr__
         a.__dict__["_mutable"] = True
 
     def _revert_mutable_fn(a: Tree):
+        assert _MUTABLE_CONTEXT.prev_mutable is not None
         # update __dict__ instead to avoid error during __setattr__
-        a.__dict__["_mutable"] = prev_mutable[a]
+        a.__dict__["_mutable"] = _MUTABLE_CONTEXT.prev_mutable[a]
 
-    try:
-        apply(_make_mutable_fn, obj, inplace=True)
-        yield
-    finally:
-        apply(_revert_mutable_fn, obj, inplace=True)
+    with _MUTABLE_CONTEXT.update(prev_mutable={}):
+        try:
+            apply(_make_mutable_fn, obj, inplace=True)
+            yield
+        finally:
+            apply(_revert_mutable_fn, obj, inplace=True)
 
 
 @contextmanager
@@ -503,3 +531,7 @@ def _make_mutable_single(*objs: Tree):
         # update __dict__ instead to avoid error during __setattr__
         for obj, _mutable in zip(objs, _mutables):
             obj.__dict__["_mutable"] = _mutable
+
+
+def _set_mutable(obj: Tree, value: bool):
+    obj.__dict__["_mutable"] = value
