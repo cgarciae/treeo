@@ -55,7 +55,7 @@ def field(
     *,
     node: bool,
     kind: type = type(None),
-    default_factory: tp.Optional[tp.Callable[[], tp.Any]] = None,
+    default_factory: tp.Any = dataclasses.MISSING,
     init: bool = True,
     repr: bool = True,
     hash: tp.Optional[bool] = None,
@@ -70,9 +70,7 @@ def field(
             "kind": kind,
             "opaque": opaque,
         },
-        default_factory=default_factory
-        if default_factory is not None
-        else dataclasses.MISSING,
+        default_factory=default_factory,
         init=init,
         repr=repr,
         hash=hash,
@@ -81,10 +79,10 @@ def field(
 
 
 def node(
-    default=dataclasses.MISSING,
+    default: tp.Any = dataclasses.MISSING,
     *,
     kind: type = type(None),
-    default_factory: tp.Optional[tp.Callable[[], tp.Any]] = None,
+    default_factory: tp.Any = dataclasses.MISSING,
     init: bool = True,
     repr: bool = True,
     hash: tp.Optional[bool] = None,
@@ -105,10 +103,10 @@ def node(
 
 
 def static(
-    default=dataclasses.MISSING,
+    default: tp.Any = dataclasses.MISSING,
     *,
     kind: type = type(None),
-    default_factory: tp.Optional[tp.Callable[[], tp.Any]] = None,
+    default_factory: tp.Any = dataclasses.MISSING,
     init: bool = True,
     repr: bool = True,
     hash: tp.Optional[bool] = None,
