@@ -219,7 +219,7 @@ class Apply:
         Returns:
             A new pytree with the updated Trees or the same input `obj` if `inplace` is `True`.
         """
-        return api.apply(f, self, *rest, inplace=inplace)
+        return tree_m.apply(f, self, *rest, inplace=inplace)
 
 
 class Compact:

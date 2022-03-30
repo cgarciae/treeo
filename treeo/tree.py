@@ -173,7 +173,8 @@ class TreeMeta(ABCMeta):
             return obj
         else:
             obj = cls.__new__(cls)
-            obj = cls.construct(obj, *args, **kwargs)
+            with _make_mutable_single(obj):
+                obj = cls.construct(obj, *args, **kwargs)
 
         if _COMPACT_CONTEXT.new_subtrees is not None:
             _COMPACT_CONTEXT.new_subtrees.append(obj)
@@ -181,27 +182,27 @@ class TreeMeta(ABCMeta):
         return obj
 
     def construct(cls, obj: T, *args, **kwargs) -> T:
-        with _make_mutable_single(obj):
-            obj._field_metadata = obj._field_metadata.copy()
 
-            # set default fields
-            for field, default_factory in obj._factory_fields.items():
-                setattr(obj, field, default_factory())
+        obj._field_metadata = obj._field_metadata.copy()
 
-            for field, default_value in obj._default_field_values.items():
-                setattr(obj, field, default_value)
+        # set default fields
+        for field, default_factory in obj._factory_fields.items():
+            setattr(obj, field, default_factory())
 
-            # reset context before __init__ and add obj as current tree
-            with _CompactContext(current_tree=obj):
-                obj.__init__(*args, **kwargs)
+        for field, default_value in obj._default_field_values.items():
+            setattr(obj, field, default_value)
 
-            # auto-annotations
-            obj._update_local_metadata()
+        # reset context before __init__ and add obj as current tree
+        with _CompactContext(current_tree=obj):
+            obj.__init__(*args, **kwargs)
 
-            if _COMPACT_CONTEXT.current_tree is not None:
-                obj._mutable = _COMPACT_CONTEXT.current_tree._mutable
+        # auto-annotations
+        obj._update_local_metadata()
 
-            return obj
+        if _COMPACT_CONTEXT.current_tree is not None:
+            obj._mutable = _COMPACT_CONTEXT.current_tree._mutable
+
+        return obj
 
 
 class Tree(metaclass=TreeMeta):
