@@ -1,4 +1,5 @@
 import dataclasses
+import inspect
 import re
 import typing as tp
 
@@ -222,3 +223,17 @@ def _safe_update_fields_from(obj, updates):
     for field, value in updates.__dict__.items():
         setattr(obj, field, value)
     return obj
+
+
+def _get_unbound_method(obj: object, method: tp.Union[str, tp.Callable]) -> tp.Callable:
+
+    if isinstance(method, str) and not hasattr(obj, method):
+        raise TypeError(f"class '{type(obj).__name__}' has no attribute {method}")
+
+    return (
+        getattr(obj.__class__, method)
+        if isinstance(method, str)
+        else method.__func__
+        if inspect.ismethod(method)
+        else method
+    )

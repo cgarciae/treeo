@@ -449,13 +449,7 @@ class Immutable:
             updated tree.
         """
 
-        unbounded_method: tp.Callable = (
-            getattr(self.__class__, method)
-            if isinstance(method, str)
-            else method.__func__
-            if inspect.ismethod(method)
-            else method
-        )
+        unbounded_method = utils._get_unbound_method(self, method)
 
         return api.mutable(unbounded_method)(self, *args, **kwargs)
 
