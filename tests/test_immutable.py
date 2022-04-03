@@ -191,6 +191,9 @@ class TestImmutable:
         assert module is not module2
         assert module2.child.n == 1
 
+        with pytest.raises(RuntimeError):
+            module.mutable(x, toplevel_only=True)
+
     def test_default(self):
         class A(to.Tree, to.Immutable):
             a: int = to.field(1, node=True)

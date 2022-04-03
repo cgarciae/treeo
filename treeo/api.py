@@ -232,7 +232,7 @@ def to_dict(
 
 
 def _remove_field_info_from_metadata(obj: Tree):
-    with tree_m._make_mutable_single(obj):
+    with tree_m._make_mutable_toplevel(obj):
         obj._field_metadata = jax.tree_map(
             lambda x: x.value if isinstance(x, FieldInfo) else x,
             obj._field_metadata,
@@ -482,7 +482,10 @@ def compact(f):
     return wrapper
 
 
-def mutable(f: tp.Callable[..., A]) -> tp.Callable[..., tp.Tuple[A, tp.Any]]:
+def mutable(
+    f: tp.Callable[..., A],
+    toplevel_only: bool = False,
+) -> tp.Callable[..., tp.Tuple[A, tp.Any]]:
     """
     A decorator that transforms a stateful function `f` that receives an Tree
     instance as a its first argument into a function that returns a tuple of the result and a Tree
@@ -511,6 +514,7 @@ def mutable(f: tp.Callable[..., A]) -> tp.Callable[..., tp.Tuple[A, tp.Any]]:
 
     Arguments:
         f: The function to be transformed.
+        toplevel_only: If `True`, only the top-level object is made mutable.
 
     Returns:
         A function that returns a tuple of the result and a Tree with the new state.
@@ -520,7 +524,7 @@ def mutable(f: tp.Callable[..., A]) -> tp.Callable[..., tp.Tuple[A, tp.Any]]:
     def wrapper(tree, *args, **kwargs) -> tp.Tuple[A, tp.Any]:
         tree = tree_m.copy(tree)
 
-        with tree_m._make_mutable(tree):
+        with tree_m.make_mutable(tree, toplevel_only=toplevel_only):
             output = f(tree, *args, **kwargs)
 
         return output, tree

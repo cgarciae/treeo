@@ -276,7 +276,7 @@ class Compact:
 
             value = initializer()
 
-            with tree_m._make_mutable_single(self):
+            with tree_m._make_mutable_toplevel(self):
                 setattr(self, field_name, value)
 
         return value
@@ -373,7 +373,7 @@ class Immutable:
     which let you modify the state by creating a new objects.
     """
 
-    _mutable: bool
+    _mutable: tp.Optional[tree_m._MutableState]
 
     def replace(self: A, **kwargs) -> A:
         """
@@ -401,16 +401,18 @@ class Immutable:
         """
         tree = tree_m.copy(self)
 
-        with tree_m._make_mutable_single(tree):
+        with tree_m._make_mutable_toplevel(tree):
             for key, value in kwargs.items():
                 setattr(tree, key, value)
 
-        return tree
+        # return a copy to potentially update metadata
+        return tree_m.copy(tree)
 
     def mutable(
         self: A,
         *args,
         method: tp.Union[str, tp.Callable] = "__call__",
+        toplevel_only: bool = False,
         **kwargs,
     ) -> tp.Tuple[tp.Any, A]:
         """
@@ -442,6 +444,7 @@ class Immutable:
             *args: The positional arguments to pass to the method.
             method: The method to call, can be a string with the method name,
                 a bounded method, or a function that takes the object as first argument.
+            toplevel_only: If `True` only the top level object will be made mutable.
             **kwargs: The keyword arguments to pass to the method.
 
         Returns:
@@ -451,7 +454,9 @@ class Immutable:
 
         unbounded_method = utils._get_unbound_method(self, method)
 
-        return api.mutable(unbounded_method)(self, *args, **kwargs)
+        return api.mutable(unbounded_method, toplevel_only=toplevel_only)(
+            self, *args, **kwargs
+        )
 
 
 # define __setattr__ outside of class so linters still detect it unknown attribute assignments

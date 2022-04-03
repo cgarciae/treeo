@@ -212,7 +212,7 @@ def _get_name(obj) -> str:
     if hasattr(obj, "name") and obj.name:
         return obj.name
     elif hasattr(obj, "__name__") and obj.__name__:
-        return obj.__name__
+        return _lower_snake_case(obj.__name__)
     elif hasattr(obj, "__class__") and obj.__class__.__name__:
         return _lower_snake_case(obj.__class__.__name__)
     else:
