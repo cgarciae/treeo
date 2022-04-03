@@ -156,6 +156,9 @@ class TestImmutable:
         assert module is not module2
         assert module2.child.n == 1
 
+        with pytest.raises(RuntimeError):
+            module.mutable(x, toplevel_only=True)
+
     def test_mutable_compact_submodule(self):
         class Parent(to.Tree, to.Immutable):
             @to.compact
