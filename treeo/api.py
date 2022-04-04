@@ -484,6 +484,7 @@ def compact(f):
 
 def mutable(
     f: tp.Callable[..., A],
+    *,
     toplevel_only: bool = False,
 ) -> tp.Callable[..., tp.Tuple[A, tp.Any]]:
     """
