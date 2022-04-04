@@ -13,6 +13,7 @@ from treeo.api import (
     to_string,
     compact,
     mutable,
+    toplevel_mutable,
 )
 from treeo.mixins import (
     Copy,
@@ -72,6 +73,7 @@ __all__ = [
     "map",
     "merge",
     "mutable",
+    "toplevel_mutable",
     "node",
     "static",
     "to_dict",

@@ -24,6 +24,7 @@ RICH_WARNING_COUNT = 0
 
 A = tp.TypeVar("A")
 B = tp.TypeVar("B")
+C = tp.TypeVar("C", bound=tp.Callable)
 T = tp.TypeVar("T", bound="Tree")
 Filter = tp.Union[
     tp.Type[tp.Any],
@@ -529,6 +530,70 @@ def mutable(
             output = f(tree, *args, **kwargs)
 
         return output, tree
+
+    return wrapper
+
+
+def toplevel_mutable(f: C) -> C:
+    """
+    A decorator that transforms a stateful function `f` that receives an Tree
+    instance as a its first argument into a mutable function. It differs from `mutable`
+    in the following ways:
+
+    * It always applies mutability to the top-level object only.
+    * `f` is expected to return the new state either as the only output or
+        as the last element of a tuple.
+
+    Example:
+
+    ```python
+    @dataclass
+    class Child(to.Tree, to.Immutable):
+        n: int = to.node()
+
+    @dataclass
+    def Parent(to.Tree, to.Immutable):
+        child: Child
+
+        @to.toplevel_mutable
+        def update(self) -> "Parent":
+            # self is currently mutable
+            self.child = self.child.replace(n=self.child.n + 1) # but child is immutable (so we use replace)
+
+            return self
+
+    tree = Parent(child=Child(n=4))
+    tree = tree.update()
+    ```
+
+    This behaviour is useful when the top-level tree mostly manipulates sub-trees that have well-defined
+    immutable APIs, avoids explicitly run `replace` to propagate updates to the sub-trees and makes
+    management of the top-level tree easier.
+
+    Arguments:
+        f: The function to be transformed.
+
+    Returns:
+        A function with top-level mutability.
+    """
+
+    @functools.wraps(f)
+    def wrapper(tree: tree_m.Tree, *args, **kwargs):
+        output, _ = mutable(f, toplevel_only=True)(tree, *args, **kwargs)
+
+        if isinstance(output, tuple):
+            *ys, last = output
+        else:
+            ys = ()
+            last = output
+
+        if type(last) is type(tree):
+            last.__dict__["_mutable"] = tree._mutable
+
+        if isinstance(output, tuple):
+            return (*ys, last)
+        else:
+            return last
 
     return wrapper
 
