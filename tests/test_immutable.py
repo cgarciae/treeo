@@ -1259,7 +1259,7 @@ class TestImmutable:
         class Parameter:
             @staticmethod
             def fn(x):
-                return np.asarray(x ** 2)
+                return np.asarray(x**2)
 
         @dataclass
         class A(to.Tree, to.Immutable):
