@@ -1006,6 +1006,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../make_mutable/" class="md-nav__link">
+        make_mutable
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../map/" class="md-nav__link">
         map
       </a>
@@ -1138,6 +1152,20 @@
 
             
           
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../toplevel_mutable/" class="md-nav__link">
+        toplevel_mutable
+      </a>
+    </li>
+  
+
+            
+          
         </ul>
       </nav>
     </li>
@@ -1222,6 +1250,8 @@ with the new state.</p>
 <span class="k">assert</span> <span class="n">tree1</span><span class="o">.</span><span class="n">n</span> <span class="o">==</span> <span class="mi">5</span>
 <span class="k">assert</span> <span class="n">y</span> <span class="o">==</span> <span class="mi">1</span>
 </code></pre></div>
+<p><strong>Note</strong>: Any <code>Tree</code>s that are found in the output of <code>f</code> are set to being
+immutable.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1239,6 +1269,12 @@ with the new state.</p>
         <td><code>Callable[..., ~A]</code></td>
         <td><p>The function to be transformed.</p></td>
         <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>toplevel_only</code></td>
+        <td><code>bool</code></td>
+        <td><p>If <code>True</code>, only the top-level object is made mutable.</p></td>
+        <td><code>False</code></td>
       </tr>
   </tbody>
 </table>
@@ -1259,7 +1295,11 @@ with the new state.</p>
 </table>
         <details class="quote">
           <summary>Source code in <code>treeo/api.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">mutable</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">A</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">tp</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">]]:</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">mutable</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">A</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">toplevel_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tp</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">tp</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A decorator that transforms a stateful function `f` that receives an Tree</span>
 <span class="sd">    instance as a its first argument into a function that returns a tuple of the result and a Tree</span>
@@ -1286,8 +1326,12 @@ with the new state.</p>
 <span class="sd">    assert y == 1</span>
 <span class="sd">    ```</span>
 
+<span class="sd">    **Note**: Any `Tree`s that are found in the output of `f` are set to being</span>
+<span class="sd">    immutable.</span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">        f: The function to be transformed.</span>
+<span class="sd">        toplevel_only: If `True`, only the top-level object is made mutable.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        A function that returns a tuple of the result and a Tree with the new state.</span>
@@ -1297,8 +1341,14 @@ with the new state.</p>
     <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tp</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
         <span class="n">tree</span> <span class="o">=</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 
-        <span class="k">with</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">_make_mutable</span><span class="p">(</span><span class="n">tree</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">make_mutable</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">toplevel_only</span><span class="o">=</span><span class="n">toplevel_only</span><span class="p">):</span>
             <span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">_make_output_immutable</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">Tree</span><span class="p">):</span>
+            <span class="c1"># update __dict__ instead to avoid error during __setattr__</span>
+            <span class="n">tree_m</span><span class="o">.</span><span class="n">_set_mutable</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="n">tree_m</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_make_output_immutable</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="n">tree</span>
 

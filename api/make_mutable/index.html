@@ -9,14 +9,14 @@
       
       
       
-        <link rel="canonical" href="https://cgarciae.github.io/treeo/api/to_dict/">
+        <link rel="canonical" href="https://cgarciae.github.io/treeo/api/make_mutable/">
       
       <link rel="icon" href="../../images/favicon.png">
       <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.0">
     
     
       
-        <title>to_dict - Treeo</title>
+        <title>make_mutable - Treeo</title>
       
     
     
@@ -65,7 +65,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#treeoto_dict" class="md-skip">
+        <a href="#treeomake_mutable" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              to_dict
+              make_mutable
             
           </span>
         </div>
@@ -1004,11 +1004,51 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../make_mutable/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          make_mutable
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         make_mutable
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#treeo.tree.make_mutable" class="md-nav__link">
+    treeo.tree.make_mutable
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1088,51 +1128,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          to_dict
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../to_dict/" class="md-nav__link">
         to_dict
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#treeo.api.to_dict" class="md-nav__link">
-    treeo.api.to_dict
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1198,8 +1198,8 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#treeo.api.to_dict" class="md-nav__link">
-    treeo.api.to_dict
+  <a href="#treeo.tree.make_mutable" class="md-nav__link">
+    treeo.tree.make_mutable
   </a>
   
 </li>
@@ -1216,39 +1216,60 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/cgarciae/treeo/edit/master/docs/api/to_dict.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/cgarciae/treeo/edit/master/docs/api/make_mutable.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="treeoto_dict">treeo.to_dict</h1>
+                <h1 id="treeomake_mutable">treeo.make_mutable</h1>
 
 
   <div class="doc doc-object doc-function">
 
-<a id="treeo.api.to_dict"></a>
+<a id="treeo.tree.make_mutable"></a>
     <div class="doc doc-contents first">
 
+      <p>Returns a context manager that makes a tree mutable.</p>
 
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>tree</code></td>
+        <td><code>Tree</code></td>
+        <td><p>The tree to make mutable.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>toplevel_only</code></td>
+        <td><code>bool</code></td>
+        <td><p>If <code>True</code>, only the top-level tree is made mutable.</p></td>
+        <td><code>False</code></td>
+      </tr>
+  </tbody>
+</table>
         <details class="quote">
-          <summary>Source code in <code>treeo/api.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span>
-    <span class="n">obj</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">private_fields</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">static_fields</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">type_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">field_info</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+          <summary>Source code in <code>treeo/tree.py</code></summary>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">make_mutable</span><span class="p">(</span><span class="n">tree</span><span class="p">:</span> <span class="n">Tree</span><span class="p">,</span> <span class="n">toplevel_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tp</span><span class="o">.</span><span class="n">ContextManager</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a context manager that makes a tree mutable.</span>
 
-    <span class="k">if</span> <span class="n">field_info</span><span class="p">:</span>
-        <span class="k">with</span> <span class="n">add_field_info</span><span class="p">(),</span> <span class="n">flatten_mode</span><span class="p">(</span><span class="n">FlattenMode</span><span class="o">.</span><span class="n">all_fields</span><span class="p">):</span>
-            <span class="n">flat</span><span class="p">,</span> <span class="n">treedef</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_flatten</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_unflatten</span><span class="p">(</span><span class="n">treedef</span><span class="p">,</span> <span class="n">flat</span><span class="p">)</span>
-        <span class="n">obj</span> <span class="o">=</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_remove_field_info_from_metadata</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">_to_dict</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">private_fields</span><span class="p">,</span> <span class="n">static_fields</span><span class="p">,</span> <span class="n">type_info</span><span class="p">)</span>
+<span class="sd">    Arguments:</span>
+<span class="sd">        tree: The tree to make mutable.</span>
+<span class="sd">        toplevel_only: If `True`, only the top-level tree is made mutable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">toplevel_only</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_make_mutable_toplevel</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_make_mutable</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -1273,7 +1294,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../static/" class="md-footer__link md-footer__link--prev" aria-label="Previous: static" rel="prev">
+        <a href="../in_compact/" class="md-footer__link md-footer__link--prev" aria-label="Previous: in_compact" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1282,20 +1303,20 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              static
+              in_compact
             </div>
           </div>
         </a>
       
       
         
-        <a href="../to_string/" class="md-footer__link md-footer__link--next" aria-label="Next: to_string" rel="next">
+        <a href="../map/" class="md-footer__link md-footer__link--next" aria-label="Next: map" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              to_string
+              map
             </div>
           </div>
           <div class="md-footer__button md-icon">

@@ -1046,6 +1046,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../make_mutable/" class="md-nav__link">
+        make_mutable
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../map/" class="md-nav__link">
         map
       </a>
@@ -1132,6 +1146,20 @@
     <li class="md-nav__item">
       <a href="../to_string/" class="md-nav__link">
         to_string
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../toplevel_mutable/" class="md-nav__link">
+        toplevel_mutable
       </a>
     </li>
   
@@ -1309,7 +1337,7 @@ The <code>rest</code> of the objects are always copied.</p>
         <span class="k">if</span> <span class="n">_top_inplace</span><span class="p">:</span>
             <span class="n">f</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">_make_mutable_single</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">_make_mutable_toplevel</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
                 <span class="n">f</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">obj</span>

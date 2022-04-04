@@ -1060,6 +1060,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../make_mutable/" class="md-nav__link">
+        make_mutable
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../map/" class="md-nav__link">
         map
       </a>
@@ -1146,6 +1160,20 @@
     <li class="md-nav__item">
       <a href="../to_string/" class="md-nav__link">
         to_string
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../toplevel_mutable/" class="md-nav__link">
+        toplevel_mutable
       </a>
     </li>
   
@@ -1282,7 +1310,7 @@ overridden to extend subclasses.</p>
     <span class="bp">cls</span><span class="o">.</span><span class="n">_factory_fields</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">cls</span><span class="o">.</span><span class="n">_default_field_values</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">cls</span><span class="o">.</span><span class="n">_subtrees</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="bp">cls</span><span class="o">.</span><span class="n">_mutable</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">cls</span><span class="o">.</span><span class="n">_mutable</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">class_vars</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">):</span>
@@ -1338,8 +1366,9 @@ overridden to extend subclasses.</p>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Checks for new fields, if found, adds them to the metadata.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">with</span> <span class="n">_CONTEXT</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">flatten_mode</span><span class="o">=</span><span class="n">FlattenMode</span><span class="o">.</span><span class="n">all_fields</span><span class="p">):</span>
-        <span class="n">jax</span><span class="o">.</span><span class="n">tree_flatten</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="c1"># flattening / unflattening process updates metadata</span>
+    <span class="n">updates</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">utils</span><span class="o">.</span><span class="n">_safe_update_fields_from</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">updates</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
