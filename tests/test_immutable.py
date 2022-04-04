@@ -242,6 +242,73 @@ class TestImmutable:
         with pytest.raises(RuntimeError):
             module.toplevel_mutable(x, True)
 
+        @to.toplevel_mutable
+        def nested_mutable(module: Parent):
+            assert module._mutable
+
+            @to.toplevel_mutable
+            def nested_fn(module: Parent):
+                y, module2 = module.toplevel_mutable(x, False)
+                return module2, module
+
+            module2, module = nested_fn(module)
+
+            assert module._mutable
+            assert not module2._mutable
+
+            return module
+
+        module = nested_mutable(module)
+        assert not module._mutable
+
+    def test_toplevel_mutable_nested(self):
+        class Parent(to.Tree, to.Immutable):
+            def __init__(self) -> None:
+                self.child = Child()
+
+            @to.compact
+            def __call__(self, x, try_mutable_child: bool):
+                if try_mutable_child:
+                    x = self.child(x)
+                else:
+                    x, self.child = self.child.mutable(x)
+                return x, self
+
+        class Child(to.Tree, to.Immutable):
+            n: int = to.node()
+
+            def __init__(self):
+                self.n = 0
+
+            def __call__(self, x):
+                self.n += 1
+                return x
+
+        x = np.random.uniform(size=(5, 2))
+        module = Parent()
+
+        @to.toplevel_mutable
+        def nested_mutable(module: Parent):
+            assert module._mutable
+
+            @to.toplevel_mutable
+            def nested_fn(module: Parent):
+                y, module2 = module.toplevel_mutable(x, False)
+
+                assert module2._mutable
+
+                return module2, module
+
+            module2, module = nested_fn(module)
+
+            assert module._mutable
+            assert not module2._mutable
+
+            return module
+
+        module = nested_mutable(module)
+        assert not module._mutable
+
     def test_default(self):
         class A(to.Tree, to.Immutable):
             a: int = to.field(1, node=True)

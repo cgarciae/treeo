@@ -515,22 +515,24 @@ def make_mutable(tree: Tree, toplevel_only: bool = False) -> tp.ContextManager[N
         return _make_mutable(tree)
 
 
+def _make_mutable_fn(a: Tree):
+    assert _MUTABLE_CONTEXT.prev_mutable is not None
+    _MUTABLE_CONTEXT.prev_mutable[id(a)] = a._mutable
+    # update __dict__ instead to avoid error during __setattr__
+    _set_mutable(a, _MutableState.ALL)
+
+
+def _revert_mutable_fn(a: Tree):
+    assert _MUTABLE_CONTEXT.prev_mutable is not None
+    # update __dict__ instead to avoid error during __setattr__
+    _set_mutable(a, _MUTABLE_CONTEXT.prev_mutable[id(a)])
+
+
 @contextmanager
 def _make_mutable(obj: tp.Any):
     """
     Context manager that makes the tree mutable.
     """
-
-    def _make_mutable_fn(a: Tree):
-        assert _MUTABLE_CONTEXT.prev_mutable is not None
-        _MUTABLE_CONTEXT.prev_mutable[id(a)] = a._mutable
-        # update __dict__ instead to avoid error during __setattr__
-        _set_mutable(a, _MutableState.ALL)
-
-    def _revert_mutable_fn(a: Tree):
-        assert _MUTABLE_CONTEXT.prev_mutable is not None
-        # update __dict__ instead to avoid error during __setattr__
-        _set_mutable(a, _MUTABLE_CONTEXT.prev_mutable[id(a)])
 
     with _MUTABLE_CONTEXT.update(prev_mutable={}):
         try:

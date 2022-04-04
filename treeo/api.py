@@ -514,6 +514,9 @@ def mutable(
     assert y == 1
     ```
 
+    **Note**: Any `Tree`s that are found in the output of `f` are set to being
+    immutable.
+
     Arguments:
         f: The function to be transformed.
         toplevel_only: If `True`, only the top-level object is made mutable.
@@ -528,6 +531,12 @@ def mutable(
 
         with tree_m.make_mutable(tree, toplevel_only=toplevel_only):
             output = f(tree, *args, **kwargs)
+
+        def _make_output_immutable(a: Tree):
+            # update __dict__ instead to avoid error during __setattr__
+            tree_m._set_mutable(a, None)
+
+        tree_m.apply(_make_output_immutable, output, inplace=True)
 
         return output, tree
 
@@ -570,6 +579,10 @@ def toplevel_mutable(f: C) -> C:
     immutable APIs, avoids explicitly run `replace` to propagate updates to the sub-trees and makes
     management of the top-level tree easier.
 
+    **Note**: Any `Tree`s that are found in the output of `f` are set to being
+    immutable, however the element is the to the same immutablity status as the
+    input tree if they have the same type.
+
     Arguments:
         f: The function to be transformed.
 
@@ -579,6 +592,9 @@ def toplevel_mutable(f: C) -> C:
 
     @functools.wraps(f)
     def wrapper(tree: tree_m.Tree, *args, **kwargs):
+        if not isinstance(tree, tree_m.Tree):
+            raise TypeError(f"Expected 'Tree' type, got '{type(tree).__name__}'")
+
         output, _ = mutable(f, toplevel_only=True)(tree, *args, **kwargs)
 
         if isinstance(output, tuple):
@@ -588,7 +604,7 @@ def toplevel_mutable(f: C) -> C:
             last = output
 
         if type(last) is type(tree):
-            last.__dict__["_mutable"] = tree._mutable
+            tree_m._set_mutable(last, tree._mutable)
 
         if isinstance(output, tuple):
             return (*ys, last)
