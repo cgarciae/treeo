@@ -156,6 +156,9 @@ class TestImmutable:
         assert module is not module2
         assert module2.child.n == 1
 
+        with pytest.raises(RuntimeError):
+            module.mutable(x, toplevel_only=True)
+
     def test_mutable_compact_submodule(self):
         class Parent(to.Tree, to.Immutable):
             @to.compact
@@ -190,6 +193,9 @@ class TestImmutable:
         assert isinstance(module2, Parent)
         assert module is not module2
         assert module2.child.n == 1
+
+        with pytest.raises(RuntimeError):
+            module.mutable(x, toplevel_only=True)
 
     def test_default(self):
         class A(to.Tree, to.Immutable):
@@ -1253,7 +1259,7 @@ class TestImmutable:
         class Parameter:
             @staticmethod
             def fn(x):
-                return np.asarray(x ** 2)
+                return np.asarray(x**2)
 
         @dataclass
         class A(to.Tree, to.Immutable):

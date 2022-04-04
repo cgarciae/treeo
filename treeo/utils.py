@@ -1,4 +1,5 @@
 import dataclasses
+import inspect
 import re
 import typing as tp
 
@@ -211,7 +212,7 @@ def _get_name(obj) -> str:
     if hasattr(obj, "name") and obj.name:
         return obj.name
     elif hasattr(obj, "__name__") and obj.__name__:
-        return obj.__name__
+        return _lower_snake_case(obj.__name__)
     elif hasattr(obj, "__class__") and obj.__class__.__name__:
         return _lower_snake_case(obj.__class__.__name__)
     else:
@@ -222,3 +223,17 @@ def _safe_update_fields_from(obj, updates):
     for field, value in updates.__dict__.items():
         setattr(obj, field, value)
     return obj
+
+
+def _get_unbound_method(obj: object, method: tp.Union[str, tp.Callable]) -> tp.Callable:
+
+    if isinstance(method, str) and not hasattr(obj, method):
+        raise TypeError(f"class '{type(obj).__name__}' has no attribute {method}")
+
+    return (
+        getattr(obj.__class__, method)
+        if isinstance(method, str)
+        else method.__func__
+        if inspect.ismethod(method)
+        else method
+    )

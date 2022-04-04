@@ -6,6 +6,7 @@ import threading
 import typing as tp
 from abc import ABCMeta
 from contextlib import contextmanager
+from copy import copy as python_copy
 from dataclasses import dataclass
 from types import MappingProxyType
 
@@ -108,7 +109,7 @@ class _CompactContext(threading.local):
                 yield
 
         if tree._subtrees is None:
-            with _make_mutable_single(tree):
+            with _make_mutable_toplevel(tree):
                 assert new_subtrees is not None
                 field_names = list(
                     utils._unique_names(
@@ -138,7 +139,7 @@ class _CompactContext(threading.local):
 
 @dataclass
 class _MutableContext(threading.local):
-    prev_mutable: tp.Optional[tp.Dict["Tree", bool]] = None
+    prev_mutable: tp.Optional[tp.Dict[int, tp.Optional["_MutableState"]]] = None
 
     def __enter__(self):
         global _MUTABLE_CONTEXT
@@ -197,17 +198,21 @@ class TreeMeta(ABCMeta):
             return obj
         else:
             obj = cls.__new__(cls)
-            with _make_mutable_single(obj):
+            with _make_mutable_toplevel(obj):
                 obj = cls.construct(obj, *args, **kwargs)
 
         if _COMPACT_CONTEXT.new_subtrees is not None:
             _COMPACT_CONTEXT.new_subtrees.append(obj)
 
-        if _COMPACT_CONTEXT.in_compact and _COMPACT_CONTEXT.current_tree is not None:
+        if (
+            _COMPACT_CONTEXT.in_compact
+            and _COMPACT_CONTEXT.current_tree is not None
+            and _COMPACT_CONTEXT.current_tree._mutable == _MutableState.ALL
+        ):
             _set_mutable(obj, _COMPACT_CONTEXT.current_tree._mutable)
 
             if _MUTABLE_CONTEXT.prev_mutable is not None:
-                _MUTABLE_CONTEXT.prev_mutable[obj] = False
+                _MUTABLE_CONTEXT.prev_mutable[id(obj)] = None
 
         return obj
 
@@ -232,12 +237,17 @@ class TreeMeta(ABCMeta):
         return obj
 
 
+class _MutableState(enum.Enum):
+    TOPLEVEL = 1
+    ALL = 2
+
+
 class Tree(metaclass=TreeMeta):
     _field_metadata: tp.Dict[str, types.FieldMetadata]
     _factory_fields: tp.Dict[str, tp.Callable[[], tp.Any]]
     _default_field_values: tp.Dict[str, tp.Any]
     _subtrees: tp.Optional[tp.Tuple[str, ...]]
-    _mutable: bool
+    _mutable: tp.Optional[_MutableState]
 
     @property
     def field_metadata(self) -> tp.Mapping[str, types.FieldMetadata]:
@@ -275,8 +285,9 @@ class Tree(metaclass=TreeMeta):
         """
         Checks for new fields, if found, adds them to the metadata.
         """
-        with _CONTEXT.update(flatten_mode=FlattenMode.all_fields):
-            jax.tree_flatten(self)
+        # flattening / unflattening process updates metadata
+        updates = copy(self)
+        utils._safe_update_fields_from(self, updates)
 
     def _update_local_metadata(self):
         for field, value in vars(self).items():
@@ -304,7 +315,7 @@ class Tree(metaclass=TreeMeta):
         cls._factory_fields = {}
         cls._default_field_values = {}
         cls._subtrees = None
-        cls._mutable = False
+        cls._mutable = None
 
         for field, value in class_vars.items():
             if isinstance(value, dataclasses.Field):
@@ -335,13 +346,15 @@ class Tree(metaclass=TreeMeta):
 
     def tree_flatten(self):
 
-        fields = vars(self).copy()
+        tree = python_copy(self)
+
+        fields = vars(tree).copy()
 
         node_fields = {}
         static_fields = {}
 
         # auto-annotations
-        self._update_local_metadata()
+        tree._update_local_metadata()
 
         if _CONTEXT.flatten_mode == FlattenMode.all_fields:
             node_fields = fields
@@ -349,7 +362,7 @@ class Tree(metaclass=TreeMeta):
             static_fields = fields
         else:  # normal or None
             for field, value in fields.items():
-                field_annotation = self._field_metadata[field]
+                field_annotation = tree._field_metadata[field]
 
                 if field_annotation.node:
                     node_fields[field] = value
@@ -369,14 +382,14 @@ class Tree(metaclass=TreeMeta):
                 if field in TREE_PRIVATE_FIELDS:
                     continue
 
-                kind = self._field_metadata[field].kind
+                kind = tree._field_metadata[field].kind
                 # leaves, treedef
                 node_fields[field] = jax.tree_map(
                     lambda x: FieldInfo(
                         name=field,
                         value=x,
                         kind=kind,
-                        module=self,
+                        module=tree,
                     )
                     if not isinstance(x, Tree)
                     else x,
@@ -404,7 +417,7 @@ class Tree(metaclass=TreeMeta):
 
         module.__dict__.update(node_fields, **static_fields)
 
-        with _make_mutable_single(module):
+        with _make_mutable_toplevel(module):
             # extract value from Opaque
             for field, value in static_fields.items():
                 if (
@@ -482,10 +495,24 @@ def apply(
         if _top_inplace:
             f(obj, *rest)
         else:
-            with _make_mutable_single(obj):
+            with _make_mutable_toplevel(obj):
                 f(obj, *rest)
 
     return obj
+
+
+def make_mutable(tree: Tree, toplevel_only: bool = False) -> tp.ContextManager[None]:
+    """
+    Returns a context manager that makes a tree mutable.
+
+    Arguments:
+        tree: The tree to make mutable.
+        toplevel_only: If `True`, only the top-level tree is made mutable.
+    """
+    if toplevel_only:
+        return _make_mutable_toplevel(tree)
+    else:
+        return _make_mutable(tree)
 
 
 @contextmanager
@@ -496,14 +523,14 @@ def _make_mutable(obj: tp.Any):
 
     def _make_mutable_fn(a: Tree):
         assert _MUTABLE_CONTEXT.prev_mutable is not None
-        _MUTABLE_CONTEXT.prev_mutable[a] = a._mutable
+        _MUTABLE_CONTEXT.prev_mutable[id(a)] = a._mutable
         # update __dict__ instead to avoid error during __setattr__
-        a.__dict__["_mutable"] = True
+        _set_mutable(a, _MutableState.ALL)
 
     def _revert_mutable_fn(a: Tree):
         assert _MUTABLE_CONTEXT.prev_mutable is not None
         # update __dict__ instead to avoid error during __setattr__
-        a.__dict__["_mutable"] = _MUTABLE_CONTEXT.prev_mutable[a]
+        _set_mutable(a, _MUTABLE_CONTEXT.prev_mutable[id(a)])
 
     with _MUTABLE_CONTEXT.update(prev_mutable={}):
         try:
@@ -514,7 +541,7 @@ def _make_mutable(obj: tp.Any):
 
 
 @contextmanager
-def _make_mutable_single(*objs: Tree):
+def _make_mutable_toplevel(*objs: Tree):
     """
     Context manager that makes a single tree mutable.
     """
@@ -523,15 +550,15 @@ def _make_mutable_single(*objs: Tree):
 
     for obj in objs:
         # update __dict__ instead to avoid error during __setattr__
-        obj.__dict__["_mutable"] = True
+        _set_mutable(obj, _MutableState.TOPLEVEL)
 
     try:
         yield
     finally:
         # update __dict__ instead to avoid error during __setattr__
         for obj, _mutable in zip(objs, _mutables):
-            obj.__dict__["_mutable"] = _mutable
+            _set_mutable(obj, _mutable)
 
 
-def _set_mutable(obj: Tree, value: bool):
+def _set_mutable(obj: Tree, value: tp.Optional[_MutableState]):
     obj.__dict__["_mutable"] = value

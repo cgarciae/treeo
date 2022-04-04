@@ -29,7 +29,7 @@ from treeo.mixins import (
     Immutable,
     ImmutableTree,
 )
-from treeo.tree import FlattenMode, FieldInfo, TreeMeta, Tree, copy, apply
+from treeo.tree import FlattenMode, FieldInfo, TreeMeta, Tree, copy, apply, make_mutable
 from treeo.types import FieldMetadata, Nothing, NOTHING, Missing, MISSING, Hashable
 from treeo.utils import OpaquePredicate, ArrayLike, Opaque, field, node, static
 
@@ -76,4 +76,5 @@ __all__ = [
     "static",
     "to_dict",
     "to_string",
+    "make_mutable",
 ]
