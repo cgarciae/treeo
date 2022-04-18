@@ -1,4 +1,5 @@
 import dataclasses
+import functools
 import inspect
 import threading
 import typing as tp
@@ -9,6 +10,7 @@ from treeo import tree as tree_m
 from treeo import types, utils
 
 A = tp.TypeVar("A")
+C = tp.TypeVar("C", bound=tp.Callable)
 
 
 class Copy:
@@ -113,7 +115,6 @@ class Filter:
     def filter(
         self: A,
         *filters: api.Filter,
-        inplace: bool = False,
         flatten_mode: tp.Union[api.FlattenMode, str, None] = None,
     ) -> A:
         """
@@ -122,13 +123,12 @@ class Filter:
         Arguments:
             *filters: Types to filter by, membership is determined by `issubclass`, or
                 callables that take in a `FieldInfo` and return a `bool`.
-            inplace: If `True`, the input `obj` is mutated and returned.
             flatten_mode: Sets a new `FlattenMode` context for the operation.
 
         Returns:
-            A new pytree with the filtered fields. If `inplace` is `True`, `obj` is returned.
+            A new pytree with the filtered fields.
         """
-        return api.filter(self, *filters, inplace=inplace, flatten_mode=flatten_mode)
+        return api.filter(self, *filters, flatten_mode=flatten_mode)
 
 
 class Merge:
@@ -140,7 +140,6 @@ class Merge:
         self: A,
         other: A,
         *rest: A,
-        inplace: bool = False,
         flatten_mode: tp.Union[api.FlattenMode, str, None] = None,
         ignore_static: bool = False,
     ) -> A:
@@ -150,18 +149,16 @@ class Merge:
         Arguments:
             other: The pytree first to get the values to merge with.
             *rest: Additional pytree to perform the merge in order from left to right.
-            inplace: If `True`, the input `obj` is mutated and returned.
             flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used. If the current flatten context is `None` and `flatten_mode` is not passed then `FlattenMode.all_fields` is used.
             ignore_static: If `True`, bypasses static fields during the process and the statics fields for output are taken from the first input (`obj`).
 
         Returns:
-            A new pytree with the merged values. If `inplace` is `True`, `obj` is returned.
+            A new pytree with the merged values.
         """
         return api.merge(
             self,
             other,
             *rest,
-            inplace=inplace,
             flatten_mode=flatten_mode,
             ignore_static=ignore_static,
         )
@@ -176,7 +173,6 @@ class Map:
         self: A,
         f: tp.Callable,
         *filters: api.Filter,
-        inplace: bool = False,
         flatten_mode: tp.Union[api.FlattenMode, str, None] = None,
         is_leaf: tp.Callable[[tp.Any], bool] = None,
     ) -> A:
@@ -186,17 +182,15 @@ class Map:
         Arguments:
             f: The function to apply to the leaves.
             *filters: The filters used to select the leaves to which the function will be applied.
-            inplace: If `True`, the input `obj` is mutated and returned.
             flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used.
 
         Returns:
-            A new pytree with the changes applied. If `inplace` is `True`, the input `obj` is returned.
+            A new pytree with the changes applied.
         """
         return api.map(
             f,
             self,
             *filters,
-            inplace=inplace,
             flatten_mode=flatten_mode,
             is_leaf=is_leaf,
         )
@@ -207,7 +201,7 @@ class Apply:
     Mixin that adds a `.apply()` method to the class.
     """
 
-    def apply(self: A, f: tp.Callable[..., None], *rest: A, inplace: bool = False) -> A:
+    def apply(self: A, f: tp.Callable[..., None], *rest: A) -> A:
         """
         `apply` is a wrapper over `treeo.apply` that passes `self` as the second argument.
 
@@ -219,7 +213,7 @@ class Apply:
         Returns:
             A new pytree with the updated Trees or the same input `obj` if `inplace` is `True`.
         """
-        return tree_m.apply(f, self, *rest, inplace=inplace)
+        return tree_m.apply(f, self, *rest)
 
 
 class Compact:
@@ -410,11 +404,10 @@ class Immutable:
 
     def mutable(
         self: A,
-        *args,
+        *,
         method: tp.Union[str, tp.Callable] = "__call__",
         toplevel_only: bool = False,
-        **kwargs,
-    ) -> tp.Tuple[tp.Any, A]:
+    ) -> tp.Callable[..., tp.Tuple[tp.Any, A]]:
         """
         Calls a method that contains stateful/mutable operations in
         an immutable fashion. `mutable` will let you perform stateful operations
@@ -453,13 +446,18 @@ class Immutable:
         """
 
         unbounded_method = utils._get_unbound_method(self, method)
-        return api.mutable(unbounded_method, toplevel_only=toplevel_only)(
-            self, *args, **kwargs
-        )
+
+        @functools.wraps(unbounded_method)
+        def wrapper(*args, **kwargs):
+            return api.mutable(unbounded_method, toplevel_only=toplevel_only)(
+                self, *args, **kwargs
+            )
+
+        return wrapper
 
     def toplevel_mutable(
-        self, *args, method: tp.Union[str, tp.Callable] = "__call__", **kwargs
-    ) -> tp.Any:
+        self, *, method: tp.Union[str, tp.Callable] = "__call__"
+    ) -> tp.Callable[..., tp.Any]:
         """
         Calls a method that contains stateful/mutable operations in
         an immutable fashion. It differs from `mutable` in the following ways:
@@ -505,7 +503,12 @@ class Immutable:
             Same outputs as `method`.
         """
         unbounded_method = utils._get_unbound_method(self, method)
-        return api.toplevel_mutable(unbounded_method)(self, *args, **kwargs)
+
+        @functools.wraps(unbounded_method)
+        def wrapper(*args, **kwargs):
+            return api.toplevel_mutable(unbounded_method)(self, *args, **kwargs)
+
+        return wrapper
 
 
 # define __setattr__ outside of class so linters still detect it unknown attribute assignments

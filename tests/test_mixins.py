@@ -24,17 +24,3 @@ class TestMixins:
 
         assert tree.x == 1
         assert tree2.x == 2
-
-    def test_apply_inplace(self):
-        @dataclass
-        class SomeTree(to.Tree, to.Apply):
-            x: int = to.node()
-
-        tree = SomeTree(x=1)
-
-        def f(tree: SomeTree):
-            tree.x = 2
-
-        tree.apply(f, inplace=True)
-
-        assert tree.x == 2

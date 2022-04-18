@@ -625,45 +625,6 @@ class TestTreeo:
                 a1, a2, a3, flatten_mode=to.FlattenMode.normal, ignore_static=False
             )
 
-    def test_update_inplace(self):
-        """
-        In this test the static part of `a1` is use of `aout` since `flatten_mode` is set to `normal`.
-        """
-
-        class A(to.Tree):
-            x: int = to.field(node=True)
-            y: int = to.field(node=False)
-
-            def __init__(self, x: int, y: int):
-                self.x = x
-                self.y = y
-
-        a1 = A(1, 2)
-        a2 = A(to.NOTHING, 4)
-        a3 = A(5, to.NOTHING)
-
-        to.merge(a1, a2, a3, inplace=True)
-
-        assert a1.x == 5
-        assert a1.y == 4
-
-    def test_update_inplace_error(self):
-        """
-        In this test the static part of `a1` is use of `aout` since `flatten_mode` is set to `normal`.
-        """
-
-        a1 = (1, 2)
-        a2 = (to.NOTHING, 4)
-        a3 = (5, to.NOTHING)
-
-        with pytest.raises(TypeError):
-            to.merge(a1, a2, a3, inplace=True)
-
-        aout = to.merge(a1, a2, a3)
-
-        assert aout[0] == 5
-        assert aout[1] == 4
-
     def test_jit_on_method(self):
         n = 0
 

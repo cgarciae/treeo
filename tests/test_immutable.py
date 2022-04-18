@@ -82,7 +82,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
 
-        y, linear2 = linear.mutable(x)
+        y, linear2 = linear.mutable()(x)
 
         assert y.shape == (5, 3)
         assert isinstance(linear2, Linear)
@@ -92,7 +92,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
 
-        y, linear2 = linear.mutable(x, method=linear.__call__)
+        y, linear2 = linear.mutable(method=linear.__call__)(x)
 
         assert y.shape == (5, 3)
         assert isinstance(linear2, Linear)
@@ -102,7 +102,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
 
-        y, linear2 = linear.mutable(x, method=Linear.__call__)
+        y, linear2 = linear.mutable(method=Linear.__call__)(x)
 
         assert y.shape == (5, 3)
         assert isinstance(linear2, Linear)
@@ -112,7 +112,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
 
-        y, linear2 = linear.mutable(x, method="double")
+        y, linear2 = linear.mutable(method="double")(x)
 
         assert y.shape == (5, 3)
         assert isinstance(linear2, Linear)
@@ -144,7 +144,7 @@ class TestImmutable:
 
         assert module.child.n == 0
 
-        y, module2 = module.mutable(x)
+        y, module2 = module.mutable()(x)
 
         assert not module._mutable
         assert not module.child._mutable
@@ -157,7 +157,7 @@ class TestImmutable:
         assert module2.child.n == 1
 
         with pytest.raises(RuntimeError):
-            module.mutable(x, toplevel_only=True)
+            module.mutable(toplevel_only=True)(x)
 
     def test_mutable_compact_submodule(self):
         class Parent(to.Tree, to.Immutable):
@@ -178,12 +178,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         module = Parent()
 
-        # with pytest.raises(RuntimeError):
-        #     y = module(x)
-
-        # assert not hasattr(module, "child")
-
-        y, module2 = module.mutable(x)
+        y, module2 = module.mutable()(x)
 
         assert not module._mutable
         assert not module2._mutable
@@ -195,7 +190,81 @@ class TestImmutable:
         assert module2.child.n == 1
 
         with pytest.raises(RuntimeError):
-            module.mutable(x, toplevel_only=True)
+            module.mutable(toplevel_only=True)(x)
+
+    def test_mutable_compact_docorators(self):
+        class Parent(to.Tree, to.Immutable):
+            @to.mutable
+            @to.compact
+            def __call__(self, x):
+                return Child()(x)
+
+        class Child(to.Tree, to.Immutable):
+            n: int = to.node()
+
+            def __init__(self):
+                self.n = 0
+
+            def __call__(self, x):
+                self.n += 1
+                return x
+
+        x = np.random.uniform(size=(5, 2))
+        module = Parent()
+
+        y, module2 = module(x)
+
+        assert not module._mutable
+        assert not module2._mutable
+        assert not module2.child._mutable
+
+        assert y.shape == (5, 2)
+        assert isinstance(module2, Parent)
+        assert module is not module2
+        assert module2.child.n == 1
+
+    def test_mutable_compact_docorators_invalid_order(self):
+        class Child(to.Tree, to.Immutable):
+            n: int = to.node()
+
+            def __init__(self):
+                self.n = 0
+
+            def __call__(self, x):
+                self.n += 1
+                return x
+
+        with pytest.raises(ValueError):
+
+            class Parent(to.Tree, to.Immutable):
+                @to.compact
+                @to.mutable
+                def __call__(self, x):
+                    return Child()(x)
+
+    def test_mutable_replace(self):
+        class Parent(to.Tree, to.Immutable):
+            def __init__(self):
+                self.child = Child()
+
+            def __call__(self, x):
+                return self.child(x)
+
+        class Child(to.Tree, to.Immutable):
+            n: int = to.node()
+
+            def __init__(self):
+                self.n = 0
+
+            def __call__(self, x):
+                self.n += 1
+                return x
+
+        x = np.random.uniform(size=(5, 2))
+        module = Parent()
+
+        with to.make_mutable(module):
+            module.child = Child()
 
     def test_mutable_returns_state(self):
         class Parent(to.Tree, to.Immutable):
@@ -207,7 +276,7 @@ class TestImmutable:
                 if try_mutable_child:
                     x = self.child(x)
                 else:
-                    x, self.child = self.child.mutable(x)
+                    x, self.child = self.child.mutable()(x)
                 return x, self
 
         class Child(to.Tree, to.Immutable):
@@ -228,7 +297,7 @@ class TestImmutable:
 
         # assert not hasattr(module, "child")
 
-        y, module2 = module.toplevel_mutable(x, False)
+        y, module2 = module.toplevel_mutable()(x, False)
 
         assert not module._mutable
         assert not module2._mutable
@@ -240,7 +309,7 @@ class TestImmutable:
         assert module2.child.n == 1
 
         with pytest.raises(RuntimeError):
-            module.toplevel_mutable(x, True)
+            module.toplevel_mutable()(x, True)
 
         @to.toplevel_mutable
         def nested_mutable(module: Parent):
@@ -248,7 +317,7 @@ class TestImmutable:
 
             @to.toplevel_mutable
             def nested_fn(module: Parent):
-                y, module2 = module.toplevel_mutable(x, False)
+                y, module2 = module.toplevel_mutable()(x, False)
                 return module2, module
 
             module2, module = nested_fn(module)
@@ -271,7 +340,7 @@ class TestImmutable:
                 if try_mutable_child:
                     x = self.child(x)
                 else:
-                    x, self.child = self.child.mutable(x)
+                    x, self.child = self.child.mutable()(x)
                 return x, self
 
         class Child(to.Tree, to.Immutable):
@@ -293,7 +362,7 @@ class TestImmutable:
 
             @to.toplevel_mutable
             def nested_fn(module: Parent):
-                y, module2 = module.toplevel_mutable(x, False)
+                y, module2 = module.toplevel_mutable()(x, False)
 
                 assert module2._mutable
 
@@ -643,13 +712,6 @@ class TestImmutable:
         tree2 = to.filter(tree, lambda field: isinstance(field.value, int))
         assert tree2["a"] == 1
 
-    def test_treex_filter_inplace(self):
-
-        tree = Linear(3, 4)
-
-        with pytest.raises(RuntimeError):
-            tree2 = to.filter(tree, Parameter, inplace=True)
-
     def test_module_map(self):
         class A(to.Tree, to.Immutable):
             def __init__(self):
@@ -881,26 +943,6 @@ class TestImmutable:
             aout = to.merge(
                 a1, a2, a3, flatten_mode=to.FlattenMode.normal, ignore_static=False
             )
-
-    def test_update_inplace(self):
-        """
-        In this test the static part of `a1` is use of `aout` since `flatten_mode` is set to `normal`.
-        """
-
-        class A(to.Tree, to.Immutable):
-            x: int = to.field(node=True)
-            y: int = to.field(node=False)
-
-            def __init__(self, x: int, y: int):
-                self.x = x
-                self.y = y
-
-        a1 = A(1, 2)
-        a2 = A(to.NOTHING, 4)
-        a3 = A(5, to.NOTHING)
-
-        with pytest.raises(RuntimeError):
-            to.merge(a1, a2, a3, inplace=True)
 
     def test_jit_on_method(self):
         n = 0
