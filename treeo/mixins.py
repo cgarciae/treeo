@@ -387,14 +387,15 @@ class Immutable:
         Returns:
             A new Tree with the updated fields.
         """
-        tree = tree_m.copy(self)
+        tree: tree_m.Tree = tree_m.copy(self)
 
         with tree_m._make_mutable_toplevel(tree):
             for key, value in kwargs.items():
                 setattr(tree, key, value)
 
+        tree._update_local_metadata()
         # return a copy to potentially update metadata
-        return tree_m.copy(tree)
+        return tree
 
     def mutable(
         self: A,
