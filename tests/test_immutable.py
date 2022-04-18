@@ -727,78 +727,6 @@ class TestImmutable:
         assert module.a == 1
         assert module2.a == 2
 
-    def test_opaque(self):
-        class A(to.Tree, to.Immutable):
-            id: to.Opaque[str]
-
-            def __init__(self, id: str):
-                self.id = to.Opaque(id, None)
-
-        a1 = A("1")
-        a2 = A("2")
-
-        n = 0
-
-        @jax.jit
-        def f(a):
-            nonlocal n
-            n += 1
-
-        f(a1)
-        f(a2)
-
-        assert n == 1
-
-    def test_opaque_field(self):
-        class A(to.Tree, to.Immutable):
-            id: str = to.field(node=False, opaque=True)
-
-            def __init__(self, id: str):
-                self.id = id
-
-        a1 = A("1")
-        a2 = A("2")
-
-        n = 0
-
-        @jax.jit
-        def f(a):
-            nonlocal n
-            n += 1
-
-        f(a1)
-        f(a2)
-
-        assert n == 1
-
-    def test_opaque_field_array(self):
-        class A(to.Tree, to.Immutable):
-            array: np.ndarray = to.field(node=False, opaque=True)
-
-            def __init__(self, array: np.ndarray):
-                self.array = array
-
-        a1 = A(np.array(1))
-        a2 = A(np.array(2))
-
-        n = 0
-
-        @jax.jit
-        def f(a):
-            nonlocal n
-            n += 1
-
-        f(a1)
-        f(a2)
-
-        assert n == 1
-
-        a3 = A(np.array([1, 2]))
-
-        f(a3)
-
-        assert n == 2
-
     def test_hashable(self):
         class A(to.Tree, to.Immutable):
             array: to.Hashable[np.ndarray]
@@ -883,15 +811,15 @@ class TestImmutable:
 
         class A(to.Tree, to.Immutable):
             x: int = to.field(node=True)
-            y: int = to.field(node=False, opaque=True)
+            y: int = to.field(node=False)
 
             def __init__(self, x: int, y: int):
                 self.x = x
                 self.y = y
 
         a1 = A(1, 2)
-        a2 = A(to.NOTHING, 3)
-        a3 = A(5, 4)
+        a2 = A(to.NOTHING, 2)
+        a3 = A(5, 2)
 
         aout = to.merge(a1, a2, a3, flatten_mode=to.FlattenMode.normal)
 

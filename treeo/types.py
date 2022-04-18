@@ -37,17 +37,14 @@ class _TrivialPytree:
 class FieldMetadata:
     node: bool
     kind: type
-    opaque: tp.Union[bool, tp.Callable[[utils.Opaque, tp.Any], bool]]
 
     def __init__(
         self,
         node: bool,
         kind: type,
-        opaque: tp.Union[bool, tp.Callable[[utils.Opaque, tp.Any], bool]],
     ):
         self.__dict__["node"] = node
         self.__dict__["kind"] = kind
-        self.__dict__["opaque"] = opaque
 
     def update(self, **kwargs) -> "FieldMetadata":
         fields = vars(self).copy()

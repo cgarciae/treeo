@@ -32,7 +32,7 @@ from treeo.mixins import (
 )
 from treeo.tree import FlattenMode, FieldInfo, TreeMeta, Tree, copy, apply, make_mutable
 from treeo.types import FieldMetadata, Nothing, NOTHING, Missing, MISSING, Hashable
-from treeo.utils import OpaquePredicate, ArrayLike, Opaque, field, node, static
+from treeo.utils import ArrayLike, field, node, static
 
 
 __all__ = [
@@ -55,8 +55,6 @@ __all__ = [
     "Missing",
     "NOTHING",
     "Nothing",
-    "Opaque",
-    "OpaquePredicate",
     "Repr",
     "ToDict",
     "ToString",

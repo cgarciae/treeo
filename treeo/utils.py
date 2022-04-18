@@ -14,41 +14,11 @@ B = tp.TypeVar("B")
 _pymap = map
 _pyfilter = filter
 
-OpaquePredicate = tp.Callable[["Opaque", tp.Any], bool]
-
 
 @tpe.runtime_checkable
 class ArrayLike(tpe.Protocol):
     shape: tp.Tuple[int, ...]
     dtype: np.dtype
-
-
-class Opaque(tp.Generic[A]):
-    def __init__(self, value: A, predicate: tp.Optional[OpaquePredicate]):
-        self.value = value
-        self.predicate = predicate
-
-    def __repr__(self):
-        return f"Hidden({self.value})"
-
-    def __eq__(self, other):
-        if self.predicate is not None:
-            return self.predicate(self, other)
-        else:
-            # if both are Opaque and their values are of the same type
-            if isinstance(other, Opaque) and type(self.value) == type(other.value):
-                # if they are array-like also compare their shapes and dtypes
-                if isinstance(self.value, ArrayLike):
-                    other_value = tp.cast(ArrayLike, other.value)
-                    return (
-                        self.value.shape == other_value.shape
-                        and self.value.dtype == other_value.dtype
-                    )
-                else:
-                    # else they are equal
-                    return True
-            else:
-                return False
 
 
 def field(
@@ -61,7 +31,6 @@ def field(
     repr: bool = True,
     hash: tp.Optional[bool] = None,
     compare: bool = True,
-    opaque: tp.Union[bool, OpaquePredicate] = False,
 ) -> tp.Any:
 
     return dataclasses.field(
@@ -69,7 +38,6 @@ def field(
         metadata={
             "node": node,
             "kind": kind,
-            "opaque": opaque,
         },
         default_factory=default_factory,
         init=init,
@@ -88,7 +56,6 @@ def node(
     repr: bool = True,
     hash: tp.Optional[bool] = None,
     compare: bool = True,
-    opaque: tp.Union[bool, OpaquePredicate] = False,
 ) -> tp.Any:
     return field(
         default=default,
@@ -99,7 +66,6 @@ def node(
         repr=repr,
         hash=hash,
         compare=compare,
-        opaque=opaque,
     )
 
 
@@ -112,7 +78,6 @@ def static(
     repr: bool = True,
     hash: tp.Optional[bool] = None,
     compare: bool = True,
-    opaque: tp.Union[bool, OpaquePredicate] = False,
 ) -> tp.Any:
     return field(
         default,
@@ -123,7 +88,6 @@ def static(
         repr=repr,
         hash=hash,
         compare=compare,
-        opaque=opaque,
     )
 
 

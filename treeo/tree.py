@@ -137,7 +137,6 @@ class _CompactContext(threading.local):
                         tree._field_metadata[field] = types.FieldMetadata(
                             kind=type(None),
                             node=True,
-                            opaque=False,
                         )
 
                     setattr(tree, field, subtree)
@@ -264,7 +263,6 @@ class Tree(metaclass=TreeMeta):
         field: str,
         node: tp.Optional[bool] = None,
         kind: tp.Optional[type] = None,
-        opaque: tp.Union[bool, utils.OpaquePredicate, None] = None,
     ) -> T:
         module = copy(self)
 
@@ -276,9 +274,6 @@ class Tree(metaclass=TreeMeta):
 
         if kind is not None:
             updates.update(kind=kind)
-
-        if opaque is not None:
-            updates.update(opaque=opaque)
 
         if updates:
             field_metadata = field_metadata.update(**updates)
@@ -302,7 +297,6 @@ class Tree(metaclass=TreeMeta):
                 self._field_metadata[field] = types.FieldMetadata(
                     node=isinstance(value, Tree),
                     kind=type(value),
-                    opaque=False,
                 )
 
     def __init_subclass__(cls):
@@ -337,7 +331,6 @@ class Tree(metaclass=TreeMeta):
                     cls._field_metadata[field] = types.FieldMetadata(
                         node=value.metadata["node"],
                         kind=value.metadata["kind"],
-                        opaque=value.metadata["opaque"],
                     )
 
         for field, value in annotations.items():
@@ -347,7 +340,6 @@ class Tree(metaclass=TreeMeta):
                 cls._field_metadata[field] = types.FieldMetadata(
                     node=is_node,
                     kind=type(None),
-                    opaque=False,
                 )
 
     def tree_flatten(self):
@@ -368,17 +360,10 @@ class Tree(metaclass=TreeMeta):
             static_fields = fields
         else:  # normal or None
             for field, value in fields.items():
-                field_annotation = tree._field_metadata[field]
+                field_annotation = tree.field_metadata[field]
 
                 if field_annotation.node:
                     node_fields[field] = value
-                elif not field_annotation.node and field_annotation.opaque != False:
-                    static_fields[field] = utils.Opaque(
-                        value,
-                        predicate=field_annotation.opaque
-                        if not isinstance(field_annotation.opaque, bool)
-                        else None,
-                    )
                 else:
                     static_fields[field] = value
 
@@ -422,16 +407,6 @@ class Tree(metaclass=TreeMeta):
                 )
 
         module.__dict__.update(node_fields, **static_fields)
-
-        with _make_mutable_toplevel(module):
-            # extract value from Opaque
-            for field, value in static_fields.items():
-                if (
-                    isinstance(value, utils.Opaque)
-                    and field in module._field_metadata
-                    and module._field_metadata[field].opaque
-                ):
-                    setattr(module, field, value.value)
 
         return module
 

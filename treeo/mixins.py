@@ -296,7 +296,6 @@ class KindMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
-        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
     ) -> tp.Any:
         return utils.field(
             default=default,
@@ -307,7 +306,6 @@ class KindMixin:
             repr=repr,
             hash=hash,
             compare=compare,
-            opaque=opaque,
         )
 
     @classmethod
@@ -320,7 +318,6 @@ class KindMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
-        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
     ) -> tp.Any:
         return utils.node(
             default=default,
@@ -330,7 +327,6 @@ class KindMixin:
             repr=repr,
             hash=hash,
             compare=compare,
-            opaque=opaque,
         )
 
     @classmethod
@@ -342,7 +338,6 @@ class KindMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
-        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
     ) -> tp.Any:
         return cls.field(
             default=default,
@@ -352,7 +347,6 @@ class KindMixin:
             repr=repr,
             hash=hash,
             compare=compare,
-            opaque=opaque,
         )
 
 
