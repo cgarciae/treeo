@@ -201,7 +201,7 @@ class Apply:
     Mixin that adds a `.apply()` method to the class.
     """
 
-    def apply(self: A, f: tp.Callable[..., None], *rest: A) -> A:
+    def apply(self: A, f: tp.Callable[..., None], *rest: A, inplace: bool = False) -> A:
         """
         `apply` is a wrapper over `treeo.apply` that passes `self` as the second argument.
 
@@ -213,7 +213,7 @@ class Apply:
         Returns:
             A new pytree with the updated Trees or the same input `obj` if `inplace` is `True`.
         """
-        return tree_m.apply(f, self, *rest)
+        return tree_m.apply(f, self, *rest, inplace=inplace)
 
 
 class Compact:

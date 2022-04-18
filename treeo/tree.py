@@ -457,7 +457,7 @@ def apply(
     f: tp.Callable[..., None],
     obj: A,
     *rest: A,
-    _inplace: bool = False,
+    inplace: bool = False,
     _top_inplace: tp.Optional[bool] = None,
     _top_level: bool = True,
 ) -> A:
@@ -475,11 +475,11 @@ def apply(
         A new pytree with the updated Trees or the same input `obj` if `inplace` is `True`.
     """
     if _top_inplace is None:
-        _top_inplace = _inplace
+        _top_inplace = inplace
 
     if _top_level:
         rest = copy(rest)
-        if not _inplace:
+        if not inplace:
             obj = copy(obj)
 
     objs = (obj,) + rest
@@ -490,7 +490,7 @@ def apply(
                 f,
                 obj,
                 *rest,
-                _inplace=True,
+                inplace=True,
                 _top_inplace=_top_inplace,
                 _top_level=False,
             )
@@ -550,10 +550,10 @@ def _make_mutable(obj):
 
     with _MUTABLE_CONTEXT.update(prev_mutable={}):
         try:
-            apply(_make_mutable_fn, obj, _inplace=True)
+            apply(_make_mutable_fn, obj, inplace=True)
             yield
         finally:
-            apply(_revert_mutable_fn, obj, _inplace=True)
+            apply(_revert_mutable_fn, obj, inplace=True)
 
 
 @contextmanager
