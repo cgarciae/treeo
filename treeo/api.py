@@ -1,4 +1,5 @@
 import functools
+import inspect
 import logging
 import re
 import typing as tp
@@ -8,6 +9,7 @@ from io import StringIO
 import jax
 import jax.numpy as jnp
 import numpy as np
+from attr import has
 
 import treeo.tree as tree_m
 from treeo import types, utils
@@ -514,6 +516,15 @@ def mutable(
         A function that returns a tuple of the result and a Tree with the new state.
     """
 
+    if inspect.ismethod(f):
+        tree0 = f.__self__
+        f = f.__func__
+    elif not inspect.isfunction(f) and callable(f):
+        tree0 = f
+        f = f.__class__.__call__
+    else:
+        tree0 = None
+
     @functools.wraps(f)
     def wrapper(tree, *args, **kwargs) -> tp.Tuple[A, tp.Any]:
 
@@ -530,6 +541,14 @@ def mutable(
         return output, tree
 
     wrapper._treeo_mutable = True
+
+    if tree0 is not None:
+
+        @functools.wraps(f)
+        def obj_wrapper(*args, **kwargs):
+            return wrapper(tree0, *args, **kwargs)
+
+        return obj_wrapper
 
     return wrapper
 
@@ -581,6 +600,15 @@ def toplevel_mutable(f: C) -> C:
         A function with top-level mutability.
     """
 
+    if inspect.ismethod(f):
+        tree0 = f.__self__
+        f = f.__func__
+    elif not inspect.isfunction(f) and callable(f):
+        tree0 = f
+        f = f.__class__.__call__
+    else:
+        tree0 = None
+
     @functools.wraps(f)
     def wrapper(tree: tree_m.Tree, *args, **kwargs):
         if not isinstance(tree, tree_m.Tree):
@@ -603,6 +631,14 @@ def toplevel_mutable(f: C) -> C:
             return last
 
     wrapper._treeo_mutable = True
+
+    if tree0 is not None:
+
+        @functools.wraps(f)
+        def obj_wrapper(*args, **kwargs):
+            return wrapper(tree0, *args, **kwargs)
+
+        return obj_wrapper
 
     return wrapper
 

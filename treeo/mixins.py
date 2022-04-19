@@ -397,119 +397,19 @@ class Immutable:
         # return a copy to potentially update metadata
         return tree
 
-    def mutable(
-        self: A,
-        *,
-        method: tp.Union[str, tp.Callable] = "__call__",
-        toplevel_only: bool = False,
-    ) -> tp.Callable[..., tp.Tuple[tp.Any, A]]:
-        """
-        Calls a method that contains stateful/mutable operations in
-        an immutable fashion. `mutable` will let you perform stateful operations
-        but all update will be performed other a new instance which is returned
-        as the second output.
 
-        Example:
+class MutabilityError(Exception):
+    """
+    Raised when an operation is attempted on an immutable object.
+    """
 
-        ```python
-        @dataclass
-        class MyTree(to.Tree, to.Immutable):
-            total: int = to.node()
-
-            def accumulate(self, inc) -> None:
-                self.total += inc
-                return self.total
-
-        tree0 = MyTree(total=1)
-
-        # increment by 10
-        total, tree = tree.mutable(10, method="accumulate")
-
-        assert total == 11
-        ```
-
-        Arguments:
-            *args: The positional arguments to pass to the method.
-            method: The method to call, can be a string with the method name,
-                a bounded method, or a function that takes the object as first argument.
-            toplevel_only: If `True` only the top level object will be made mutable.
-            **kwargs: The keyword arguments to pass to the method.
-
-        Returns:
-            A (output, tree) tuple containing the output of the method and the
-            updated tree.
-        """
-
-        unbounded_method = utils._get_unbound_method(self, method)
-
-        @functools.wraps(unbounded_method)
-        def wrapper(*args, **kwargs):
-            return api.mutable(unbounded_method, toplevel_only=toplevel_only)(
-                self, *args, **kwargs
-            )
-
-        return wrapper
-
-    def toplevel_mutable(
-        self, *, method: tp.Union[str, tp.Callable] = "__call__"
-    ) -> tp.Callable[..., tp.Any]:
-        """
-        Calls a method that contains stateful/mutable operations in
-        an immutable fashion. It differs from `mutable` in the following ways:
-
-        * Mutability is granted only for the current top-level Tree, sub-trees are not affected.
-        * `method` is expected to return the new state (usually self) either as the only output or
-            as the last element of a tuple.
-
-        Note that since the original object is not modified, `Immutable` instance remain in the end immutable.
-
-        Example:
-
-        ```python
-        @dataclass
-        class Child(to.Tree, to.Immutable):
-            n: int = to.node()
-
-        @dataclass
-        def Parent(to.Tree, to.Immutable):
-            child: Child
-
-            def update(self) -> "Parent":
-                # self is currently mutable
-                self.child = self.child.replace(n=self.child.n + 1) # but child is immutable (so we use replace)
-
-                return self
-
-        tree = Parent(child=Child(n=4))
-        tree = tree.toplevel_mutable(method="update")
-        ```
-
-        This behaviour is useful when the top-level tree mostly manipulates sub-trees that have well-defined
-        immutable APIs, avoids explicitly run `replace` to propagate updates to the sub-trees and makes
-        management of the top-level tree easier.
-
-        Arguments:
-            *args: The positional arguments to pass to the method.
-            method: The method to call, can be a string with the method name,
-                a bounded method, or a function that takes the object as first argument.
-            **kwargs: The keyword arguments to pass to the method.
-
-        Returns:
-            Same outputs as `method`.
-        """
-        unbounded_method = utils._get_unbound_method(self, method)
-
-        @functools.wraps(unbounded_method)
-        def wrapper(*args, **kwargs):
-            return api.toplevel_mutable(unbounded_method)(self, *args, **kwargs)
-
-        return wrapper
+    pass
 
 
 # define __setattr__ outside of class so linters still detect it unknown attribute assignments
 def _immutable_setattr(self: Immutable, key: str, value: tp.Any) -> None:
     if not self._mutable:
-        raise RuntimeError(
+        raise MutabilityError(
             f"Trying to mutate field '{key}' in immutable '{type(self).__name__}' object."
         )
 

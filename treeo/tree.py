@@ -416,7 +416,7 @@ TREE_PRIVATE_FIELDS = {
 }
 
 
-def copy(obj: A) -> A:
+def copy(obj: A, shallow: bool = False) -> A:
     """
     Returns a deep copy of the tree, almost equivalent to:
     ```python
@@ -424,8 +424,13 @@ def copy(obj: A) -> A:
     ```
     but will try to copy static nodes as well.
     """
+    if shallow:
+        isleaf = lambda x: isinstance(x, Tree) and x is not obj
+    else:
+        isleaf = None
+
     with _CONTEXT.update(flatten_mode=FlattenMode.all_fields):
-        return jax.tree_map(lambda x: x, obj)
+        return jax.tree_map(lambda x: x, obj, is_leaf=isleaf)
 
 
 def apply(
