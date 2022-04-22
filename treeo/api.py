@@ -516,14 +516,23 @@ def mutable(
         A function that returns a tuple of the result and a Tree with the new state.
     """
 
+    f0 = f
+
     if inspect.ismethod(f):
         tree0 = f.__self__
         f = f.__func__
-    elif not inspect.isfunction(f) and callable(f):
+    elif isinstance(f, tree_m.Tree) and callable(f):
         tree0 = f
         f = f.__class__.__call__
     else:
         tree0 = None
+
+    if tree0 is not None and not isinstance(tree0, Tree):
+        name = f0.__name__ is hasattr(f0, "__name__") and f0.__class__.__name__
+        raise TypeError(
+            f"Invalid bounded method or callable '{name}', tried to infer unbouded function and instance, "
+            f"expected a 'Tree' instance but '{type(tree0).__name__}' instead. Try using an unbounded class method instead."
+        )
 
     @functools.wraps(f)
     def wrapper(tree, *args, **kwargs) -> tp.Tuple[A, tp.Any]:
@@ -600,14 +609,23 @@ def toplevel_mutable(f: C) -> C:
         A function with top-level mutability.
     """
 
+    f0 = f
+
     if inspect.ismethod(f):
         tree0 = f.__self__
         f = f.__func__
-    elif not inspect.isfunction(f) and callable(f):
+    elif isinstance(f, tree_m.Tree) and callable(f):
         tree0 = f
         f = f.__class__.__call__
     else:
         tree0 = None
+
+    if tree0 is not None and not isinstance(tree0, Tree):
+        name = f0.__name__ is hasattr(f0, "__name__") and f0.__class__.__name__
+        raise TypeError(
+            f"Invalid bounded method or callable '{name}', tried to infer unbouded function and instance, "
+            f"expected a 'Tree' instance but '{type(tree0).__name__}' instead. Try using an unbounded class method instead."
+        )
 
     @functools.wraps(f)
     def wrapper(tree: tree_m.Tree, *args, **kwargs):

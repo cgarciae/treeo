@@ -363,6 +363,14 @@ class Immutable:
 
     _mutable: tp.Optional[tree_m._MutableState]
 
+    @property
+    def is_mutable(self) -> bool:
+        """
+        Returns:
+            `True` if the object is mutable.
+        """
+        return self._mutable is not None
+
     def replace(self: A, **kwargs) -> A:
         """
         Returns a copy of the Tree with the given fields specified in `kwargs`
@@ -398,7 +406,7 @@ class Immutable:
         return tree
 
 
-class MutabilityError(Exception):
+class MutabilityError(AttributeError):
     """
     Raised when an operation is attempted on an immutable object.
     """
