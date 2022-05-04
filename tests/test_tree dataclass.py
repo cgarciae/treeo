@@ -364,25 +364,6 @@ class TestTreeoDataclass:
         assert "linear1" in mlp.field_metadata
         assert not mlp.field_metadata["linear2"].node
 
-    def test_annotations_missing_field_no_error(self):
-        class MLP(to.Tree):
-            linear3: Linear  # missing field
-
-            def __init__(self, din, dmid, dout, name="mlp"):
-                super().__init__()
-                self.din = din
-                self.dmid = dmid
-                self.dout = dout
-                self.name = name
-
-                self.linear1 = Linear(din, dmid, name="linear1")
-                self.linear2 = Linear(dmid, dout, name="linear2")
-
-        mlp = MLP(2, 3, 5)
-
-        assert "linear1" in mlp.field_metadata
-        assert "linear2" in mlp.field_metadata
-
     def test_treex_filter(self):
 
         tree = dict(a=1, b=Linear(3, 4))

@@ -115,31 +115,30 @@ class _CompactContext(threading.local):
             new_subtrees = _COMPACT_CONTEXT.new_subtrees
 
         if tree._subtrees is None:
-            with _make_mutable_toplevel(tree):
-                assert new_subtrees is not None
-                field_names = list(
-                    utils._unique_names(
-                        (utils._get_name(new_tree) for new_tree in new_subtrees),
-                        existing_names=set(vars(tree).keys()),
-                    )
+            assert new_subtrees is not None
+            field_names = list(
+                utils._unique_names(
+                    (utils._get_name(new_tree) for new_tree in new_subtrees),
+                    existing_names=set(vars(tree).keys()),
                 )
-                tree._subtrees = tuple(field_names)
-                for field, subtree in zip(field_names, new_subtrees):
-                    if (
-                        field in tree._field_metadata
-                        and not tree._field_metadata[field].node
-                    ):
-                        raise ValueError(
-                            f"Trying to subtree '{type(subtree).__name__}' to field '{field}' of '{type(tree).__name__}' but it has previously been declared with `node=False`"
-                        )
+            )
+            tree._subtrees = tuple(field_names)
+            for field, subtree in zip(field_names, new_subtrees):
+                if (
+                    field in tree._field_metadata
+                    and not tree._field_metadata[field].node
+                ):
+                    raise ValueError(
+                        f"Trying to subtree '{type(subtree).__name__}' to field '{field}' of '{type(tree).__name__}' but it has previously been declared with `node=False`"
+                    )
 
-                    if field not in tree._field_metadata:
-                        tree._field_metadata[field] = types.FieldMetadata(
-                            kind=type(None),
-                            node=True,
-                        )
+                if field not in tree._field_metadata:
+                    tree._field_metadata[field] = types.FieldMetadata(
+                        kind=type(None),
+                        node=True,
+                    )
 
-                    setattr(tree, field, subtree)
+                setattr(tree, field, subtree)
 
 
 @dataclass
@@ -205,6 +204,15 @@ class TreeMeta(ABCMeta):
             obj = cls.__new__(cls)
             with _make_mutable_toplevel(obj):
                 obj = cls.construct(obj, *args, **kwargs)
+
+        # check for uninitialized fields
+        for field in obj._field_metadata:
+            if not hasattr(obj, field) or isinstance(
+                getattr(obj, field), dataclasses.Field
+            ):
+                raise TypeError(
+                    f"Field '{field}' of '{type(obj).__name__}' was not initialized. Make sure to initialize all annotated fields."
+                )
 
         if _COMPACT_CONTEXT.new_subtrees is not None:
             _COMPACT_CONTEXT.new_subtrees.append(obj)

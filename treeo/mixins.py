@@ -235,45 +235,44 @@ class Compact:
 
     # NOTE: it feels like `get_field` could be safely used in non-`compact` methods, maybe
     # the various checks done to verify that this method is used inside `compact` could be removed.
-    def get_field(
-        self,
-        field_name: str,
-        initializer: tp.Callable[[], A],
-    ) -> A:
-        """
-        A method that gets a field with the given name if exists, otherwise it initializes it and returns it.
+    # def get_field(
+    #     self,
+    #     field_name: str,
+    #     initializer: tp.Callable[[], A],
+    # ) -> A:
+    #     """
+    #     A method that gets a field with the given name if exists, otherwise it initializes it and returns it.
 
-        Currently the follow restrictions apply:
+    #     Currently the follow restrictions apply:
 
-        * The field must be declared in the class definition.
-        * The method can only be called inside a `compact` context.
+    #     * The field must be declared in the class definition.
+    #     * The method can only be called inside a `compact` context.
 
-        Arguments:
-            field_name: The name of the field to get.
-            initializer: The function to initialize the field if it does not exist.
+    #     Arguments:
+    #         field_name: The name of the field to get.
+    #         initializer: The function to initialize the field if it does not exist.
 
-        Returns:
-            The field value.
-        """
-        value: A
+    #     Returns:
+    #         The field value.
+    #     """
+    #     value: A
 
-        if field_name not in self._field_metadata:
-            raise ValueError(f"Metadata for field '{field_name}' does not exist.")
+    #     if field_name not in self._field_metadata:
+    #         raise ValueError(f"Metadata for field '{field_name}' does not exist.")
 
-        if field_name in vars(self):
-            value = getattr(self, field_name)
-        else:
-            if tree_m._COMPACT_CONTEXT.in_compact and not self.first_run:
-                raise RuntimeError(
-                    f"Trying to initialize field '{field_name}' after the first run of `compact`."
-                )
+    #     if field_name in vars(self):
+    #         value = getattr(self, field_name)
+    #     else:
+    #         if tree_m._COMPACT_CONTEXT.in_compact and not self.first_run:
+    #             raise RuntimeError(
+    #                 f"Trying to initialize field '{field_name}' after the first run of `compact`."
+    #             )
 
-            value = initializer()
+    #         value = initializer()
 
-            with tree_m._make_mutable_toplevel(self):
-                setattr(self, field_name, value)
+    #         setattr(self, field_name, value)
 
-        return value
+    #     return value
 
 
 class Extensions(Copy, ToString, ToDict, Repr, Filter, Merge, Map, Apply, Compact):
@@ -399,6 +398,9 @@ class Immutable:
 
         with tree_m._make_mutable_toplevel(tree):
             for key, value in kwargs.items():
+                if not hasattr(tree, key):
+                    raise TypeError(f"Field '{key}' does not exist.")
+
                 setattr(tree, key, value)
 
         tree._update_local_metadata()
