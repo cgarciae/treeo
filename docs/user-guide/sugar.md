@@ -1,5 +1,5 @@
 <!-- ### Sugar 🍬 -->
-For pedagogical reason, `field` has been used throught the documentation to reinforce the concepts, however, Treeo has a couple of shortcuts to make it easier and more understandable to define Trees.
+For pedagogical reason, `field` has been used throught the documentation to reinforce the concepts. However, Treeo has a couple of shortcuts to make it easier and more understandable to define `Tree`s.
 
 | normal                            | shortcut        |
 | --------------------------------- | --------------- |
@@ -17,7 +17,7 @@ class Parameter:
 class Child(to.Tree):
     a: float = to.field(node=True)
     b: str = to.field(node=False)
-    b: float = to.field(node=True, kind=Parameter)
+    c: float = to.field(node=True, kind=Parameter)
     d: float = to.field(node=False, kind=Parameter)
 
 class Parent(to.Tree):
@@ -34,7 +34,7 @@ class Parameter(to.KindMixin): pass
 class Child(to.Tree):
     a: float = to.node()
     b: str # = to.static(), inferred
-    b: float = Parameter.node()
+    c: float = Parameter.node()
     d: float = Parameter.static()
 
 class Parent(to.Tree):

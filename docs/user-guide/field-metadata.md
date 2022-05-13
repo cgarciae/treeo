@@ -18,7 +18,7 @@ assert mike.field_metadata == {
     ), 
     'name': FieldMetadata(
         node=False, 
-        kind=None, 
+        kind=NoneType, 
         opaque=True,
     )
 }
@@ -38,7 +38,7 @@ class BatchNorm(to.Tree):
 
 model = BatchNorm(features_in=32, momentum=0.9)
 ```
-The `momentum` hyperparameter field is here is a float that you could even wish to make diffentiable in e.g. a meta-gradient setting, however, since the original author of the class didn't consider this its not a node, you can get around this by updating its metadata:
+The `momentum` hyperparameter field here is a float that you wish to make diffentiable in e.g. a meta-gradient setting. However, the original author of the class didn't consider this field a node, but you can get around this by updating its metadata:
 
 ```python
 class DifferentiableHyperParam:

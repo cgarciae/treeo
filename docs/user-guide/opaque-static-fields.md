@@ -30,12 +30,12 @@ def do_something(person: Person):
 do_something(Person(height=1.5, name='John')) # compiles
 do_something(Person(height=1.5, name='Fred')) # cached! 🤩
 ```
-`opaque` will "hide" the value content of the field from JAX, changes will only be detected if the type of an opaque field changes or, in case its an array-like type, if its shape or dtype changes.
+`opaque` will "hide" the value content of the field from JAX. Changes will only be detected if the type of an opaque field changes or, in case it's an array-like type, if its shape or dtype changes.
 
-## opaque predicates
-If you want to define you on policy on how opaque fields are handled, you can use pass a `Callable[[to.Opaque, Any], bool]`  function that takes in a `to.Opaque(value: Any)` object and the new value of the field and return a boolean indicating whether the new value is considered equal to the opaque value.
+## Opaque predicates
+If you want to define your own policy on how opaque fields are handled, you can pass a `Callable[[to.Opaque, Any], bool]`  function that takes in a `to.Opaque(value: Any)` object and the new value of the field and returns a boolean indicating whether the new value is considered equal to the opaque value.
 
-```python hl_lines="19"
+```python hl_lines="18"
 def same_length(opaque: to.Opaque, other: Any):
     if (
         isinstance(other, to.Opaque) 
