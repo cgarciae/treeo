@@ -20,7 +20,7 @@ class Average(to.Tree):
 <!-- TODO: Add a list of rules to follow around jitted functions -->
 State management is one of the most challenging things in JAX, but with the help of Treeo it seems effortless, what is the catch? As always there is a trade-off to consider: Treeo's approach requires to consider how to propagate state changes properly while taking into account the fact that Pytree operations create new objects, that is, since reference do not persist across calls through these functions changes might be lost. 
 
-A standard solution to this problem is: **always output the Tree to update state**. For example, a typical gradient function in a Deep Learning application that contains a stateful Tree would look like this:
+A standard solution to this problem is: **always output the `Tree` whose state has been updated**. For example, a typical gradient function in a Deep Learning application that contains a stateful Tree would look like this:
 
 ```python
 @partial(jax.value_and_grad, has_aux=True)
