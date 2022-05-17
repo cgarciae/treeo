@@ -9,7 +9,6 @@ from io import StringIO
 import jax
 import jax.numpy as jnp
 import numpy as np
-from attr import has
 
 import treeo.tree as tree_m
 from treeo import types, utils
