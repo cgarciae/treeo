@@ -1,6 +1,6 @@
 # Compact
 
-Treeo's `compact` decorator and `Compact` mixin allow the initialization of fields and the definition of Tree nodes during a function call. `compact` enables a simpler syntax for Trees who's computation structure follows the Tree's structure. 
+Treeo's `compact` decorator and `Compact` mixin allow the initialization of fields and the definition of Tree nodes during a function call. `compact` enables a simpler syntax for Trees whose computation structure follows the Tree's structure.
 
 For example, if you have Trees with the following behavior:
 
@@ -64,7 +64,7 @@ The previous example will result in the following fields: `child`, `child2`, `ch
 
 ## Compact Mixin
 
-With the `Compact` mixin you can add the `get_field` method and the `first_run` property to a Tree subclass, these methods provide mechanisms to initialize fields at runtime potentially based on some properties of the input. As an example lets code a `Linear` Tree that does shape inference for its `w` and `b` parameters:
+With the `Compact` mixin you can add the `get_field` method and the `first_run` property to a Tree subclass. These methods provide mechanisms to initialize fields at runtime potentially based on some properties of the input. As an example let's code a `Linear` Tree that does shape inference for its `w` and `b` parameters:
 
 ```python
 class Linear(to.Tree, to.Compact):

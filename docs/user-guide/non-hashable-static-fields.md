@@ -10,7 +10,7 @@ class MyTree(to.Tree):
     table: np.ndarray
 ```
 
-One solution is to make that field `opaque`, this will work as long as you don't need `jit` and friends to reach to changes to its value content for recompiling.  If you do, you can instead use the `to.Hashable(value)` class to wrap around it like this:
+One solution is to make that field `opaque`. This will work as long as you don't need `jit` and friends to react to changes to its value content for recompiling.  If you do, you can instead use the `to.Hashable(value)` class to wrap around it like this:
 
 ```python
 @dataclass
@@ -37,4 +37,4 @@ module.table = to.Hashable(np.zeros((10, 10)))
 
 tree = do_something(tree) # recompiles
 ```
-**Warning**: If you are somehow able to mutate `Hashable.value` directly JAX won't know about this and `jit` won't recompile.
+**Warning**: If you somehow mutate `Hashable.value` directly, JAX won't know about this and `jit` won't recompile.
