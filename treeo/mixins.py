@@ -1,4 +1,5 @@
 import dataclasses
+import functools
 import inspect
 import threading
 import typing as tp
@@ -9,6 +10,7 @@ from treeo import tree as tree_m
 from treeo import types, utils
 
 A = tp.TypeVar("A")
+C = tp.TypeVar("C", bound=tp.Callable)
 
 
 class Copy:
@@ -113,7 +115,6 @@ class Filter:
     def filter(
         self: A,
         *filters: api.Filter,
-        inplace: bool = False,
         flatten_mode: tp.Union[api.FlattenMode, str, None] = None,
     ) -> A:
         """
@@ -122,13 +123,12 @@ class Filter:
         Arguments:
             *filters: Types to filter by, membership is determined by `issubclass`, or
                 callables that take in a `FieldInfo` and return a `bool`.
-            inplace: If `True`, the input `obj` is mutated and returned.
             flatten_mode: Sets a new `FlattenMode` context for the operation.
 
         Returns:
-            A new pytree with the filtered fields. If `inplace` is `True`, `obj` is returned.
+            A new pytree with the filtered fields.
         """
-        return api.filter(self, *filters, inplace=inplace, flatten_mode=flatten_mode)
+        return api.filter(self, *filters, flatten_mode=flatten_mode)
 
 
 class Merge:
@@ -140,7 +140,6 @@ class Merge:
         self: A,
         other: A,
         *rest: A,
-        inplace: bool = False,
         flatten_mode: tp.Union[api.FlattenMode, str, None] = None,
         ignore_static: bool = False,
     ) -> A:
@@ -150,18 +149,16 @@ class Merge:
         Arguments:
             other: The pytree first to get the values to merge with.
             *rest: Additional pytree to perform the merge in order from left to right.
-            inplace: If `True`, the input `obj` is mutated and returned.
             flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used. If the current flatten context is `None` and `flatten_mode` is not passed then `FlattenMode.all_fields` is used.
             ignore_static: If `True`, bypasses static fields during the process and the statics fields for output are taken from the first input (`obj`).
 
         Returns:
-            A new pytree with the merged values. If `inplace` is `True`, `obj` is returned.
+            A new pytree with the merged values.
         """
         return api.merge(
             self,
             other,
             *rest,
-            inplace=inplace,
             flatten_mode=flatten_mode,
             ignore_static=ignore_static,
         )
@@ -176,7 +173,6 @@ class Map:
         self: A,
         f: tp.Callable,
         *filters: api.Filter,
-        inplace: bool = False,
         flatten_mode: tp.Union[api.FlattenMode, str, None] = None,
         is_leaf: tp.Callable[[tp.Any], bool] = None,
     ) -> A:
@@ -186,17 +182,15 @@ class Map:
         Arguments:
             f: The function to apply to the leaves.
             *filters: The filters used to select the leaves to which the function will be applied.
-            inplace: If `True`, the input `obj` is mutated and returned.
             flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used.
 
         Returns:
-            A new pytree with the changes applied. If `inplace` is `True`, the input `obj` is returned.
+            A new pytree with the changes applied.
         """
         return api.map(
             f,
             self,
             *filters,
-            inplace=inplace,
             flatten_mode=flatten_mode,
             is_leaf=is_leaf,
         )
@@ -241,45 +235,44 @@ class Compact:
 
     # NOTE: it feels like `get_field` could be safely used in non-`compact` methods, maybe
     # the various checks done to verify that this method is used inside `compact` could be removed.
-    def get_field(
-        self,
-        field_name: str,
-        initializer: tp.Callable[[], A],
-    ) -> A:
-        """
-        A method that gets a field with the given name if exists, otherwise it initializes it and returns it.
+    # def get_field(
+    #     self,
+    #     field_name: str,
+    #     initializer: tp.Callable[[], A],
+    # ) -> A:
+    #     """
+    #     A method that gets a field with the given name if exists, otherwise it initializes it and returns it.
 
-        Currently the follow restrictions apply:
+    #     Currently the follow restrictions apply:
 
-        * The field must be declared in the class definition.
-        * The method can only be called inside a `compact` context.
+    #     * The field must be declared in the class definition.
+    #     * The method can only be called inside a `compact` context.
 
-        Arguments:
-            field_name: The name of the field to get.
-            initializer: The function to initialize the field if it does not exist.
+    #     Arguments:
+    #         field_name: The name of the field to get.
+    #         initializer: The function to initialize the field if it does not exist.
 
-        Returns:
-            The field value.
-        """
-        value: A
+    #     Returns:
+    #         The field value.
+    #     """
+    #     value: A
 
-        if field_name not in self._field_metadata:
-            raise ValueError(f"Metadata for field '{field_name}' does not exist.")
+    #     if field_name not in self._field_metadata:
+    #         raise ValueError(f"Metadata for field '{field_name}' does not exist.")
 
-        if field_name in vars(self):
-            value = getattr(self, field_name)
-        else:
-            if tree_m._COMPACT_CONTEXT.in_compact and not self.first_run:
-                raise RuntimeError(
-                    f"Trying to initialize field '{field_name}' after the first run of `compact`."
-                )
+    #     if field_name in vars(self):
+    #         value = getattr(self, field_name)
+    #     else:
+    #         if tree_m._COMPACT_CONTEXT.in_compact and not self.first_run:
+    #             raise RuntimeError(
+    #                 f"Trying to initialize field '{field_name}' after the first run of `compact`."
+    #             )
 
-            value = initializer()
+    #         value = initializer()
 
-            with tree_m._make_mutable_toplevel(self):
-                setattr(self, field_name, value)
+    #         setattr(self, field_name, value)
 
-        return value
+    #     return value
 
 
 class Extensions(Copy, ToString, ToDict, Repr, Filter, Merge, Map, Apply, Compact):
@@ -302,7 +295,6 @@ class KindMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
-        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
     ) -> tp.Any:
         return utils.field(
             default=default,
@@ -313,7 +305,6 @@ class KindMixin:
             repr=repr,
             hash=hash,
             compare=compare,
-            opaque=opaque,
         )
 
     @classmethod
@@ -326,7 +317,6 @@ class KindMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
-        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
     ) -> tp.Any:
         return utils.node(
             default=default,
@@ -336,7 +326,6 @@ class KindMixin:
             repr=repr,
             hash=hash,
             compare=compare,
-            opaque=opaque,
         )
 
     @classmethod
@@ -348,7 +337,6 @@ class KindMixin:
         repr: bool = True,
         hash: tp.Optional[bool] = None,
         compare: bool = True,
-        opaque: tp.Union[bool, utils.OpaquePredicate] = False,
     ) -> tp.Any:
         return cls.field(
             default=default,
@@ -358,7 +346,6 @@ class KindMixin:
             repr=repr,
             hash=hash,
             compare=compare,
-            opaque=opaque,
         )
 
 
@@ -374,6 +361,14 @@ class Immutable:
     """
 
     _mutable: tp.Optional[tree_m._MutableState]
+
+    @property
+    def is_mutable(self) -> bool:
+        """
+        Returns:
+            `True` if the object is mutable.
+        """
+        return self._mutable is not None
 
     def replace(self: A, **kwargs) -> A:
         """
@@ -399,119 +394,32 @@ class Immutable:
         Returns:
             A new Tree with the updated fields.
         """
-        tree = tree_m.copy(self)
+        tree: tree_m.Tree = tree_m.copy(self)
 
         with tree_m._make_mutable_toplevel(tree):
             for key, value in kwargs.items():
+                if not hasattr(tree, key):
+                    raise TypeError(f"Field '{key}' does not exist.")
+
                 setattr(tree, key, value)
 
+        tree._update_local_metadata()
         # return a copy to potentially update metadata
-        return tree_m.copy(tree)
+        return tree
 
-    def mutable(
-        self: A,
-        *args,
-        method: tp.Union[str, tp.Callable] = "__call__",
-        toplevel_only: bool = False,
-        **kwargs,
-    ) -> tp.Tuple[tp.Any, A]:
-        """
-        Calls a method that contains stateful/mutable operations in
-        an immutable fashion. `mutable` will let you perform stateful operations
-        but all update will be performed other a new instance which is returned
-        as the second output.
 
-        Example:
+class MutabilityError(AttributeError):
+    """
+    Raised when an operation is attempted on an immutable object.
+    """
 
-        ```python
-        @dataclass
-        class MyTree(to.Tree, to.Immutable):
-            total: int = to.node()
-
-            def accumulate(self, inc) -> None:
-                self.total += inc
-                return self.total
-
-        tree0 = MyTree(total=1)
-
-        # increment by 10
-        total, tree = tree.mutable(10, method="accumulate")
-
-        assert total == 11
-        ```
-
-        Arguments:
-            *args: The positional arguments to pass to the method.
-            method: The method to call, can be a string with the method name,
-                a bounded method, or a function that takes the object as first argument.
-            toplevel_only: If `True` only the top level object will be made mutable.
-            **kwargs: The keyword arguments to pass to the method.
-
-        Returns:
-            A (output, tree) tuple containing the output of the method and the
-            updated tree.
-        """
-
-        unbounded_method = utils._get_unbound_method(self, method)
-        return api.mutable(unbounded_method, toplevel_only=toplevel_only)(
-            self, *args, **kwargs
-        )
-
-    def toplevel_mutable(
-        self, *args, method: tp.Union[str, tp.Callable] = "__call__", **kwargs
-    ) -> tp.Any:
-        """
-        Calls a method that contains stateful/mutable operations in
-        an immutable fashion. It differs from `mutable` in the following ways:
-
-        * Mutability is granted only for the current top-level Tree, sub-trees are not affected.
-        * `method` is expected to return the new state (usually self) either as the only output or
-            as the last element of a tuple.
-
-        Note that since the original object is not modified, `Immutable` instance remain in the end immutable.
-
-        Example:
-
-        ```python
-        @dataclass
-        class Child(to.Tree, to.Immutable):
-            n: int = to.node()
-
-        @dataclass
-        def Parent(to.Tree, to.Immutable):
-            child: Child
-
-            def update(self) -> "Parent":
-                # self is currently mutable
-                self.child = self.child.replace(n=self.child.n + 1) # but child is immutable (so we use replace)
-
-                return self
-
-        tree = Parent(child=Child(n=4))
-        tree = tree.toplevel_mutable(method="update")
-        ```
-
-        This behaviour is useful when the top-level tree mostly manipulates sub-trees that have well-defined
-        immutable APIs, avoids explicitly run `replace` to propagate updates to the sub-trees and makes
-        management of the top-level tree easier.
-
-        Arguments:
-            *args: The positional arguments to pass to the method.
-            method: The method to call, can be a string with the method name,
-                a bounded method, or a function that takes the object as first argument.
-            **kwargs: The keyword arguments to pass to the method.
-
-        Returns:
-            Same outputs as `method`.
-        """
-        unbounded_method = utils._get_unbound_method(self, method)
-        return api.toplevel_mutable(unbounded_method)(self, *args, **kwargs)
+    pass
 
 
 # define __setattr__ outside of class so linters still detect it unknown attribute assignments
 def _immutable_setattr(self: Immutable, key: str, value: tp.Any) -> None:
     if not self._mutable:
-        raise RuntimeError(
+        raise MutabilityError(
             f"Trying to mutate field '{key}' in immutable '{type(self).__name__}' object."
         )
 

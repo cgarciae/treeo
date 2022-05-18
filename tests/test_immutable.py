@@ -65,7 +65,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
 
-        with pytest.raises(RuntimeError):
+        with pytest.raises(to.MutabilityError):
             y = linear(x)
 
     def test_mutable_functional(self):
@@ -78,11 +78,11 @@ class TestImmutable:
         assert isinstance(linear2, Linear)
         assert linear is not linear2
 
-    def test_mutable_no_arg(self):
+    def test_mutable_callable(self):
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
 
-        y, linear2 = linear.mutable(x)
+        y, linear2 = to.mutable(linear)(x)
 
         assert y.shape == (5, 3)
         assert isinstance(linear2, Linear)
@@ -92,7 +92,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
 
-        y, linear2 = linear.mutable(x, method=linear.__call__)
+        y, linear2 = to.mutable(linear.__call__)(x)
 
         assert y.shape == (5, 3)
         assert isinstance(linear2, Linear)
@@ -102,7 +102,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
 
-        y, linear2 = linear.mutable(x, method=Linear.__call__)
+        y, linear2 = to.mutable(Linear.__call__)(linear, x)
 
         assert y.shape == (5, 3)
         assert isinstance(linear2, Linear)
@@ -112,7 +112,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         linear = Linear(2, 3)
 
-        y, linear2 = linear.mutable(x, method="double")
+        y, linear2 = to.mutable(linear.double)(x)
 
         assert y.shape == (5, 3)
         assert isinstance(linear2, Linear)
@@ -139,12 +139,12 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         module = Parent()
 
-        with pytest.raises(RuntimeError):
+        with pytest.raises(to.MutabilityError):
             y = module(x)
 
         assert module.child.n == 0
 
-        y, module2 = module.mutable(x)
+        y, module2 = to.mutable(module)(x)
 
         assert not module._mutable
         assert not module.child._mutable
@@ -156,8 +156,8 @@ class TestImmutable:
         assert module is not module2
         assert module2.child.n == 1
 
-        with pytest.raises(RuntimeError):
-            module.mutable(x, toplevel_only=True)
+        with pytest.raises(to.MutabilityError):
+            to.mutable(module, toplevel_only=True)(x)
 
     def test_mutable_compact_submodule(self):
         class Parent(to.Tree, to.Immutable):
@@ -178,12 +178,7 @@ class TestImmutable:
         x = np.random.uniform(size=(5, 2))
         module = Parent()
 
-        # with pytest.raises(RuntimeError):
-        #     y = module(x)
-
-        # assert not hasattr(module, "child")
-
-        y, module2 = module.mutable(x)
+        y, module2 = to.mutable(module)(x)
 
         assert not module._mutable
         assert not module2._mutable
@@ -194,8 +189,82 @@ class TestImmutable:
         assert module is not module2
         assert module2.child.n == 1
 
-        with pytest.raises(RuntimeError):
-            module.mutable(x, toplevel_only=True)
+        with pytest.raises(to.MutabilityError):
+            to.mutable(module, toplevel_only=True)(x)
+
+    def test_mutable_compact_docorators(self):
+        class Parent(to.Tree, to.Immutable):
+            @to.mutable
+            @to.compact
+            def __call__(self, x):
+                return Child()(x)
+
+        class Child(to.Tree, to.Immutable):
+            n: int = to.node()
+
+            def __init__(self):
+                self.n = 0
+
+            def __call__(self, x):
+                self.n += 1
+                return x
+
+        x = np.random.uniform(size=(5, 2))
+        module = Parent()
+
+        y, module2 = module(x)
+
+        assert not module._mutable
+        assert not module2._mutable
+        assert not module2.child._mutable
+
+        assert y.shape == (5, 2)
+        assert isinstance(module2, Parent)
+        assert module is not module2
+        assert module2.child.n == 1
+
+    def test_mutable_compact_docorators_invalid_order(self):
+        class Child(to.Tree, to.Immutable):
+            n: int = to.node()
+
+            def __init__(self):
+                self.n = 0
+
+            def __call__(self, x):
+                self.n += 1
+                return x
+
+        with pytest.raises(ValueError):
+
+            class Parent(to.Tree, to.Immutable):
+                @to.compact
+                @to.mutable
+                def __call__(self, x):
+                    return Child()(x)
+
+    def test_mutable_replace(self):
+        class Parent(to.Tree, to.Immutable):
+            def __init__(self):
+                self.child = Child()
+
+            def __call__(self, x):
+                return self.child(x)
+
+        class Child(to.Tree, to.Immutable):
+            n: int = to.node()
+
+            def __init__(self):
+                self.n = 0
+
+            def __call__(self, x):
+                self.n += 1
+                return x
+
+        x = np.random.uniform(size=(5, 2))
+        module = Parent()
+
+        with to.make_mutable(module):
+            module.child = Child()
 
     def test_mutable_returns_state(self):
         class Parent(to.Tree, to.Immutable):
@@ -207,7 +276,7 @@ class TestImmutable:
                 if try_mutable_child:
                     x = self.child(x)
                 else:
-                    x, self.child = self.child.mutable(x)
+                    x, self.child = to.mutable(self.child)(x)
                 return x, self
 
         class Child(to.Tree, to.Immutable):
@@ -228,7 +297,7 @@ class TestImmutable:
 
         # assert not hasattr(module, "child")
 
-        y, module2 = module.toplevel_mutable(x, False)
+        y, module2 = to.toplevel_mutable(module)(x, False)
 
         assert not module._mutable
         assert not module2._mutable
@@ -239,8 +308,8 @@ class TestImmutable:
         assert module is not module2
         assert module2.child.n == 1
 
-        with pytest.raises(RuntimeError):
-            module.toplevel_mutable(x, True)
+        with pytest.raises(to.MutabilityError):
+            to.toplevel_mutable(module)(x, True)
 
         @to.toplevel_mutable
         def nested_mutable(module: Parent):
@@ -248,7 +317,7 @@ class TestImmutable:
 
             @to.toplevel_mutable
             def nested_fn(module: Parent):
-                y, module2 = module.toplevel_mutable(x, False)
+                y, module2 = to.toplevel_mutable(module)(x, False)
                 return module2, module
 
             module2, module = nested_fn(module)
@@ -271,7 +340,7 @@ class TestImmutable:
                 if try_mutable_child:
                     x = self.child(x)
                 else:
-                    x, self.child = self.child.mutable(x)
+                    x, self.child = to.mutable(self.child)(x)
                 return x, self
 
         class Child(to.Tree, to.Immutable):
@@ -293,7 +362,7 @@ class TestImmutable:
 
             @to.toplevel_mutable
             def nested_fn(module: Parent):
-                y, module2 = module.toplevel_mutable(x, False)
+                y, module2 = to.toplevel_mutable(module)(x, False)
 
                 assert module2._mutable
 
@@ -577,6 +646,8 @@ class TestImmutable:
 
     def test_auto_annotations_inserted(self):
         class MLP(to.Tree, to.Immutable):
+            linear3: tp.Optional[Linear] = None
+
             def __init__(self, din, dmid, dout, name="mlp"):
                 super().__init__()
                 self.din = din
@@ -614,25 +685,6 @@ class TestImmutable:
         assert "linear1" in mlp.field_metadata
         assert not mlp.field_metadata["linear2"].node
 
-    def test_annotations_missing_field_no_error(self):
-        class MLP(to.Tree, to.Immutable):
-            linear3: Linear  # missing field
-
-            def __init__(self, din, dmid, dout, name="mlp"):
-                super().__init__()
-                self.din = din
-                self.dmid = dmid
-                self.dout = dout
-                self.name = name
-
-                self.linear1 = Linear(din, dmid, name="linear1")
-                self.linear2 = Linear(dmid, dout, name="linear2")
-
-        mlp = MLP(2, 3, 5)
-
-        assert "linear1" in mlp.field_metadata
-        assert "linear2" in mlp.field_metadata
-
     def test_treex_filter(self):
 
         tree = dict(a=1, b=Linear(3, 4))
@@ -642,13 +694,6 @@ class TestImmutable:
 
         tree2 = to.filter(tree, lambda field: isinstance(field.value, int))
         assert tree2["a"] == 1
-
-    def test_treex_filter_inplace(self):
-
-        tree = Linear(3, 4)
-
-        with pytest.raises(RuntimeError):
-            tree2 = to.filter(tree, Parameter, inplace=True)
 
     def test_module_map(self):
         class A(to.Tree, to.Immutable):
@@ -664,78 +709,6 @@ class TestImmutable:
         module2 = to.apply(map_fn, module)
         assert module.a == 1
         assert module2.a == 2
-
-    def test_opaque(self):
-        class A(to.Tree, to.Immutable):
-            id: to.Opaque[str]
-
-            def __init__(self, id: str):
-                self.id = to.Opaque(id, None)
-
-        a1 = A("1")
-        a2 = A("2")
-
-        n = 0
-
-        @jax.jit
-        def f(a):
-            nonlocal n
-            n += 1
-
-        f(a1)
-        f(a2)
-
-        assert n == 1
-
-    def test_opaque_field(self):
-        class A(to.Tree, to.Immutable):
-            id: str = to.field(node=False, opaque=True)
-
-            def __init__(self, id: str):
-                self.id = id
-
-        a1 = A("1")
-        a2 = A("2")
-
-        n = 0
-
-        @jax.jit
-        def f(a):
-            nonlocal n
-            n += 1
-
-        f(a1)
-        f(a2)
-
-        assert n == 1
-
-    def test_opaque_field_array(self):
-        class A(to.Tree, to.Immutable):
-            array: np.ndarray = to.field(node=False, opaque=True)
-
-            def __init__(self, array: np.ndarray):
-                self.array = array
-
-        a1 = A(np.array(1))
-        a2 = A(np.array(2))
-
-        n = 0
-
-        @jax.jit
-        def f(a):
-            nonlocal n
-            n += 1
-
-        f(a1)
-        f(a2)
-
-        assert n == 1
-
-        a3 = A(np.array([1, 2]))
-
-        f(a3)
-
-        assert n == 2
 
     def test_hashable(self):
         class A(to.Tree, to.Immutable):
@@ -821,15 +794,15 @@ class TestImmutable:
 
         class A(to.Tree, to.Immutable):
             x: int = to.field(node=True)
-            y: int = to.field(node=False, opaque=True)
+            y: int = to.field(node=False)
 
             def __init__(self, x: int, y: int):
                 self.x = x
                 self.y = y
 
         a1 = A(1, 2)
-        a2 = A(to.NOTHING, 3)
-        a3 = A(5, 4)
+        a2 = A(to.NOTHING, 2)
+        a3 = A(5, 2)
 
         aout = to.merge(a1, a2, a3, flatten_mode=to.FlattenMode.normal)
 
@@ -881,26 +854,6 @@ class TestImmutable:
             aout = to.merge(
                 a1, a2, a3, flatten_mode=to.FlattenMode.normal, ignore_static=False
             )
-
-    def test_update_inplace(self):
-        """
-        In this test the static part of `a1` is use of `aout` since `flatten_mode` is set to `normal`.
-        """
-
-        class A(to.Tree, to.Immutable):
-            x: int = to.field(node=True)
-            y: int = to.field(node=False)
-
-            def __init__(self, x: int, y: int):
-                self.x = x
-                self.y = y
-
-        a1 = A(1, 2)
-        a2 = A(to.NOTHING, 4)
-        a3 = A(5, to.NOTHING)
-
-        with pytest.raises(RuntimeError):
-            to.merge(a1, a2, a3, inplace=True)
 
     def test_jit_on_method(self):
         n = 0
@@ -1064,9 +1017,9 @@ class TestImmutable:
 
     def test_compact(self):
         class Linear(to.Tree, to.Compact, to.Immutable):
-            w: np.ndarray = Parameter.node()
-            b: np.ndarray = Parameter.node()
-            n: int = State.node()
+            w: tp.Optional[np.ndarray] = Parameter.node(None)
+            b: tp.Optional[np.ndarray] = Parameter.node(None)
+            n: tp.Optional[int] = State.node(None)
 
             def __init__(self, din, dout, name="linear"):
                 self.din = din
@@ -1075,16 +1028,12 @@ class TestImmutable:
 
             @to.compact
             def __call__(self):
-                w = self.get_field(
-                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
-                )
-                b = self.get_field("b", lambda: np.random.uniform(size=(self.dout,)))
-                n = self.get_field("n", lambda: 1)
+                if self.first_run:
+                    self.w = np.random.uniform(size=(self.din, self.dout))
+                    self.b = np.random.uniform(size=(self.dout,))
+                    self.n = 1
 
         class MLP(to.Tree, to.Immutable):
-            linear1: Linear
-            linear2: Linear
-
             def __init__(self, din, dmid, dout, name="mlp"):
                 self.din = din
                 self.dmid = dmid
@@ -1096,9 +1045,9 @@ class TestImmutable:
                 Linear(self.din, self.dmid, name="linear1")()
                 Linear(self.dmid, self.dout, name="linear2")()
 
-        mlp = MLP(2, 4, 3)
-        mlp()
-        mlp()
+        mlp: MLP = MLP(2, 4, 3)
+        mlp = to.mutable(mlp)()[1]
+        mlp = to.mutable(mlp)()[1]
 
         assert mlp.linear1.w.shape == (2, 4)
         assert mlp.linear1.b.shape == (4,)
@@ -1140,9 +1089,9 @@ class TestImmutable:
 
     def test_compact_sugar(self):
         class Linear(to.Tree, to.Compact, to.Immutable):
-            w: np.ndarray = Parameter.node()
-            b: np.ndarray = Parameter.node()
-            n: int = State.node()
+            w: tp.Optional[np.ndarray] = Parameter.node(None)
+            b: tp.Optional[np.ndarray] = Parameter.node(None)
+            n: tp.Optional[int] = State.node(None)
 
             def __init__(self, din, dout, name="linear"):
                 self.din = din
@@ -1151,16 +1100,12 @@ class TestImmutable:
 
             @to.compact
             def __call__(self):
-                w = self.get_field(
-                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
-                )
-                b = self.get_field("b", lambda: np.random.uniform(size=(self.dout,)))
-                n = self.get_field("n", lambda: 1)
+                if self.first_run:
+                    self.w = np.random.uniform(size=(self.din, self.dout))
+                    self.b = np.random.uniform(size=(self.dout,))
+                    self.n = 1
 
         class MLP(to.Tree, to.Immutable):
-            linear1: Linear
-            linear2: Linear
-
             def __init__(self, din, dmid, dout, name="mlp"):
                 self.din = din
                 self.dmid = dmid
@@ -1172,9 +1117,9 @@ class TestImmutable:
                 Linear(self.din, self.dmid, name="linear1")()
                 Linear(self.dmid, self.dout, name="linear2")()
 
-        mlp = MLP(2, 4, 3)
-        mlp()
-        mlp()
+        mlp: MLP = MLP(2, 4, 3)
+        mlp = to.mutable(mlp)()[1]
+        mlp = to.mutable(mlp)()[1]
 
         assert mlp.linear1.w.shape == (2, 4)
         assert mlp.linear1.b.shape == (4,)
@@ -1216,26 +1161,23 @@ class TestImmutable:
 
     def test_compact_naming(self):
         class Linear(to.Tree, to.Compact, to.Immutable):
-            w: np.ndarray = Parameter.node()
-            b: np.ndarray = Parameter.node()
-            n: int = State.node()
+            w: tp.Optional[np.ndarray] = Parameter.node(None)
+            b: tp.Optional[np.ndarray] = Parameter.node(None)
+            n: tp.Optional[int] = State.node(None)
 
-            def __init__(self, din, dout):
+            def __init__(self, din, dout, name="linear"):
                 self.din = din
                 self.dout = dout
+                self.name = name
 
             @to.compact
             def __call__(self):
-                w = self.get_field(
-                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
-                )
-                b = self.get_field("b", lambda: np.random.uniform(size=(self.dout,)))
-                n = self.get_field("n", lambda: 1)
+                if self.first_run:
+                    self.w = np.random.uniform(size=(self.din, self.dout))
+                    self.b = np.random.uniform(size=(self.dout,))
+                    self.n = 1
 
         class MLP(to.Tree, to.Immutable):
-            linear: Linear
-            linear2: Linear
-
             def __init__(self, din, dmid, dout, name="mlp"):
                 self.din = din
                 self.dmid = dmid
@@ -1247,9 +1189,9 @@ class TestImmutable:
                 Linear(self.din, self.dmid)()
                 Linear(self.dmid, self.dout)()
 
-        mlp = MLP(2, 4, 3)
-        mlp()
-        mlp()
+        mlp: MLP = MLP(2, 4, 3)
+        mlp = to.mutable(mlp)()[1]
+        mlp = to.mutable(mlp)()[1]
 
         assert mlp.linear.w.shape == (2, 4)
         assert mlp.linear.b.shape == (4,)
@@ -1268,7 +1210,7 @@ class TestImmutable:
         assert mlp.linear2.din == 4
         assert mlp.linear2.dout == 3
 
-    def test_compact_error_no_annotations(self):
+    def test_compact_new_field(self):
         class Linear(to.Tree, to.Compact, to.Immutable):
             def __init__(self, din, dout, name="linear"):
                 self.din = din
@@ -1277,18 +1219,17 @@ class TestImmutable:
 
             @to.compact
             def __call__(self):
-                w = self.get_field(
-                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
-                )
+                self.w = np.random.uniform(size=(self.din, self.dout))
 
-        tree = Linear(2, 4)
+        tree: Linear = Linear(2, 4)
 
-        with pytest.raises(ValueError):
-            tree()
+        _, tree = to.mutable(tree)()
+
+        assert not tree.field_metadata["w"].node
 
     def test_compact_override_ok(self):
         class Linear(to.Tree, to.Compact, to.Immutable):
-            w: np.ndarray = Parameter.node()
+            w: tp.Optional[np.ndarray] = Parameter.node(None)
 
             def __init__(self, din, dout, name="linear"):
                 self.din = din
@@ -1297,28 +1238,28 @@ class TestImmutable:
 
             @to.compact
             def __call__(self):
-                w = self.get_field(
-                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
-                )
+                if self.first_run:
+                    self.w = np.random.uniform(size=(self.din, self.dout))
 
         class NewLinear(Linear):
-            b: np.ndarray = Parameter.node()
+            b: tp.Optional[np.ndarray] = Parameter.node(None)
 
             @to.compact
             def __call__(self):
-                b = self.get_field("b", lambda: np.random.uniform(size=(self.dout,)))
+                if self.first_run:
+                    self.b = np.random.uniform(size=(self.dout,))
                 super().__call__()
 
         tree = NewLinear(2, 4)
 
-        tree()
+        tree = to.mutable(tree)()[1]
 
         assert tree.w.shape == (2, 4)
         assert tree.b.shape == (4,)
 
     def test_compact_recursion_error(self):
         class Linear(to.Tree, to.Compact, to.Immutable):
-            w: np.ndarray = Parameter.node()
+            w: tp.Optional[np.ndarray] = Parameter.node(None)
 
             def __init__(self, din, dout, name="linear"):
                 self.din = din
@@ -1327,15 +1268,14 @@ class TestImmutable:
 
             @to.compact
             def __call__(self):
-                w = self.get_field(
-                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
-                )
+                if self.first_run:
+                    self.w = np.random.uniform(size=(self.din, self.dout))
                 self()
 
         tree = Linear(2, 4)
 
         with pytest.raises(RuntimeError):
-            tree()
+            tree = to.mutable(tree)()[1]
 
     def test_not_compact_in_init(self):
         a_init_ran = False
@@ -1361,7 +1301,7 @@ class TestImmutable:
 
         assert b_init_ran
 
-        b()
+        b = to.mutable(b)()[1]
 
         assert a_init_ran
         assert "a" in vars(b)
@@ -1392,3 +1332,17 @@ class TestImmutable:
         assert type(m) == type(m1)
         assert type(m1.x) == type(m.x)
         assert type(m1.y) == type(m.y)
+
+    def test_uninitialized(self):
+        class A(to.Tree, to.Immutable):
+            x: int = to.field(node=True)
+
+            def __init__(self, x: tp.Optional[int] = None) -> None:
+                if x is not None:
+                    self.x = x
+
+        with pytest.raises(TypeError):
+            a = A()
+
+        a = A(1)
+        assert a.x == 1

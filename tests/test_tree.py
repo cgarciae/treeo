@@ -364,25 +364,6 @@ class TestTreeo:
         assert "linear1" in mlp.field_metadata
         assert not mlp.field_metadata["linear2"].node
 
-    def test_annotations_missing_field_no_error(self):
-        class MLP(to.Tree):
-            linear3: Linear  # missing field
-
-            def __init__(self, din, dmid, dout, name="mlp"):
-                super().__init__()
-                self.din = din
-                self.dmid = dmid
-                self.dout = dout
-                self.name = name
-
-                self.linear1 = Linear(din, dmid, name="linear1")
-                self.linear2 = Linear(dmid, dout, name="linear2")
-
-        mlp = MLP(2, 3, 5)
-
-        assert "linear1" in mlp.field_metadata
-        assert "linear2" in mlp.field_metadata
-
     def test_treex_filter(self):
 
         tree = dict(a=1, b=Linear(3, 4))
@@ -407,78 +388,6 @@ class TestTreeo:
         module2 = to.apply(map_fn, module)
         assert module.a == 1
         assert module2.a == 2
-
-    def test_opaque(self):
-        class A(to.Tree):
-            id: to.Opaque[str]
-
-            def __init__(self, id: str):
-                self.id = to.Opaque(id, None)
-
-        a1 = A("1")
-        a2 = A("2")
-
-        n = 0
-
-        @jax.jit
-        def f(a):
-            nonlocal n
-            n += 1
-
-        f(a1)
-        f(a2)
-
-        assert n == 1
-
-    def test_opaque_field(self):
-        class A(to.Tree):
-            id: str = to.field(node=False, opaque=True)
-
-            def __init__(self, id: str):
-                self.id = id
-
-        a1 = A("1")
-        a2 = A("2")
-
-        n = 0
-
-        @jax.jit
-        def f(a):
-            nonlocal n
-            n += 1
-
-        f(a1)
-        f(a2)
-
-        assert n == 1
-
-    def test_opaque_field_array(self):
-        class A(to.Tree):
-            array: np.ndarray = to.field(node=False, opaque=True)
-
-            def __init__(self, array: np.ndarray):
-                self.array = array
-
-        a1 = A(np.array(1))
-        a2 = A(np.array(2))
-
-        n = 0
-
-        @jax.jit
-        def f(a):
-            nonlocal n
-            n += 1
-
-        f(a1)
-        f(a2)
-
-        assert n == 1
-
-        a3 = A(np.array([1, 2]))
-
-        f(a3)
-
-        assert n == 2
 
     def test_hashable(self):
         class A(to.Tree):
@@ -564,15 +473,15 @@ class TestTreeo:
 
         class A(to.Tree):
             x: int = to.field(node=True)
-            y: int = to.field(node=False, opaque=True)
+            y: int = to.field(node=False)
 
             def __init__(self, x: int, y: int):
                 self.x = x
                 self.y = y
 
         a1 = A(1, 2)
-        a2 = A(to.NOTHING, 3)
-        a3 = A(5, 4)
+        a2 = A(to.NOTHING, 2)
+        a3 = A(5, 2)
 
         aout = to.merge(a1, a2, a3, flatten_mode=to.FlattenMode.normal)
 
@@ -624,45 +533,6 @@ class TestTreeo:
             aout = to.merge(
                 a1, a2, a3, flatten_mode=to.FlattenMode.normal, ignore_static=False
             )
-
-    def test_update_inplace(self):
-        """
-        In this test the static part of `a1` is use of `aout` since `flatten_mode` is set to `normal`.
-        """
-
-        class A(to.Tree):
-            x: int = to.field(node=True)
-            y: int = to.field(node=False)
-
-            def __init__(self, x: int, y: int):
-                self.x = x
-                self.y = y
-
-        a1 = A(1, 2)
-        a2 = A(to.NOTHING, 4)
-        a3 = A(5, to.NOTHING)
-
-        to.merge(a1, a2, a3, inplace=True)
-
-        assert a1.x == 5
-        assert a1.y == 4
-
-    def test_update_inplace_error(self):
-        """
-        In this test the static part of `a1` is use of `aout` since `flatten_mode` is set to `normal`.
-        """
-
-        a1 = (1, 2)
-        a2 = (to.NOTHING, 4)
-        a3 = (5, to.NOTHING)
-
-        with pytest.raises(TypeError):
-            to.merge(a1, a2, a3, inplace=True)
-
-        aout = to.merge(a1, a2, a3)
-
-        assert aout[0] == 5
-        assert aout[1] == 4
 
     def test_jit_on_method(self):
         n = 0
@@ -825,9 +695,9 @@ class TestTreeo:
 
     def test_compact(self):
         class Linear(to.Tree, to.Compact):
-            w: np.ndarray = Parameter.node()
-            b: np.ndarray = Parameter.node()
-            n: int = State.node()
+            w: tp.Optional[np.ndarray] = Parameter.node(None)
+            b: tp.Optional[np.ndarray] = Parameter.node(None)
+            n: tp.Optional[int] = State.node(None)
 
             def __init__(self, din, dout, name="linear"):
                 self.din = din
@@ -836,18 +706,12 @@ class TestTreeo:
 
             @to.compact
             def __call__(self):
-                self.w = self.get_field(
-                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
-                )
-                self.b = self.get_field(
-                    "b", lambda: np.random.uniform(size=(self.dout,))
-                )
-                self.n = self.get_field("n", lambda: 1)
+                if self.first_run:
+                    self.w = np.random.uniform(size=(self.din, self.dout))
+                    self.b = np.random.uniform(size=(self.dout,))
+                    self.n = 1
 
         class MLP(to.Tree):
-            linear1: Linear
-            linear2: Linear
-
             def __init__(self, din, dmid, dout, name="mlp"):
                 self.din = din
                 self.dmid = dmid
@@ -903,9 +767,9 @@ class TestTreeo:
 
     def test_compact_sugar(self):
         class Linear(to.Tree, to.Compact):
-            w: np.ndarray = Parameter.node()
-            b: np.ndarray = Parameter.node()
-            n: int = State.node()
+            w: tp.Optional[np.ndarray] = Parameter.node(None)
+            b: tp.Optional[np.ndarray] = Parameter.node(None)
+            n: tp.Optional[int] = State.node(None)
 
             def __init__(self, din, dout, name="linear"):
                 self.din = din
@@ -914,18 +778,12 @@ class TestTreeo:
 
             @to.compact
             def __call__(self):
-                self.w = self.get_field(
-                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
-                )
-                self.b = self.get_field(
-                    "b", lambda: np.random.uniform(size=(self.dout,))
-                )
-                self.n = self.get_field("n", lambda: 1)
+                if self.first_run:
+                    self.w = np.random.uniform(size=(self.din, self.dout))
+                    self.b = np.random.uniform(size=(self.dout,))
+                    self.n = 1
 
         class MLP(to.Tree):
-            linear1: Linear
-            linear2: Linear
-
             def __init__(self, din, dmid, dout, name="mlp"):
                 self.din = din
                 self.dmid = dmid
@@ -981,28 +839,23 @@ class TestTreeo:
 
     def test_compact_naming(self):
         class Linear(to.Tree, to.Compact):
-            w: np.ndarray = Parameter.node()
-            b: np.ndarray = Parameter.node()
-            n: int = State.node()
+            w: tp.Optional[np.ndarray] = Parameter.node(None)
+            b: tp.Optional[np.ndarray] = Parameter.node(None)
+            n: tp.Optional[int] = State.node(None)
 
-            def __init__(self, din, dout):
+            def __init__(self, din, dout, name="linear"):
                 self.din = din
                 self.dout = dout
+                self.name = name
 
             @to.compact
             def __call__(self):
-                self.w = self.get_field(
-                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
-                )
-                self.b = self.get_field(
-                    "b", lambda: np.random.uniform(size=(self.dout,))
-                )
-                self.n = self.get_field("n", lambda: 1)
+                if self.first_run:
+                    self.w = np.random.uniform(size=(self.din, self.dout))
+                    self.b = np.random.uniform(size=(self.dout,))
+                    self.n = 1
 
         class MLP(to.Tree):
-            linear: Linear
-            linear2: Linear
-
             def __init__(self, din, dmid, dout, name="mlp"):
                 self.din = din
                 self.dmid = dmid
@@ -1035,27 +888,9 @@ class TestTreeo:
         assert mlp.linear2.din == 4
         assert mlp.linear2.dout == 3
 
-    def test_compact_error_no_annotations(self):
-        class Linear(to.Tree, to.Compact):
-            def __init__(self, din, dout, name="linear"):
-                self.din = din
-                self.dout = dout
-                self.name = name
-
-            @to.compact
-            def __call__(self):
-                self.w = self.get_field(
-                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
-                )
-
-        tree = Linear(2, 4)
-
-        with pytest.raises(ValueError):
-            tree()
-
     def test_compact_override_ok(self):
         class Linear(to.Tree, to.Compact):
-            w: np.ndarray = Parameter.node()
+            w: tp.Optional[np.ndarray] = Parameter.node(None)
 
             def __init__(self, din, dout, name="linear"):
                 self.din = din
@@ -1064,18 +899,14 @@ class TestTreeo:
 
             @to.compact
             def __call__(self):
-                self.w = self.get_field(
-                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
-                )
+                self.w = np.random.uniform(size=(self.din, self.dout))
 
         class NewLinear(Linear):
-            b: np.ndarray = Parameter.node()
+            b: tp.Optional[np.ndarray] = Parameter.node(None)
 
             @to.compact
             def __call__(self):
-                self.b = self.get_field(
-                    "b", lambda: np.random.uniform(size=(self.dout,))
-                )
+                self.b = np.random.uniform(size=(self.dout,))
                 super().__call__()
 
         tree = NewLinear(2, 4)
@@ -1087,7 +918,7 @@ class TestTreeo:
 
     def test_compact_recursion_error(self):
         class Linear(to.Tree, to.Compact):
-            w: np.ndarray = Parameter.node()
+            w: tp.Optional[np.ndarray] = Parameter.node(None)
 
             def __init__(self, din, dout, name="linear"):
                 self.din = din
@@ -1096,9 +927,8 @@ class TestTreeo:
 
             @to.compact
             def __call__(self):
-                self.w = self.get_field(
-                    "w", lambda: np.random.uniform(size=(self.din, self.dout))
-                )
+                if self.first_run:
+                    self.w = np.random.uniform(size=(self.din, self.dout))
                 self()
 
         tree = Linear(2, 4)

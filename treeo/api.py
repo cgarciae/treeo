@@ -1,4 +1,5 @@
 import functools
+import inspect
 import logging
 import re
 import typing as tp
@@ -46,7 +47,6 @@ LEAF_TYPES = (types.Nothing, type(None))
 def filter(
     obj: A,
     *filters: Filter,
-    inplace: bool = False,
     flatten_mode: tp.Union[FlattenMode, str, None] = None,
 ) -> A:
     """
@@ -60,16 +60,11 @@ def filter(
         obj: A pytree (possibly containing `to.Tree`s) to be filtered.
         *filters: Types to filter by, membership is determined by `issubclass`, or
             callables that take in a `FieldInfo` and return a `bool`.
-        inplace: If `True`, the input `obj` is mutated and returned.
         flatten_mode: Sets a new `FlattenMode` context for the operation.
     Returns:
-        A new pytree with the filtered fields. If `inplace` is `True`, `obj` is returned.
+        A new pytree with the filtered fields.
 
     """
-    if inplace and not hasattr(obj, "__dict__"):
-        raise ValueError(
-            f"Cannot filter inplace on objects with no __dict__ property, got {obj}"
-        )
 
     input_obj = obj
 
@@ -92,9 +87,6 @@ def filter(
     with tree_m._CONTEXT.update(add_field_info=True), _flatten_context(flatten_mode):
         obj = jax.tree_map(apply_filters, obj)
 
-    if inplace:
-        obj = utils._safe_update_fields_from(input_obj, obj)
-
     return obj
 
 
@@ -102,7 +94,6 @@ def merge(
     obj: A,
     other: A,
     *rest: A,
-    inplace: bool = False,
     flatten_mode: tp.Union[FlattenMode, str, None] = None,
     ignore_static: bool = False,
 ) -> A:
@@ -114,18 +105,12 @@ def merge(
         obj: Main pytree to merge.
         other: The pytree first to get the values to merge with.
         *rest: Additional pytree to perform the merge in order from left to right.
-        inplace: If `True`, the input `obj` is mutated and returned.
         flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used. If the current flatten context is `None` and `flatten_mode` is not passed then `FlattenMode.all_fields` is used.
         ignore_static: If `True`, bypasses static fields during the process and the statics fields for output are taken from the first input (`obj`).
 
     Returns:
-        A new pytree with the updated values. If `inplace` is `True`, `obj` is returned.
+        A new pytree with the updated values.
     """
-
-    if inplace and not hasattr(obj, "__dict__"):
-        raise TypeError(
-            f"Cannot update inplace on objects with no __dict__ property, got {obj}"
-        )
 
     if flatten_mode is None and tree_m._CONTEXT.flatten_mode is None:
         flatten_mode = FlattenMode.all_fields
@@ -149,9 +134,6 @@ def merge(
             is_leaf=lambda x: isinstance(x, LEAF_TYPES),
         )
 
-    if inplace:
-        obj = utils._safe_update_fields_from(input_obj, obj)
-
     return obj
 
 
@@ -159,7 +141,6 @@ def map(
     f: tp.Callable,
     obj: A,
     *filters: Filter,
-    inplace: bool = False,
     flatten_mode: tp.Union[FlattenMode, str, None] = None,
     is_leaf: tp.Callable[[tp.Any], bool] = None,
     field_info: tp.Optional[bool] = False,
@@ -174,18 +155,13 @@ def map(
         f: The function to apply to the leaves.
         obj: a pytree possibly containing `to.Tree`s.
         *filters: The filters used to select the leaves to which the function will be applied.
-        inplace: If `True`, the input `obj` is mutated and returned.
         flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used.
         add_field_info: Represent the leaves of the tree by a `FieldInfo` type. This enables values of the field such as
         kind and value to be used within the `map` function.
 
     Returns:
-        A new pytree with the changes applied. If `inplace` is `True`, the input `obj` is returned.
+        A new pytree with the changes applied.
     """
-    if inplace and not hasattr(obj, "__dict__"):
-        raise ValueError(
-            f"Cannot map inplace on objects with no __dict__ property, got {obj}"
-        )
 
     input_obj = obj
 
@@ -206,9 +182,6 @@ def map(
 
         if has_filters:
             new_obj = merge(obj, new_obj)
-
-    if inplace:
-        new_obj = utils._safe_update_fields_from(input_obj, new_obj)
 
     return new_obj
 
@@ -473,6 +446,23 @@ def compact(f):
     A decorator that enable the definition of Tree subnodes at runtime.
     """
 
+    if hasattr(f, "_treeo_mutable"):
+        raise ValueError(
+            f"""Cannot make 'compact' a 'mutable' function, invert the order. If you are using it as a decorator, instead of e.g.
+    
+    @compact
+    @mutable
+    def {f.__name__}(self, ...):
+    
+use:
+
+    @mutable
+    @compact
+    def {f.__name__}(self, ...):
+
+"""
+        )
+
     @functools.wraps(f)
     def wrapper(tree, *args, **kwargs):
         with tree_m._COMPACT_CONTEXT.compact(f, tree):
@@ -525,20 +515,48 @@ def mutable(
         A function that returns a tuple of the result and a Tree with the new state.
     """
 
+    f0 = f
+
+    if inspect.ismethod(f):
+        tree0 = f.__self__
+        f = f.__func__
+    elif isinstance(f, tree_m.Tree) and callable(f):
+        tree0 = f
+        f = f.__class__.__call__
+    else:
+        tree0 = None
+
+    if tree0 is not None and not isinstance(tree0, Tree):
+        name = f0.__name__ is hasattr(f0, "__name__") and f0.__class__.__name__
+        raise TypeError(
+            f"Invalid bounded method or callable '{name}', tried to infer unbouded function and instance, "
+            f"expected a 'Tree' instance but '{type(tree0).__name__}' instead. Try using an unbounded class method instead."
+        )
+
     @functools.wraps(f)
     def wrapper(tree, *args, **kwargs) -> tp.Tuple[A, tp.Any]:
+
         tree = tree_m.copy(tree)
 
         with tree_m.make_mutable(tree, toplevel_only=toplevel_only):
             output = f(tree, *args, **kwargs)
 
         def _make_output_immutable(a: Tree):
-            # update __dict__ instead to avoid error during __setattr__
             tree_m._set_mutable(a, None)
 
-        tree_m.apply(_make_output_immutable, output, inplace=True)
+        output = tree_m.apply(_make_output_immutable, output)
 
         return output, tree
+
+    wrapper._treeo_mutable = True
+
+    if tree0 is not None:
+
+        @functools.wraps(f)
+        def obj_wrapper(*args, **kwargs):
+            return wrapper(tree0, *args, **kwargs)
+
+        return obj_wrapper
 
     return wrapper
 
@@ -590,6 +608,24 @@ def toplevel_mutable(f: C) -> C:
         A function with top-level mutability.
     """
 
+    f0 = f
+
+    if inspect.ismethod(f):
+        tree0 = f.__self__
+        f = f.__func__
+    elif isinstance(f, tree_m.Tree) and callable(f):
+        tree0 = f
+        f = f.__class__.__call__
+    else:
+        tree0 = None
+
+    if tree0 is not None and not isinstance(tree0, Tree):
+        name = f0.__name__ is hasattr(f0, "__name__") and f0.__class__.__name__
+        raise TypeError(
+            f"Invalid bounded method or callable '{name}', tried to infer unbouded function and instance, "
+            f"expected a 'Tree' instance but '{type(tree0).__name__}' instead. Try using an unbounded class method instead."
+        )
+
     @functools.wraps(f)
     def wrapper(tree: tree_m.Tree, *args, **kwargs):
         if not isinstance(tree, tree_m.Tree):
@@ -610,6 +646,16 @@ def toplevel_mutable(f: C) -> C:
             return (*ys, last)
         else:
             return last
+
+    wrapper._treeo_mutable = True
+
+    if tree0 is not None:
+
+        @functools.wraps(f)
+        def obj_wrapper(*args, **kwargs):
+            return wrapper(tree0, *args, **kwargs)
+
+        return obj_wrapper
 
     return wrapper
 

@@ -364,25 +364,6 @@ class TestTreeoDataclass:
         assert "linear1" in mlp.field_metadata
         assert not mlp.field_metadata["linear2"].node
 
-    def test_annotations_missing_field_no_error(self):
-        class MLP(to.Tree):
-            linear3: Linear  # missing field
-
-            def __init__(self, din, dmid, dout, name="mlp"):
-                super().__init__()
-                self.din = din
-                self.dmid = dmid
-                self.dout = dout
-                self.name = name
-
-                self.linear1 = Linear(din, dmid, name="linear1")
-                self.linear2 = Linear(dmid, dout, name="linear2")
-
-        mlp = MLP(2, 3, 5)
-
-        assert "linear1" in mlp.field_metadata
-        assert "linear2" in mlp.field_metadata
-
     def test_treex_filter(self):
 
         tree = dict(a=1, b=Linear(3, 4))
@@ -408,50 +389,6 @@ class TestTreeoDataclass:
 
         assert module.a == 1
         assert module2.a == 2
-
-    def test_opaque(self):
-        @dataclass
-        class A(to.Tree):
-            id: to.Opaque[str]
-
-            @classmethod
-            def new(cls, id: str):
-                return cls(id=to.Opaque(id, None))
-
-        a1 = A.new("1")
-        a2 = A.new("2")
-
-        n = 0
-
-        @jax.jit
-        def f(a):
-            nonlocal n
-            n += 1
-
-        f(a1)
-        f(a2)
-
-        assert n == 1
-
-    def test_opaque_field(self):
-        @dataclass
-        class A(to.Tree):
-            id: str = to.field(node=False, opaque=True)
-
-        a1 = A("1")
-        a2 = A("2")
-
-        n = 0
-
-        @jax.jit
-        def f(a):
-            nonlocal n
-            n += 1
-
-        f(a1)
-        f(a2)
-
-        assert n == 1
 
     def test_hashable(self):
         @dataclass
