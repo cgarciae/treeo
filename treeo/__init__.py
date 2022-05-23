@@ -1,5 +1,5 @@
 # isort:skip_file
-__version__ = "0.1.2"
+__version__ = "0.2.0"
 
 
 from treeo.api import (
