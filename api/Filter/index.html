@@ -438,7 +438,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/opaque-static-fields/" class="md-nav__link">
+      <a href="../../user-guide/opaque-static-fields.md" class="md-nav__link">
         Opaque static fields
       </a>
     </li>
@@ -815,6 +815,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../MutabilityError/" class="md-nav__link">
+        MutabilityError
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../NOTHING/" class="md-nav__link">
         NOTHING
       </a>
@@ -831,34 +845,6 @@
     <li class="md-nav__item">
       <a href="../Nothing/" class="md-nav__link">
         Nothing
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Opaque/" class="md-nav__link">
-        Opaque
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../OpaquePredicate/" class="md-nav__link">
-        OpaquePredicate
       </a>
     </li>
   
@@ -1263,7 +1249,7 @@
 
 
 <h2 id="treeo.mixins.Filter.filter" class="doc doc-heading">
-<code class="highlight language-python"><span class="nb">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">filters</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flatten_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="nb">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">filters</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">flatten_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
 
 
 </h2>
@@ -1291,12 +1277,6 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
         <td><code>()</code></td>
       </tr>
       <tr>
-        <td><code>inplace</code></td>
-        <td><code>bool</code></td>
-        <td><p>If <code>True</code>, the input <code>obj</code> is mutated and returned.</p></td>
-        <td><code>False</code></td>
-      </tr>
-      <tr>
         <td><code>flatten_mode</code></td>
         <td><code>Union[treeo.tree.FlattenMode, str]</code></td>
         <td><p>Sets a new <code>FlattenMode</code> context for the operation.</p></td>
@@ -1315,7 +1295,7 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
   <tbody>
     <tr>
       <td><code>~A</code></td>
-      <td><p>A new pytree with the filtered fields. If <code>inplace</code> is <code>True</code>, <code>obj</code> is returned.</p></td>
+      <td><p>A new pytree with the filtered fields.</p></td>
     </tr>
   </tbody>
 </table>
@@ -1324,7 +1304,6 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
           <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">filter</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span>
     <span class="o">*</span><span class="n">filters</span><span class="p">:</span> <span class="n">api</span><span class="o">.</span><span class="n">Filter</span><span class="p">,</span>
-    <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">flatten_mode</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">api</span><span class="o">.</span><span class="n">FlattenMode</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1333,13 +1312,12 @@ callables that take in a <code>FieldInfo</code> and return a <code>bool</code>.<
 <span class="sd">    Arguments:</span>
 <span class="sd">        *filters: Types to filter by, membership is determined by `issubclass`, or</span>
 <span class="sd">            callables that take in a `FieldInfo` and return a `bool`.</span>
-<span class="sd">        inplace: If `True`, the input `obj` is mutated and returned.</span>
 <span class="sd">        flatten_mode: Sets a new `FlattenMode` context for the operation.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A new pytree with the filtered fields. If `inplace` is `True`, `obj` is returned.</span>
+<span class="sd">        A new pytree with the filtered fields.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">api</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">filters</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">,</span> <span class="n">flatten_mode</span><span class="o">=</span><span class="n">flatten_mode</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">api</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">filters</span><span class="p">,</span> <span class="n">flatten_mode</span><span class="o">=</span><span class="n">flatten_mode</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>

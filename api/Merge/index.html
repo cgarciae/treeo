@@ -438,7 +438,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/opaque-static-fields/" class="md-nav__link">
+      <a href="../../user-guide/opaque-static-fields.md" class="md-nav__link">
         Opaque static fields
       </a>
     </li>
@@ -815,6 +815,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../MutabilityError/" class="md-nav__link">
+        MutabilityError
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../NOTHING/" class="md-nav__link">
         NOTHING
       </a>
@@ -831,34 +845,6 @@
     <li class="md-nav__item">
       <a href="../Nothing/" class="md-nav__link">
         Nothing
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Opaque/" class="md-nav__link">
-        Opaque
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../OpaquePredicate/" class="md-nav__link">
-        OpaquePredicate
       </a>
     </li>
   
@@ -1263,7 +1249,7 @@
 
 
 <h2 id="treeo.mixins.Merge.merge" class="doc doc-heading">
-<code class="highlight language-python"><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">flatten_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ignore_static</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+<code class="highlight language-python"><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="o">*</span><span class="n">rest</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">flatten_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ignore_static</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
 
 
 </h2>
@@ -1296,12 +1282,6 @@
         <td><code>()</code></td>
       </tr>
       <tr>
-        <td><code>inplace</code></td>
-        <td><code>bool</code></td>
-        <td><p>If <code>True</code>, the input <code>obj</code> is mutated and returned.</p></td>
-        <td><code>False</code></td>
-      </tr>
-      <tr>
         <td><code>flatten_mode</code></td>
         <td><code>Union[treeo.tree.FlattenMode, str]</code></td>
         <td><p>Sets a new <code>FlattenMode</code> context for the operation, if <code>None</code> the current context is used. If the current flatten context is <code>None</code> and <code>flatten_mode</code> is not passed then <code>FlattenMode.all_fields</code> is used.</p></td>
@@ -1326,7 +1306,7 @@
   <tbody>
     <tr>
       <td><code>~A</code></td>
-      <td><p>A new pytree with the merged values. If <code>inplace</code> is <code>True</code>, <code>obj</code> is returned.</p></td>
+      <td><p>A new pytree with the merged values.</p></td>
     </tr>
   </tbody>
 </table>
@@ -1336,7 +1316,6 @@
     <span class="bp">self</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span>
     <span class="n">other</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span>
     <span class="o">*</span><span class="n">rest</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span>
-    <span class="n">inplace</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">flatten_mode</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">api</span><span class="o">.</span><span class="n">FlattenMode</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">ignore_static</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="p">:</span>
@@ -1346,18 +1325,16 @@
 <span class="sd">    Arguments:</span>
 <span class="sd">        other: The pytree first to get the values to merge with.</span>
 <span class="sd">        *rest: Additional pytree to perform the merge in order from left to right.</span>
-<span class="sd">        inplace: If `True`, the input `obj` is mutated and returned.</span>
 <span class="sd">        flatten_mode: Sets a new `FlattenMode` context for the operation, if `None` the current context is used. If the current flatten context is `None` and `flatten_mode` is not passed then `FlattenMode.all_fields` is used.</span>
 <span class="sd">        ignore_static: If `True`, bypasses static fields during the process and the statics fields for output are taken from the first input (`obj`).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A new pytree with the merged values. If `inplace` is `True`, `obj` is returned.</span>
+<span class="sd">        A new pytree with the merged values.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">api</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">other</span><span class="p">,</span>
         <span class="o">*</span><span class="n">rest</span><span class="p">,</span>
-        <span class="n">inplace</span><span class="o">=</span><span class="n">inplace</span><span class="p">,</span>
         <span class="n">flatten_mode</span><span class="o">=</span><span class="n">flatten_mode</span><span class="p">,</span>
         <span class="n">ignore_static</span><span class="o">=</span><span class="n">ignore_static</span><span class="p">,</span>
     <span class="p">)</span>

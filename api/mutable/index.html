@@ -438,7 +438,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/opaque-static-fields/" class="md-nav__link">
+      <a href="../../user-guide/opaque-static-fields.md" class="md-nav__link">
         Opaque static fields
       </a>
     </li>
@@ -768,6 +768,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../MutabilityError/" class="md-nav__link">
+        MutabilityError
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../NOTHING/" class="md-nav__link">
         NOTHING
       </a>
@@ -784,34 +798,6 @@
     <li class="md-nav__item">
       <a href="../Nothing/" class="md-nav__link">
         Nothing
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Opaque/" class="md-nav__link">
-        Opaque
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../OpaquePredicate/" class="md-nav__link">
-        OpaquePredicate
       </a>
     </li>
   
@@ -1337,20 +1323,48 @@ immutable.</p>
 <span class="sd">        A function that returns a tuple of the result and a Tree with the new state.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">f0</span> <span class="o">=</span> <span class="n">f</span>
+
+    <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="n">tree0</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="vm">__self__</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="vm">__func__</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">Tree</span><span class="p">)</span> <span class="ow">and</span> <span class="n">callable</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="n">tree0</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="fm">__call__</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">tree0</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">tree0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tree0</span><span class="p">,</span> <span class="n">Tree</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">f0</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">is</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f0</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f0</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Invalid bounded method or callable &#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;, tried to infer unbouded function and instance, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;expected a &#39;Tree&#39; instance but &#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">tree0</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; instead. Try using an unbounded class method instead.&quot;</span>
+        <span class="p">)</span>
+
     <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tp</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">A</span><span class="p">,</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+
         <span class="n">tree</span> <span class="o">=</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">make_mutable</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="n">toplevel_only</span><span class="o">=</span><span class="n">toplevel_only</span><span class="p">):</span>
             <span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">tree</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">_make_output_immutable</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">Tree</span><span class="p">):</span>
-            <span class="c1"># update __dict__ instead to avoid error during __setattr__</span>
             <span class="n">tree_m</span><span class="o">.</span><span class="n">_set_mutable</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-        <span class="n">tree_m</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_make_output_immutable</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">tree_m</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_make_output_immutable</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">output</span><span class="p">,</span> <span class="n">tree</span>
+
+    <span class="n">wrapper</span><span class="o">.</span><span class="n">_treeo_mutable</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">tree0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">obj_wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">tree0</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">obj_wrapper</span>
 
     <span class="k">return</span> <span class="n">wrapper</span>
 </code></pre></div>

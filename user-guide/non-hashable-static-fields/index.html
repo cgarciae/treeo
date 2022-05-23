@@ -435,7 +435,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../opaque-static-fields/" class="md-nav__link">
+      <a href="../opaque-static-fields.md" class="md-nav__link">
         Opaque static fields
       </a>
     </li>
@@ -771,6 +771,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/MutabilityError/" class="md-nav__link">
+        MutabilityError
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/NOTHING/" class="md-nav__link">
         NOTHING
       </a>
@@ -787,34 +801,6 @@
     <li class="md-nav__item">
       <a href="../../api/Nothing/" class="md-nav__link">
         Nothing
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/Opaque/" class="md-nav__link">
-        Opaque
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/OpaquePredicate/" class="md-nav__link">
-        OpaquePredicate
       </a>
     </li>
   
@@ -1162,7 +1148,7 @@
 <span class="k">class</span> <span class="nc">MyTree</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
     <span class="n">table</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
 </code></pre></div>
-<p>One solution is to make that field <code>opaque</code>, this will work as long as you don't need <code>jit</code> and friends to reach to changes to its value content for recompiling.  If you do, you can instead use the <code>to.Hashable(value)</code> class to wrap around it like this:</p>
+<p>One solution is to make that field <code>opaque</code>. This will work as long as you don't need <code>jit</code> and friends to react to changes to its value content for recompiling.  If you do, you can instead use the <code>to.Hashable(value)</code> class to wrap around it like this:</p>
 <div class="highlight"><pre><span></span><code><span class="nd">@dataclass</span>
 <span class="k">class</span> <span class="nc">MyTree</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
     <span class="n">table</span><span class="p">:</span> <span class="n">to</span><span class="o">.</span><span class="n">Hashable</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span>
@@ -1184,7 +1170,7 @@
 </span>
 <span class="n">tree</span> <span class="o">=</span> <span class="n">do_something</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span> <span class="c1"># recompiles</span>
 </code></pre></div>
-<strong>Warning</strong>: If you are somehow able to mutate <code>Hashable.value</code> directly JAX won't know about this and <code>jit</code> won't recompile.</p>
+<strong>Warning</strong>: If you somehow mutate <code>Hashable.value</code> directly, JAX won't know about this and <code>jit</code> won't recompile.</p>
                 
               
               
@@ -1204,7 +1190,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
         
-        <a href="../opaque-static-fields/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Opaque static fields" rel="prev">
+        <a href="../state-management/" class="md-footer__link md-footer__link--prev" aria-label="Previous: State Management" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
           </div>
@@ -1213,7 +1199,7 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              Opaque static fields
+              State Management
             </div>
           </div>
         </a>

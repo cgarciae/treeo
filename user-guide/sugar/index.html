@@ -443,7 +443,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../opaque-static-fields/" class="md-nav__link">
+      <a href="../opaque-static-fields.md" class="md-nav__link">
         Opaque static fields
       </a>
     </li>
@@ -771,6 +771,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/MutabilityError/" class="md-nav__link">
+        MutabilityError
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/NOTHING/" class="md-nav__link">
         NOTHING
       </a>
@@ -787,34 +801,6 @@
     <li class="md-nav__item">
       <a href="../../api/Nothing/" class="md-nav__link">
         Nothing
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/Opaque/" class="md-nav__link">
-        Opaque
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/OpaquePredicate/" class="md-nav__link">
-        OpaquePredicate
       </a>
     </li>
   
@@ -1155,7 +1141,7 @@
                   <h1>Sugar 🍬</h1>
                 
                 <!-- ### Sugar 🍬 -->
-<p>For pedagogical reason, <code>field</code> has been used throught the documentation to reinforce the concepts, however, Treeo has a couple of shortcuts to make it easier and more understandable to define Trees.</p>
+<p>For pedagogical reason, <code>field</code> has been used throught the documentation to reinforce the concepts. However, Treeo has a couple of shortcuts to make it easier and more understandable to define <code>Tree</code>s.</p>
 <table>
 <thead>
 <tr>
@@ -1189,7 +1175,7 @@
 <span class="k">class</span> <span class="nc">Child</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
     <span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">b</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">b</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="p">)</span>
+    <span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="p">)</span>
     <span class="n">d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">node</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="n">Parameter</span><span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">Parent</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
@@ -1203,7 +1189,7 @@
 <span class="k">class</span> <span class="nc">Child</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>
     <span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">to</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
     <span class="n">b</span><span class="p">:</span> <span class="nb">str</span> <span class="c1"># = to.static(), inferred</span>
-    <span class="n">b</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
+    <span class="n">c</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">node</span><span class="p">()</span>
     <span class="n">d</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">static</span><span class="p">()</span>
 
 <span class="k">class</span> <span class="nc">Parent</span><span class="p">(</span><span class="n">to</span><span class="o">.</span><span class="n">Tree</span><span class="p">):</span>

@@ -440,7 +440,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../opaque-static-fields/" class="md-nav__link">
+      <a href="../opaque-static-fields.md" class="md-nav__link">
         Opaque static fields
       </a>
     </li>
@@ -804,6 +804,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/MutabilityError/" class="md-nav__link">
+        MutabilityError
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/NOTHING/" class="md-nav__link">
         NOTHING
       </a>
@@ -820,34 +834,6 @@
     <li class="md-nav__item">
       <a href="../../api/Nothing/" class="md-nav__link">
         Nothing
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/Opaque/" class="md-nav__link">
-        Opaque
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/OpaquePredicate/" class="md-nav__link">
-        OpaquePredicate
       </a>
     </li>
   
@@ -1235,7 +1221,7 @@
     <span class="p">),</span> 
     <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="n">FieldMetadata</span><span class="p">(</span>
         <span class="n">node</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
-        <span class="n">kind</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">kind</span><span class="o">=</span><span class="n">NoneType</span><span class="p">,</span> 
         <span class="n">opaque</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
 <span class="p">}</span>
@@ -1253,7 +1239,7 @@
 
 <span class="n">model</span> <span class="o">=</span> <span class="n">BatchNorm</span><span class="p">(</span><span class="n">features_in</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
 </code></pre></div>
-The <code>momentum</code> hyperparameter field is here is a float that you could even wish to make diffentiable in e.g. a meta-gradient setting, however, since the original author of the class didn't consider this its not a node, you can get around this by updating its metadata:</p>
+The <code>momentum</code> hyperparameter field here is a float that you wish to make diffentiable in e.g. a meta-gradient setting. However, the original author of the class didn't consider this field a node, but you can get around this by updating its metadata:</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">DifferentiableHyperParam</span><span class="p">:</span>
     <span class="k">pass</span>
 

@@ -438,7 +438,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/opaque-static-fields/" class="md-nav__link">
+      <a href="../../user-guide/opaque-static-fields.md" class="md-nav__link">
         Opaque static fields
       </a>
     </li>
@@ -768,6 +768,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../MutabilityError/" class="md-nav__link">
+        MutabilityError
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../NOTHING/" class="md-nav__link">
         NOTHING
       </a>
@@ -784,34 +798,6 @@
     <li class="md-nav__item">
       <a href="../Nothing/" class="md-nav__link">
         Nothing
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Opaque/" class="md-nav__link">
-        Opaque
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../OpaquePredicate/" class="md-nav__link">
-        OpaquePredicate
       </a>
     </li>
   
@@ -1236,7 +1222,7 @@ but will try to copy static nodes as well.</p>
 
         <details class="quote">
           <summary>Source code in <code>treeo/tree.py</code></summary>
-          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">A</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="p">:</span>
+          <div class="highlight"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">A</span><span class="p">,</span> <span class="n">shallow</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">A</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns a deep copy of the tree, almost equivalent to:</span>
 <span class="sd">    ```python</span>
@@ -1244,8 +1230,13 @@ but will try to copy static nodes as well.</p>
 <span class="sd">    ```</span>
 <span class="sd">    but will try to copy static nodes as well.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">shallow</span><span class="p">:</span>
+        <span class="n">isleaf</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Tree</span><span class="p">)</span> <span class="ow">and</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">obj</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">isleaf</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="k">with</span> <span class="n">_CONTEXT</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">flatten_mode</span><span class="o">=</span><span class="n">FlattenMode</span><span class="o">.</span><span class="n">all_fields</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">jax</span><span class="o">.</span><span class="n">tree_map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">is_leaf</span><span class="o">=</span><span class="n">isleaf</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>

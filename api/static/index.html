@@ -438,7 +438,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../user-guide/opaque-static-fields/" class="md-nav__link">
+      <a href="../../user-guide/opaque-static-fields.md" class="md-nav__link">
         Opaque static fields
       </a>
     </li>
@@ -768,6 +768,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../MutabilityError/" class="md-nav__link">
+        MutabilityError
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../NOTHING/" class="md-nav__link">
         NOTHING
       </a>
@@ -784,34 +798,6 @@
     <li class="md-nav__item">
       <a href="../Nothing/" class="md-nav__link">
         Nothing
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../Opaque/" class="md-nav__link">
-        Opaque
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../OpaquePredicate/" class="md-nav__link">
-        OpaquePredicate
       </a>
     </li>
   
@@ -1241,7 +1227,6 @@
     <span class="nb">repr</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="nb">hash</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">compare</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">opaque</span><span class="p">:</span> <span class="n">tp</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">OpaquePredicate</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tp</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">field</span><span class="p">(</span>
         <span class="n">default</span><span class="p">,</span>
@@ -1252,7 +1237,6 @@
         <span class="nb">repr</span><span class="o">=</span><span class="nb">repr</span><span class="p">,</span>
         <span class="nb">hash</span><span class="o">=</span><span class="nb">hash</span><span class="p">,</span>
         <span class="n">compare</span><span class="o">=</span><span class="n">compare</span><span class="p">,</span>
-        <span class="n">opaque</span><span class="o">=</span><span class="n">opaque</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div>
         </details>

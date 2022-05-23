@@ -443,7 +443,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../opaque-static-fields/" class="md-nav__link">
+      <a href="../opaque-static-fields.md" class="md-nav__link">
         Opaque static fields
       </a>
     </li>
@@ -771,6 +771,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../api/MutabilityError/" class="md-nav__link">
+        MutabilityError
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../api/NOTHING/" class="md-nav__link">
         NOTHING
       </a>
@@ -787,34 +801,6 @@
     <li class="md-nav__item">
       <a href="../../api/Nothing/" class="md-nav__link">
         Nothing
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/Opaque/" class="md-nav__link">
-        Opaque
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/OpaquePredicate/" class="md-nav__link">
-        OpaquePredicate
       </a>
     </li>
   
@@ -1158,7 +1144,7 @@
 <p>If a field is <strong>not</strong> marked with <code>to.field</code> the following policy will be applied when determining whether a field is a node or not:</p>
 <ul>
 <li>If the field is <em>annotated</em> with a <code>Tree</code> subtype or a generic containing a <code>Tree</code> subtype e.g. <code>List[to.Tree]</code>, the field is considered a <strong>node</strong>.</li>
-<li>If the runtime value of the field is a <code>to.Tree</code> instance, the field is considered a <strong>node</strong> and the <code>Tree</code>'s metadata will be updated to reflect this.</li>
+<li>If the runtime value of the field is a <code>to.Tree</code> instance, the field is considered a <strong>node</strong>. The <code>Tree</code>'s metadata will be updated to reflect this.</li>
 <li>If none of the above apply, the field is considered a <strong>static</strong> field.</li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="kn">import</span> <span class="nn">treeo</span> <span class="k">as</span> <span class="nn">to</span>
