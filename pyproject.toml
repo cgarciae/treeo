@@ -11,11 +11,10 @@ homepage = "https://cgarciae.github.io/treeo"
 [tool.poetry.dependencies]
 python = "^3.7"
 typing-extensions = ">=3.7.0"
-flax = "^0.5.1"
 
 [tool.poetry.dev-dependencies]
-jax = ">=0.2.24"
-jaxlib = ">=0.1.73"
+jax = ">=0.3.0"
+jaxlib = ">=0.3.0"
 matplotlib = { version = "^3.4.3", python = ">=3.7" }
 pytest = "^5.2"
 black = {version = "^22.3.0", allow-prereleases = true}
