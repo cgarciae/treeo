@@ -51,6 +51,9 @@ class FieldMetadata:
         fields.update(kwargs)
         return FieldMetadata(**fields)
 
+    def __eq__(self, other):
+        return self.node == other.node and self.kind == other.kind
+
     def __setattr__(self, name: str, value: tp.Any) -> None:
         raise AttributeError(f"FieldMetadata is immutable, cannot set {name}")
 
