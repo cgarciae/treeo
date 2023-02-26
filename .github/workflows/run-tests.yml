@@ -36,18 +36,17 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          poetry config virtualenvs.create false
-          pip install -U certifi
+          poetry config virtualenvs.in-project true
           poetry install
 
       - name: Run Tests
-        run: pytest --cov=treeo --cov-report=term-missing --cov-report=xml
+        run: poetry run pytest --cov=treeo --cov-report=term-missing --cov-report=xml
 
       - name: Upload coverage
         uses: codecov/codecov-action@v1
 
       - name: Test Examples
-        run: bash scripts/test-examples.sh
+        run: poetry run bash scripts/test-examples.sh
 
   test-import:
     name: Test Import without Dev Dependencies
@@ -73,11 +72,10 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -U certifi
-          poetry config virtualenvs.create false
+          poetry config virtualenvs.in-project true
           poetry install --without dev
-          pip install jax jaxlib
+          poetry run pip install jax jaxlib
         
       - name: Test Import Treex
         run: |
-          python -c "import treeo"
+          poetry run python -c "import treeo"
