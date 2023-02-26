@@ -676,7 +676,9 @@ def _looser_tree_map(
         tree,
         is_leaf=is_leaf,
     )
-    all_leaves = [leaves] + [jax.tree_util.tree_flatten(r, is_leaf=is_leaf)[0] for r in rest]
+    all_leaves = [leaves] + [
+        jax.tree_util.tree_flatten(r, is_leaf=is_leaf)[0] for r in rest
+    ]
 
     n_leaves = len(leaves)
     assert all(len(l) == n_leaves for l in all_leaves)
