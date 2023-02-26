@@ -197,7 +197,7 @@ def to_dict(
 
     if field_info:
         with add_field_info(), flatten_mode(FlattenMode.all_fields):
-            flat, treedef = jax.tree_flatten(obj)
+            flat, treedef = jax.tree_util.tree_flatten(obj)
 
         obj = jax.tree_unflatten(treedef, flat)
         obj = tree_m.apply(_remove_field_info_from_metadata, obj)
@@ -672,11 +672,11 @@ def _looser_tree_map(
     is_leaf: tp.Optional[tp.Callable[[tp.Any], bool]] = None,
 ) -> tp.Any:
     jax.tree_map
-    leaves, treedef = jax.tree_flatten(
+    leaves, treedef = jax.tree_util.tree_flatten(
         tree,
         is_leaf=is_leaf,
     )
-    all_leaves = [leaves] + [jax.tree_flatten(r, is_leaf=is_leaf)[0] for r in rest]
+    all_leaves = [leaves] + [jax.tree_util.tree_flatten(r, is_leaf=is_leaf)[0] for r in rest]
 
     n_leaves = len(leaves)
     assert all(len(l) == n_leaves for l in all_leaves)

@@ -406,7 +406,7 @@ class TestImmutable:
 
         mlp = MLP(2, 3, 5)
 
-        flat = jax.tree_leaves(mlp)
+        flat = jax.tree_util.tree_leaves(mlp)
 
         assert len(flat) == 6
 
@@ -414,7 +414,7 @@ class TestImmutable:
 
         mlp = to.filter(MLP(2, 3, 5), State)
 
-        flat = jax.tree_leaves(mlp)
+        flat = jax.tree_util.tree_leaves(mlp)
 
         assert len(flat) == 2
 
@@ -422,7 +422,7 @@ class TestImmutable:
 
         mlp = to.filter(MLP(2, 3, 5), State)
 
-        flat = jax.tree_flatten(mlp, lambda x: isinstance(x, to.Nothing))[0]
+        flat = jax.tree_util.tree_flatten(mlp, lambda x: isinstance(x, to.Nothing))[0]
 
         assert len(flat) == 6
 
@@ -434,23 +434,23 @@ class TestImmutable:
         def idfn(x):
             return x
 
-        assert not isinstance(mlp.linear1.w, jnp.DeviceArray)
-        assert not isinstance(mlp.linear1.b, jnp.DeviceArray)
-        assert not isinstance(mlp.linear1.n, jnp.DeviceArray)
+        assert not isinstance(mlp.linear1.w, jax.Array)
+        assert not isinstance(mlp.linear1.b, jax.Array)
+        assert not isinstance(mlp.linear1.n, jax.Array)
 
-        assert not isinstance(mlp.linear2.w, jnp.DeviceArray)
-        assert not isinstance(mlp.linear2.b, jnp.DeviceArray)
-        assert not isinstance(mlp.linear1.n, jnp.DeviceArray)
+        assert not isinstance(mlp.linear2.w, jax.Array)
+        assert not isinstance(mlp.linear2.b, jax.Array)
+        assert not isinstance(mlp.linear1.n, jax.Array)
 
         mlp = idfn(mlp)
 
-        assert isinstance(mlp.linear1.w, jnp.DeviceArray)
-        assert isinstance(mlp.linear1.b, jnp.DeviceArray)
-        assert isinstance(mlp.linear1.n, jnp.DeviceArray)
+        assert isinstance(mlp.linear1.w, jax.Array)
+        assert isinstance(mlp.linear1.b, jax.Array)
+        assert isinstance(mlp.linear1.n, jax.Array)
 
-        assert isinstance(mlp.linear2.w, jnp.DeviceArray)
-        assert isinstance(mlp.linear2.b, jnp.DeviceArray)
-        assert isinstance(mlp.linear2.n, jnp.DeviceArray)
+        assert isinstance(mlp.linear2.w, jax.Array)
+        assert isinstance(mlp.linear2.b, jax.Array)
+        assert isinstance(mlp.linear2.n, jax.Array)
 
     def test_update_field_metadata(self):
 
@@ -462,23 +462,23 @@ class TestImmutable:
         def idfn(x):
             return x
 
-        assert not isinstance(mlp.linear1.w, jnp.DeviceArray)
-        assert not isinstance(mlp.linear1.b, jnp.DeviceArray)
-        assert not isinstance(mlp.linear1.n, jnp.DeviceArray)
+        assert not isinstance(mlp.linear1.w, jax.Array)
+        assert not isinstance(mlp.linear1.b, jax.Array)
+        assert not isinstance(mlp.linear1.n, jax.Array)
 
-        assert not isinstance(mlp.linear2.w, jnp.DeviceArray)
-        assert not isinstance(mlp.linear2.b, jnp.DeviceArray)
-        assert not isinstance(mlp.linear1.n, jnp.DeviceArray)
+        assert not isinstance(mlp.linear2.w, jax.Array)
+        assert not isinstance(mlp.linear2.b, jax.Array)
+        assert not isinstance(mlp.linear1.n, jax.Array)
 
         mlp = idfn(mlp)
 
-        assert not isinstance(mlp.linear1.w, jnp.DeviceArray)
-        assert isinstance(mlp.linear1.b, jnp.DeviceArray)
-        assert isinstance(mlp.linear1.n, jnp.DeviceArray)
+        assert not isinstance(mlp.linear1.w, jax.Array)
+        assert isinstance(mlp.linear1.b, jax.Array)
+        assert isinstance(mlp.linear1.n, jax.Array)
 
-        assert isinstance(mlp.linear2.w, jnp.DeviceArray)
-        assert isinstance(mlp.linear2.b, jnp.DeviceArray)
-        assert isinstance(mlp.linear2.n, jnp.DeviceArray)
+        assert isinstance(mlp.linear2.w, jax.Array)
+        assert isinstance(mlp.linear2.b, jax.Array)
+        assert isinstance(mlp.linear2.n, jax.Array)
 
     def test_filter(self):
 
@@ -561,13 +561,13 @@ class TestImmutable:
         def idfn(x):
             return x
 
-        assert not isinstance(linear.params[0], jnp.DeviceArray)
-        assert not isinstance(linear.params[1], jnp.DeviceArray)
+        assert not isinstance(linear.params[0], jax.Array)
+        assert not isinstance(linear.params[1], jax.Array)
 
         linear = idfn(linear)
 
-        assert isinstance(linear.params[0], jnp.DeviceArray)
-        assert isinstance(linear.params[1], jnp.DeviceArray)
+        assert isinstance(linear.params[0], jax.Array)
+        assert isinstance(linear.params[1], jax.Array)
 
     def test_treelist(self):
         class MLP(to.Tree, to.Immutable):
@@ -586,23 +586,23 @@ class TestImmutable:
         def idfn(x):
             return x
 
-        assert not isinstance(mlp.linears[0].w, jnp.DeviceArray)
-        assert not isinstance(mlp.linears[0].b, jnp.DeviceArray)
-        assert not isinstance(mlp.linears[0].n, jnp.DeviceArray)
+        assert not isinstance(mlp.linears[0].w, jax.Array)
+        assert not isinstance(mlp.linears[0].b, jax.Array)
+        assert not isinstance(mlp.linears[0].n, jax.Array)
 
-        assert not isinstance(mlp.linears[1].w, jnp.DeviceArray)
-        assert not isinstance(mlp.linears[1].b, jnp.DeviceArray)
-        assert not isinstance(mlp.linears[1].n, jnp.DeviceArray)
+        assert not isinstance(mlp.linears[1].w, jax.Array)
+        assert not isinstance(mlp.linears[1].b, jax.Array)
+        assert not isinstance(mlp.linears[1].n, jax.Array)
 
         mlp = idfn(mlp)
 
-        assert isinstance(mlp.linears[0].w, jnp.DeviceArray)
-        assert isinstance(mlp.linears[0].b, jnp.DeviceArray)
-        assert isinstance(mlp.linears[0].n, jnp.DeviceArray)
+        assert isinstance(mlp.linears[0].w, jax.Array)
+        assert isinstance(mlp.linears[0].b, jax.Array)
+        assert isinstance(mlp.linears[0].n, jax.Array)
 
-        assert isinstance(mlp.linears[1].w, jnp.DeviceArray)
-        assert isinstance(mlp.linears[1].b, jnp.DeviceArray)
-        assert isinstance(mlp.linears[1].n, jnp.DeviceArray)
+        assert isinstance(mlp.linears[1].w, jax.Array)
+        assert isinstance(mlp.linears[1].b, jax.Array)
+        assert isinstance(mlp.linears[1].n, jax.Array)
 
     def test_static_annotation(self):
         class Mod(to.Tree, to.Immutable):
@@ -618,7 +618,7 @@ class TestImmutable:
 
         mod: Mod = jax.tree_map(lambda x: "abc", mod)
 
-        assert len(jax.tree_leaves(mod)) == 3
+        assert len(jax.tree_util.tree_leaves(mod)) == 3
 
         assert isinstance(mod.a.w, str)
         assert isinstance(mod.a.b, str)
@@ -662,7 +662,7 @@ class TestImmutable:
 
         mlp = mlp.replace(linear3=Linear(7, 8, name="linear3"))
 
-        jax.tree_leaves(mlp)  # force flatten
+        jax.tree_util.tree_leaves(mlp)  # force flatten
 
         assert "linear3" in mlp.field_metadata
 
@@ -764,7 +764,7 @@ class TestImmutable:
         assert module.tree_or_array[1].field_metadata["w"].kind == Parameter
 
         with to.add_field_info():
-            infos = jax.tree_leaves(module)
+            infos = jax.tree_util.tree_leaves(module)
 
         assert infos[0].kind == type(None)
         assert infos[1].kind == Parameter
@@ -1061,7 +1061,7 @@ class TestImmutable:
         assert mlp.linear2.name == "linear2"
         assert mlp.name == "mlp"
 
-        flat = jax.tree_leaves(mlp)
+        flat = jax.tree_util.tree_leaves(mlp)
 
         assert len(flat) == 6
 
@@ -1133,7 +1133,7 @@ class TestImmutable:
         assert mlp.linear2.name == "linear2"
         assert mlp.name == "mlp"
 
-        flat = jax.tree_leaves(mlp)
+        flat = jax.tree_util.tree_leaves(mlp)
 
         assert len(flat) == 6
 
