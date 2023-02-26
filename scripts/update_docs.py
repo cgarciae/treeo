@@ -88,7 +88,7 @@ template = """
 api_path = Path("docs/api")
 shutil.rmtree(api_path, ignore_errors=True)
 
-for info in jax.tree_leaves(docs_info):
+for info in jax.tree_util.tree_leaves(docs_info):
     info: MemberInfo
 
     filepath: Path = api_path / ("/".join(info.path) + ".md")

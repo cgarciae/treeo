@@ -9,24 +9,24 @@ repository = "https://github.com/cgarciae/treeo"
 homepage = "https://cgarciae.github.io/treeo"
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 typing-extensions = ">=3.7.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 jax = ">=0.3.0"
 jaxlib = ">=0.3.0"
 matplotlib = { version = "^3.4.3", python = ">=3.7" }
-pytest = "^5.2"
+pytest = ">=5.2"
 black = {version = "^22.3.0", allow-prereleases = true}
 pre-commit = "^2.14.0"
-isort = "^5.10.1"
+isort = "5.12.0"
 mkdocs = "^1.2.2"
 mkdocstrings = "^0.15.2"
 mkdocs-jupyter = { version = "^0.17.3", python = ">=3.7" }
 mkdocs-material = "^7.2.8"
 rich = "^11.1.0"
 coverage = "^6.3.1"
-pytest-cov = "^3.0.0"
+pytest-cov = ">=3.0.0"
 typer = "^0.4.0"
 
 [build-system]
