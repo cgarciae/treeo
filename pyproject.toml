@@ -12,7 +12,7 @@ homepage = "https://cgarciae.github.io/treeo"
 python = "^3.7"
 typing-extensions = ">=3.7.0"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 jax = ">=0.3.0"
 jaxlib = ">=0.3.0"
 matplotlib = { version = "^3.4.3", python = ">=3.7" }

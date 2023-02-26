@@ -9,9 +9,9 @@ jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
-    - uses: pre-commit/action@v2.0.3
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+    - uses: pre-commit/action@v3
   test:
     name: Run Tests
     if: ${{ !contains(github.event.pull_request.title, 'WIP') }}
@@ -21,11 +21,11 @@ jobs:
         python-version: [3.7, 3.8, 3.9]
     steps:
       - name: Check out the code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 1
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -58,11 +58,11 @@ jobs:
         python-version: [3.7, 3.8, 3.9]
     steps:
       - name: Check out the code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 1
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -75,7 +75,7 @@ jobs:
         run: |
           pip install -U certifi
           poetry config virtualenvs.create false
-          poetry install --no-dev
+          poetry install --without dev
           pip install jax jaxlib
         
       - name: Test Import Treex
